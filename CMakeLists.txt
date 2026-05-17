@@ -14,3 +14,6 @@ add_executable(MorseCore
         include/morse.h
         include/file_utils.h
 )
+set_target_properties(MorseCore PROPERTIES
+        VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+)
