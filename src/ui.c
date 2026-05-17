@@ -20,6 +20,45 @@ void waitForEnter(void)
     printf("\nPress Enter to continue...");
     getchar();
 }
+int isEmptyInput(const char input[])
+{
+    return input[0] == '\0';
+}
+int getMenuChoice(void)
+{
+    char input[20];
+    int choice;
+
+    printf(COLOR_YELLOW "Choose an option: " COLOR_RESET);
+
+    fgets(input, sizeof(input), stdin);
+
+    if (sscanf(input, "%d", &choice) != 1) {
+        return -1;
+    }
+
+    return choice;
+}
+void showAboutProject(void)
+{
+    printf(COLOR_CYAN "About MorseCore\n" COLOR_RESET);
+    printf("--------------------------------\n");
+    printf("MorseCore is a C-based Morse encoder and decoder.\n\n");
+
+    printf("This project demonstrates:\n");
+    printf("- 2D array usage\n");
+    printf("- File input and output\n");
+    printf("- String operations\n");
+    printf("- Function-based modular design\n");
+    printf("- Header/source file separation\n");
+    printf("- Switch-case menu structure\n");
+    printf("- Input validation\n");
+    printf("- Turkish character normalization\n");
+    printf("- Automatic output file naming\n");
+    printf("--------------------------------\n");
+    printf(COLOR_GREEN "Author: " COLOR_RED "Mustafa Mert Akceylan\n" COLOR_RESET);
+    printf(COLOR_GREEN "Student Number: " COLOR_RED "030240117" COLOR_RESET);
+}
 void printPreview(const char title[], const char content[])
 {
     printf("\n%s\n", title);
@@ -63,12 +102,12 @@ void runApplication(void)
         printf("| [2] Morse to Text                                 |\n");
         printf("| [3] Read text from file and convert to Morse      |\n");
         printf("| [4] Read Morse from file and convert to Text      |\n");
+        printf("| [5] Show Morse Table                              |\n");
+        printf("| [6] About Project                                 |\n");
         printf("| [0] Exit                                          |\n");
         printf("+---------------------------------------------------+\n");
         printf(COLOR_RESET);
-        printf(COLOR_YELLOW "Choose an option: " COLOR_RESET);
-        scanf("%d", &choice);
-        getchar();
+        choice = getMenuChoice();
         clearConsole();
         switch (choice) {
             case 1:
@@ -118,7 +157,11 @@ void runApplication(void)
                 printf("Enter input file name from data folder: ");
                 fgets(inputFileName, sizeof(inputFileName), stdin);
                 inputFileName[strcspn(inputFileName, "\n")] = '\0';
-
+                if (isEmptyInput(inputFileName)) {
+                    printf(COLOR_RED "\nFile name cannot be empty.\n" COLOR_RESET);
+                    waitForEnter();
+                    break;
+                }
                 buildDataFilePath(inputPath, inputFileName);
 
                 if (readFromFile(inputPath, text, MAX_TEXT_LENGTH)) {
@@ -156,7 +199,11 @@ void runApplication(void)
                 printf("Enter Morse file name from data folder: ");
                 fgets(inputFileName, sizeof(inputFileName), stdin);
                 inputFileName[strcspn(inputFileName, "\n")] = '\0';
-
+                if (isEmptyInput(inputFileName)) {
+                    printf(COLOR_RED "\nFile name cannot be empty.\n" COLOR_RESET);
+                    waitForEnter();
+                    break;
+                }
                 buildDataFilePath(inputPath, inputFileName);
 
                 if (readFromFile(inputPath, text, MAX_TEXT_LENGTH)) {
@@ -178,6 +225,22 @@ void runApplication(void)
                 } else {
                     printf(COLOR_RED "\nMorse input file could not be opened.\n" COLOR_RESET);
                 }
+
+                waitForEnter();
+                break;
+            }
+            case 5:
+            {
+                printf(COLOR_CYAN "Morse Table\n" COLOR_RESET);
+
+                printMorseTable();
+
+                waitForEnter();
+                break;
+            }
+            case 6:
+            {
+                showAboutProject();
 
                 waitForEnter();
                 break;

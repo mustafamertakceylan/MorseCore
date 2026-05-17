@@ -156,3 +156,14 @@ int morseToText(const char morseInput[], char textOutput[])
 
     return 1;
 }
+void printMorseTable(void)
+{
+    printf("\nMorse Table\n");
+    printf("-------------------------\n");
+
+    for (int i = 0; i < MORSE_COUNT; i++) {
+        printf("%c  ->  %s\n", characters[i], morseCodes[i]);
+    }
+
+    printf("-------------------------\n");
+}

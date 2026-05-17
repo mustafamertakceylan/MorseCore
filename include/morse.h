@@ -3,5 +3,5 @@
 
 int textToMorse(const char text[], char morseOutput[]);
 int morseToText(const char morseInput[], char textOutput[]);
-
+void printMorseTable(void);
 #endif
