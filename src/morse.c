@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+
 #include "morse.h"
 #include "constants.h"
-
 
 char characters[MORSE_COUNT] = {
     'A','B','C','D','E','F','G','H','I','J','K','L','M',
@@ -18,6 +18,7 @@ char morseCodes[MORSE_COUNT][MAX_MORSE_LENGTH] = {
     "-----", ".----", "..---", "...--", "....-", ".....",
     "-....", "--...", "---..", "----."
 };
+
 unsigned char normalizeTurkishCharacter(const char text[], int *index)
 {
     unsigned char currentChar = (unsigned char) text[*index];
@@ -63,21 +64,30 @@ unsigned char normalizeTurkishCharacter(const char text[], int *index)
 
     return (unsigned char) toupper(currentChar);
 }
-int textToMorse(const char text[], char morseOutput[])
+
+int textToMorse(const char text[], char morseOutput[], char wordSeparator)
 {
     morseOutput[0] = '\0';
 
     int convertedCharacterCount = 0;
+
     for (int i = 0; text[i] != '\0'; i++) {
         unsigned char currentChar = (unsigned char) text[i];
 
         if (currentChar == '\n' || currentChar == '\r' || currentChar == '\t') {
             continue;
         }
+
         if (currentChar == ' ') {
-            strcat(morseOutput, "/ ");
+            int len = strlen(morseOutput);
+
+            morseOutput[len] = wordSeparator;
+            morseOutput[len + 1] = ' ';
+            morseOutput[len + 2] = '\0';
+
             continue;
         }
+
         currentChar = normalizeTurkishCharacter(text, &i);
 
         if (currentChar == 0) {
@@ -91,6 +101,7 @@ int textToMorse(const char text[], char morseOutput[])
             if (currentChar == characters[j]) {
                 strcat(morseOutput, morseCodes[j]);
                 strcat(morseOutput, " ");
+
                 convertedCharacterCount++;
                 found = 1;
                 break;
@@ -109,7 +120,8 @@ int textToMorse(const char text[], char morseOutput[])
 
     return 1;
 }
-int morseToText(const char morseInput[], char textOutput[])
+
+int morseToText(const char morseInput[], char textOutput[], char wordSeparator)
 {
     char temp[1000];
     char *token;
@@ -122,7 +134,7 @@ int morseToText(const char morseInput[], char textOutput[])
     token = strtok(temp, " \n\r\t");
 
     while (token != NULL) {
-        if (strcmp(token, "/") == 0) {
+        if (strlen(token) == 1 && token[0] == wordSeparator) {
             strcat(textOutput, " ");
         } else {
             int found = 0;
@@ -155,6 +167,7 @@ int morseToText(const char morseInput[], char textOutput[])
 
     return 1;
 }
+
 void printMorseTable(void)
 {
     printf("\nMorse Table\n");

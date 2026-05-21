@@ -8,8 +8,12 @@
 void clearConsole(void);
 void waitForEnter(void);
 void printPreview(const char title[], const char content[]);
-void askToSaveOutput(const char output[]);
+int askToSaveOutput(const char output[]);
 int getMenuChoice(void);
 void showAboutProject(void);
-int isEmptyInput(const char input[]);
+void waitForSeconds(int seconds);
+void printMainMenu(void);
+void printSettingsMenu(char wordSeparator, const char language[]);
+void printSeparatorSavedMessage(char newSeparator);
+void printLanguageSavedMessage(const char language[]);
 #endif

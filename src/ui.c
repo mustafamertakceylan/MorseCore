@@ -1,22 +1,41 @@
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <unistd.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+
 #include "ui.h"
-#include "morse.h"
 #include "file_utils.h"
-void clearConsole(void) //Konsol temizleme
+#include "app_config.h"
+#include "error.h"
+
+void clearConsole(void)
 {
+#ifdef _WIN32
     system("cls");
+#else
+    system("clear");
+#endif
 }
-void waitForEnter(void) // Kullanıcıdan enter girdisi bekleme
+
+void waitForEnter(void)
 {
     printf("\nPress Enter to continue...");
     getchar();
 }
-int isEmptyInput(const char input[]) //inputun boş olması hatası
+
+void waitForSeconds(int seconds)
 {
-    return input[0] == '\0';
+#ifdef _WIN32
+    Sleep(seconds * 1000);
+#else
+    sleep(seconds);
+#endif
 }
+
 int getMenuChoice(void)
 {
     char input[20];
@@ -32,7 +51,52 @@ int getMenuChoice(void)
 
     return choice;
 }
-void showAboutProject(void) //Proje hakkında bilgiler
+
+void printMainMenu(void)
+{
+    printf(COLOR_CYAN);
+    printf("+---------------------------------------------------+\n");
+    printf("|                     MorseCore                     |\n");
+    printf("+---------------------------------------------------+\n");
+    printf("| [1] Text to Morse                                 |\n");
+    printf("| [2] Morse to Text                                 |\n");
+    printf("| [3] Read text from file and convert to Morse      |\n");
+    printf("| [4] Read Morse from file and convert to Text      |\n");
+    printf("| [5] Show Morse Table                              |\n");
+    printf("| [6] About Project                                 |\n");
+    printf("| [7] Settings                                      |\n");
+    printf("| [0] Exit                                          |\n");
+    printf("+---------------------------------------------------+\n");
+    printf(COLOR_RESET);
+}
+
+void printSettingsMenu(char wordSeparator, const char language[])
+{
+    printf(COLOR_CYAN);
+    printf("+---------------------------------------------------+\n");
+    printf("|                      Settings                     |\n");
+    printf("+---------------------------------------------------+\n");
+    printf("| Current word separator: %-26c |\n", wordSeparator);
+    printf("| Current language      : %-26s |\n", language);
+    printf("+---------------------------------------------------+\n");
+    printf("| [1] Change word separator                         |\n");
+    printf("| [2] Change language                               |\n");
+    printf("| [0] Back                                          |\n");
+    printf("+---------------------------------------------------+\n");
+    printf(COLOR_RESET);
+}
+void printLanguageSavedMessage(const char language[])
+{
+    printf(COLOR_GREEN "\nLanguage saved successfully.\n" COLOR_RESET);
+    printf("New language: %s\n", language);
+}
+void printSeparatorSavedMessage(char newSeparator)
+{
+    printf(COLOR_GREEN "\nSeparator saved successfully.\n" COLOR_RESET);
+    printf("New separator: %c\n", newSeparator);
+}
+
+void showAboutProject(void)
 {
     printf(COLOR_CYAN "About MorseCore\n" COLOR_RESET);
     printf("--------------------------------\n");
@@ -48,10 +112,14 @@ void showAboutProject(void) //Proje hakkında bilgiler
     printf("- Input validation\n");
     printf("- Turkish character normalization\n");
     printf("- Automatic output file naming\n");
+    printf("- Persistent separator settings\n");
+    printf("- Struct and pointer usage through statistics\n");
+
     printf("--------------------------------\n");
     printf(COLOR_GREEN "Author: " COLOR_RED "Mustafa Mert Akceylan\n" COLOR_RESET);
-    printf(COLOR_GREEN "Student Number: " COLOR_RED "030240117" COLOR_RESET);
+    printf(COLOR_GREEN "Student Number: " COLOR_RED "030240117\n" COLOR_RESET);
 }
+
 void printPreview(const char title[], const char content[])
 {
     printf("\n%s\n", title);
@@ -59,7 +127,8 @@ void printPreview(const char title[], const char content[])
     printf("%s\n", content);
     printf("--------------------------------\n");
 }
-void askToSaveOutput(const char output[])
+
+int askToSaveOutput(const char output[])
 {
     char answer;
     char fileName[100];
@@ -70,14 +139,17 @@ void askToSaveOutput(const char output[])
     getchar();
 
     if (answer == 'y' || answer == 'Y') {
-        generateNextFileName(fileName, "morse_output", "txt");
+        generateNextFileName(fileName, MORSE_OUTPUT_PREFIX, DEFAULT_FILE_EXTENSION);
         buildDataFilePath(fullPath, fileName);
 
         if (writeToFile(fullPath, output)) {
             printf(COLOR_GREEN "Output saved successfully: data/%s\n" COLOR_RESET, fileName);
-        } else {
-            printf(COLOR_RED "Output file could not be written.\n" COLOR_RESET);
+            return 1;
         }
-    }
-}
 
+        printError(RESULT_FILE_WRITE_ERROR);
+        return 0;
+    }
+
+    return 0;
+}
