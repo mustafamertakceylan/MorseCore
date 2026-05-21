@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "file_utils.h"
+#include "app_config.h"
 
 int readFromFile(const char fileName[], char content[], int maxLength)
 {
@@ -56,7 +57,7 @@ void generateNextFileName(char fileName[], const char prefix[], const char exten
 
     for (int i = 1; i < 10000; i++) {
         sprintf(fileName, "%s_%d.%s", prefix, i, extension);
-        sprintf(fullPath, "../data/%s", fileName);
+        sprintf(fullPath, "%s%s", DATA_FOLDER_PATH, fileName);
 
         if (!fileExists(fullPath)) {
             return;
@@ -68,5 +69,5 @@ void generateNextFileName(char fileName[], const char prefix[], const char exten
 
 void buildDataFilePath(char fullPath[], const char fileName[])
 {
-    sprintf(fullPath, "../data/%s", fileName);
+    sprintf(fullPath, "%s%s", DATA_FOLDER_PATH, fileName);
 }

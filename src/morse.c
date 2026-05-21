@@ -2,9 +2,8 @@
 #include <string.h>
 #include <ctype.h>
 #include "morse.h"
+#include "constants.h"
 
-#define MORSE_COUNT 36
-#define MAX_MORSE_LENGTH 6
 
 char characters[MORSE_COUNT] = {
     'A','B','C','D','E','F','G','H','I','J','K','L','M',
@@ -120,7 +119,7 @@ int morseToText(const char morseInput[], char textOutput[])
 
     strcpy(temp, morseInput);
 
-    token = strtok(temp, " ");
+    token = strtok(temp, " \n\r\t");
 
     while (token != NULL) {
         if (strcmp(token, "/") == 0) {
@@ -147,7 +146,7 @@ int morseToText(const char morseInput[], char textOutput[])
             }
         }
 
-        token = strtok(NULL, " ");
+        token = strtok(NULL, " \n\r\t");
     }
 
     if (convertedCharacterCount == 0) {

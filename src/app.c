@@ -4,9 +4,8 @@
 #include "ui.h"
 #include "morse.h"
 #include "file_utils.h"
+#include "constants.h"
 
-#define MAX_TEXT_LENGTH 1000
-#define MAX_OUTPUT_LENGTH 5000
 void runApplication(void)
 {
     char text[MAX_TEXT_LENGTH];
