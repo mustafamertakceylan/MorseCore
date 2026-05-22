@@ -17,7 +17,7 @@ add_executable(MorseCore
         src/validation.c
         src/stats.c
         src/settings.c
-        src/seperator.c
+        src/separator.c
         src/language.c
         include/morse.h
         include/file_utils.h
