@@ -1,2 +1,2 @@
 word_separator=/
-language=TR
+language=EN

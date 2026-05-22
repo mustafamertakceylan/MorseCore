@@ -1,0 +1,7 @@
+# Runtime data files
+data/*.txt
+!data/.gitkeep
+
+# Build folders
+cmake-build-*/
+build/
