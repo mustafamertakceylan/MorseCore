@@ -18,6 +18,7 @@ add_executable(MorseCore
         src/stats.c
         src/settings.c
         src/seperator.c
+        src/language.c
         include/morse.h
         include/file_utils.h
         include/ui.h
@@ -31,6 +32,7 @@ add_executable(MorseCore
         include/stats.h
         include/settings.h
         include/separator.h
+        include/language.h
 )
 set_target_properties(MorseCore PROPERTIES
         VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"

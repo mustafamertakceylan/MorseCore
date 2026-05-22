@@ -4,6 +4,7 @@
 
 #include "stats.h"
 #include "ui.h"
+#include "language.h"
 
 static int countWords(const char input[])
 {
@@ -66,27 +67,27 @@ void calculateConversionStats(const char input[], const char output[], Conversio
     stats->spaceCount = countSpaces(input);
 }
 
-void printConversionStats(const ConversionStats *stats)
+void printConversionStats(const ConversionStats *stats, const char language[])
 {
-    printf(COLOR_CYAN "\nConversion Statistics\n" COLOR_RESET);
+    printf(COLOR_CYAN "\n%s\n" COLOR_RESET, getText(language, TXT_CONVERSION_STATISTICS));
     printf("--------------------------------\n");
-    printf("Input length: %d\n", stats->inputLength);
-    printf("Output length: %d\n", stats->outputLength);
-    printf("Word count: %d\n", stats->wordCount);
-    printf("Converted characters: %d\n", stats->convertedCharacterCount);
-    printf("Space count: %d\n", stats->spaceCount);
+    printf("%s: %d\n", getText(language, TXT_INPUT_LENGTH), stats->inputLength);
+    printf("%s: %d\n", getText(language, TXT_OUTPUT_LENGTH), stats->outputLength);
+    printf("%s: %d\n", getText(language, TXT_WORD_COUNT), stats->wordCount);
+    printf("%s: %d\n", getText(language, TXT_CONVERTED_CHARACTERS), stats->convertedCharacterCount);
+    printf("%s: %d\n", getText(language, TXT_SPACE_COUNT), stats->spaceCount);
     printf("--------------------------------\n");
 }
 
-void printSessionSummary(const SessionStats *stats)
+void printSessionSummary(const SessionStats *stats, const char language[])
 {
-    printf(COLOR_CYAN "\nSession Summary\n" COLOR_RESET);
+    printf(COLOR_CYAN "\n%s\n" COLOR_RESET, getText(language, TXT_SESSION_SUMMARY));
     printf("--------------------------------\n");
-    printf("Text to Morse operations: %d\n", stats->textToMorseCount);
-    printf("Morse to Text operations: %d\n", stats->morseToTextCount);
-    printf("File operations: %d\n", stats->fileOperationCount);
-    printf("Invalid inputs: %d\n", stats->invalidInputCount);
-    printf("Saved outputs: %d\n", stats->savedOutputCount);
+    printf("%s: %d\n", getText(language, TXT_TEXT_TO_MORSE_OPERATIONS), stats->textToMorseCount);
+    printf("%s: %d\n", getText(language, TXT_MORSE_TO_TEXT_OPERATIONS), stats->morseToTextCount);
+    printf("%s: %d\n", getText(language, TXT_FILE_OPERATIONS), stats->fileOperationCount);
+    printf("%s: %d\n", getText(language, TXT_INVALID_INPUTS), stats->invalidInputCount);
+    printf("%s: %d\n", getText(language, TXT_SAVED_OUTPUTS), stats->savedOutputCount);
     printf("--------------------------------\n");
 }
 

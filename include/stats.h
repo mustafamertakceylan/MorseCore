@@ -18,9 +18,12 @@ typedef struct {
 } SessionStats;
 
 void initializeSessionStats(SessionStats *stats);
+
 void calculateConversionStats(const char input[], const char output[], ConversionStats *stats);
-void printConversionStats(const ConversionStats *stats);
-void printSessionSummary(const SessionStats *stats);
+void printConversionStats(const ConversionStats *stats, const char language[]);
+
+void printSessionSummary(const SessionStats *stats, const char language[]);
+
 void increaseTextToMorseCount(SessionStats *stats);
 void increaseMorseToTextCount(SessionStats *stats);
 void increaseFileOperationCount(SessionStats *stats);

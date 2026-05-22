@@ -11,6 +11,7 @@
 #include "file_utils.h"
 #include "app_config.h"
 #include "error.h"
+#include "language.h"
 
 void clearConsole(void)
 {
@@ -21,9 +22,9 @@ void clearConsole(void)
 #endif
 }
 
-void waitForEnter(void)
+void waitForEnter(const char language[])
 {
-    printf("\nPress Enter to continue...");
+    printf("\n%s", getText(language, TXT_PRESS_ENTER));
     getchar();
 }
 
@@ -36,12 +37,12 @@ void waitForSeconds(int seconds)
 #endif
 }
 
-int getMenuChoice(void)
+int getMenuChoice(const char language[])
 {
     char input[20];
     int choice;
 
-    printf(COLOR_YELLOW "Choose an option: " COLOR_RESET);
+    printf(COLOR_YELLOW "%s" COLOR_RESET, getText(language, TXT_CHOOSE_OPTION));
 
     fgets(input, sizeof(input), stdin);
 
@@ -52,20 +53,20 @@ int getMenuChoice(void)
     return choice;
 }
 
-void printMainMenu(void)
+void printMainMenu(const char language[])
 {
     printf(COLOR_CYAN);
     printf("+---------------------------------------------------+\n");
-    printf("|                     MorseCore                     |\n");
+    printf("|                     %-29s|\n", getText(language, TXT_MAIN_TITLE));
     printf("+---------------------------------------------------+\n");
-    printf("| [1] Text to Morse                                 |\n");
-    printf("| [2] Morse to Text                                 |\n");
-    printf("| [3] Read text from file and convert to Morse      |\n");
-    printf("| [4] Read Morse from file and convert to Text      |\n");
-    printf("| [5] Show Morse Table                              |\n");
-    printf("| [6] About Project                                 |\n");
-    printf("| [7] Settings                                      |\n");
-    printf("| [0] Exit                                          |\n");
+    printf("| [1] %-47s|\n", getText(language, TXT_MENU_TEXT_TO_MORSE));
+    printf("| [2] %-47s|\n", getText(language, TXT_MENU_MORSE_TO_TEXT));
+    printf("| [3] %-47s|\n", getText(language, TXT_MENU_FILE_TEXT_TO_MORSE));
+    printf("| [4] %-47s|\n", getText(language, TXT_MENU_FILE_MORSE_TO_TEXT));
+    printf("| [5] %-47s|\n", getText(language, TXT_MENU_SHOW_TABLE));
+    printf("| [6] %-47s|\n", getText(language, TXT_MENU_ABOUT));
+    printf("| [7] %-47s|\n", getText(language, TXT_MENU_SETTINGS));
+    printf("| [0] %-47s|\n", getText(language, TXT_MENU_EXIT));
     printf("+---------------------------------------------------+\n");
     printf(COLOR_RESET);
 }
@@ -74,50 +75,55 @@ void printSettingsMenu(char wordSeparator, const char language[])
 {
     printf(COLOR_CYAN);
     printf("+---------------------------------------------------+\n");
-    printf("|                      Settings                     |\n");
+    printf("|                      %-29s|\n", getText(language, TXT_SETTINGS_TITLE));
     printf("+---------------------------------------------------+\n");
-    printf("| Current word separator: %-26c |\n", wordSeparator);
-    printf("| Current language      : %-26s |\n", language);
+    printf("| %-27s: %-20c|\n", getText(language, TXT_CURRENT_SEPARATOR), wordSeparator);
+    printf("| %-27s: %-20s|\n", getText(language, TXT_CURRENT_LANGUAGE), language);
     printf("+---------------------------------------------------+\n");
-    printf("| [1] Change word separator                         |\n");
-    printf("| [2] Change language                               |\n");
-    printf("| [0] Back                                          |\n");
+    printf("| [1] %-47s|\n", getText(language, TXT_CHANGE_SEPARATOR));
+    printf("| [2] %-47s|\n", getText(language, TXT_CHANGE_LANGUAGE));
+    printf("| [0] %-47s|\n", getText(language, TXT_BACK));
     printf("+---------------------------------------------------+\n");
     printf(COLOR_RESET);
 }
+
+void printSeparatorSavedMessage(char newSeparator, const char language[])
+{
+    printf(COLOR_GREEN "\n%s\n" COLOR_RESET, getText(language, TXT_SEPARATOR_SAVED));
+    printf("%s: %c\n", getText(language, TXT_NEW_SEPARATOR), newSeparator);
+}
+
 void printLanguageSavedMessage(const char language[])
 {
-    printf(COLOR_GREEN "\nLanguage saved successfully.\n" COLOR_RESET);
-    printf("New language: %s\n", language);
-}
-void printSeparatorSavedMessage(char newSeparator)
-{
-    printf(COLOR_GREEN "\nSeparator saved successfully.\n" COLOR_RESET);
-    printf("New separator: %c\n", newSeparator);
+    printf(COLOR_GREEN "\n%s\n" COLOR_RESET, getText(language, TXT_LANGUAGE_SAVED));
+    printf("%s: %s\n", getText(language, TXT_NEW_LANGUAGE), language);
 }
 
-void showAboutProject(void)
+void showAboutProject(const char language[])
 {
-    printf(COLOR_CYAN "About MorseCore\n" COLOR_RESET);
+    printf(COLOR_CYAN "%s\n" COLOR_RESET, getText(language, TXT_ABOUT_TITLE));
     printf("--------------------------------\n");
-    printf("MorseCore is a C-based Morse encoder and decoder.\n\n");
+    printf("%s\n\n", getText(language, TXT_ABOUT_DESCRIPTION));
 
-    printf("This project demonstrates:\n");
-    printf("- 2D array usage\n");
-    printf("- File input and output\n");
-    printf("- String operations\n");
-    printf("- Function-based modular design\n");
-    printf("- Header/source file separation\n");
-    printf("- Switch-case menu structure\n");
-    printf("- Input validation\n");
-    printf("- Turkish character normalization\n");
-    printf("- Automatic output file naming\n");
-    printf("- Persistent separator settings\n");
-    printf("- Struct and pointer usage through statistics\n");
+    printf("%s\n", getText(language, TXT_ABOUT_DEMONSTRATES));
+    printf("- %s\n", getText(language, TXT_ABOUT_2D_ARRAY));
+    printf("- %s\n", getText(language, TXT_ABOUT_FILE_IO));
+    printf("- %s\n", getText(language, TXT_ABOUT_STRING_OPERATIONS));
+    printf("- %s\n", getText(language, TXT_ABOUT_MODULAR_DESIGN));
+    printf("- %s\n", getText(language, TXT_ABOUT_HEADER_SOURCE));
+    printf("- %s\n", getText(language, TXT_ABOUT_SWITCH_CASE));
+    printf("- %s\n", getText(language, TXT_ABOUT_INPUT_VALIDATION));
+    printf("- %s\n", getText(language, TXT_ABOUT_TURKISH_NORMALIZATION));
+    printf("- %s\n", getText(language, TXT_ABOUT_AUTO_FILE_NAMING));
+    printf("- %s\n", getText(language, TXT_ABOUT_PERSISTENT_SETTINGS));
+    printf("- %s\n", getText(language, TXT_ABOUT_STRUCT_POINTER));
 
     printf("--------------------------------\n");
-    printf(COLOR_GREEN "Author: " COLOR_RED "Mustafa Mert Akceylan\n" COLOR_RESET);
-    printf(COLOR_GREEN "Student Number: " COLOR_RED "030240117\n" COLOR_RESET);
+    printf(COLOR_GREEN "%s: " COLOR_RED "Mustafa Mert Akceylan\n" COLOR_RESET,
+           getText(language, TXT_ABOUT_AUTHOR));
+
+    printf(COLOR_GREEN "%s: " COLOR_RED "030240117\n" COLOR_RESET,
+           getText(language, TXT_ABOUT_STUDENT_NUMBER));
 }
 
 void printPreview(const char title[], const char content[])
@@ -128,13 +134,13 @@ void printPreview(const char title[], const char content[])
     printf("--------------------------------\n");
 }
 
-int askToSaveOutput(const char output[])
+int askToSaveOutput(const char output[], const char language[])
 {
     char answer;
     char fileName[100];
     char fullPath[200];
 
-    printf("\nDo you want to save this output? (y/n): ");
+    printf("\n%s", getText(language, TXT_DO_YOU_WANT_TO_SAVE));
     scanf(" %c", &answer);
     getchar();
 
@@ -143,11 +149,13 @@ int askToSaveOutput(const char output[])
         buildDataFilePath(fullPath, fileName);
 
         if (writeToFile(fullPath, output)) {
-            printf(COLOR_GREEN "Output saved successfully: data/%s\n" COLOR_RESET, fileName);
+            printf(COLOR_GREEN "%s: data/%s\n" COLOR_RESET,
+                   getText(language, TXT_OUTPUT_SAVED_SUCCESSFULLY),
+                   fileName);
             return 1;
         }
 
-        printError(RESULT_FILE_WRITE_ERROR);
+        printError(RESULT_FILE_WRITE_ERROR, language);
         return 0;
     }
 
