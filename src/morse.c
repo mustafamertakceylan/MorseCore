@@ -69,22 +69,19 @@ int textToMorse(const char text[], char morseOutput[], char wordSeparator)
 {
     morseOutput[0] = '\0';
 
+    if (strlen(text) >= MAX_TEXT_LENGTH) {
+        return 0;
+    }
+
     int convertedCharacterCount = 0;
+    int pendingWordSeparator = 0;
 
     for (int i = 0; text[i] != '\0'; i++) {
         unsigned char currentChar = (unsigned char) text[i];
 
-        if (currentChar == '\n' || currentChar == '\r' || currentChar == '\t') {
-            continue;
-        }
-
-        if (currentChar == ' ') {
-            int len = strlen(morseOutput);
-
-            morseOutput[len] = wordSeparator;
-            morseOutput[len + 1] = ' ';
-            morseOutput[len + 2] = '\0';
-
+        if (currentChar == ' ' || currentChar == '\n' ||
+            currentChar == '\r' || currentChar == '\t') {
+            pendingWordSeparator = convertedCharacterCount > 0;
             continue;
         }
 
@@ -99,6 +96,13 @@ int textToMorse(const char text[], char morseOutput[], char wordSeparator)
 
         for (int j = 0; j < MORSE_COUNT; j++) {
             if (currentChar == characters[j]) {
+                if (pendingWordSeparator) {
+                    size_t len = strlen(morseOutput);
+                    morseOutput[len] = wordSeparator;
+                    morseOutput[len + 1] = ' ';
+                    morseOutput[len + 2] = '\0';
+                    pendingWordSeparator = 0;
+                }
                 strcat(morseOutput, morseCodes[j]);
                 strcat(morseOutput, " ");
 
@@ -123,11 +127,15 @@ int textToMorse(const char text[], char morseOutput[], char wordSeparator)
 
 int morseToText(const char morseInput[], char textOutput[], char wordSeparator)
 {
-    char temp[1000];
+    char temp[MAX_TEXT_LENGTH];
     char *token;
     int convertedCharacterCount = 0;
 
     textOutput[0] = '\0';
+
+    if (strlen(morseInput) >= sizeof(temp)) {
+        return 0;
+    }
 
     strcpy(temp, morseInput);
 
@@ -141,7 +149,7 @@ int morseToText(const char morseInput[], char textOutput[], char wordSeparator)
 
             for (int i = 0; i < MORSE_COUNT; i++) {
                 if (strcmp(token, morseCodes[i]) == 0) {
-                    int len = strlen(textOutput);
+                    size_t len = strlen(textOutput);
 
                     textOutput[len] = characters[i];
                     textOutput[len + 1] = '\0';

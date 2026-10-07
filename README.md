@@ -494,6 +494,24 @@ Output:
 
 This project uses CMake.
 
+Requirements: CMake 3.28 or newer, a C17 compiler, and Ninja for the
+included `debug` preset. The Windows setup was built with MSYS2 UCRT64 GCC.
+Python 3 is optional for building the application and required for the CLI tests.
+
+From the project directory, the checked-in presets provide a repeatable setup:
+
+```powershell
+cmake --preset debug
+cmake --build --preset debug
+ctest --preset debug
+.\run.cmd
+```
+
+`run.cmd` can also be double-clicked on Windows after building.
+The CMake build embeds this checkout's absolute path for `data/` and `config/`,
+so the executable can be launched from another working directory. Reconfigure
+and rebuild after moving the checkout; the executable is not a standalone package.
+
 ### Configure
 
 ```bash
@@ -529,6 +547,17 @@ cmake-build-debug\MorseCore.exe
 - Word separator and language settings are persistent.
 - File outputs are automatically numbered.
 - Runtime `.txt` files inside `data/` are excluded from Git tracking.
+- Existing sample `.txt` files already tracked in the repository remain tracked;
+  `.gitignore` only excludes newly created runtime files.
+- Input is limited to 999 bytes (UTF-8 Turkish letters use two bytes). Oversized
+  interactive lines and files are rejected rather than partially converted.
+- Spaces, tabs, and line breaks between words are encoded as one word separator;
+  leading and trailing whitespace is ignored.
+- Conversion statistics currently count input bytes and Morse tokens; decoded
+  word counts and Unicode character counts need a separate statistics revision.
+- The tests cover conversion, Turkish encodings, all four separators, output
+  buffer limits, file read/write, settings persistence, invalid input, and EOF.
+  CLI tests restore settings and check that existing sample files are unchanged.
 - The project is intentionally modular for readability and future expansion.
 
 ---

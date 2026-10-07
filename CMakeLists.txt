@@ -37,3 +37,20 @@ add_executable(MorseCore
 set_target_properties(MorseCore PROPERTIES
         VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
 )
+target_compile_definitions(MorseCore PRIVATE
+        MORSECORE_ROOT_PATH="${CMAKE_CURRENT_SOURCE_DIR}/"
+)
+
+include(CTest)
+if(BUILD_TESTING)
+    add_executable(MorseCoreTests tests/core_tests.c
+            src/morse.c src/separator.c src/file_utils.c src/validation.c)
+    add_test(NAME core COMMAND MorseCoreTests)
+
+    find_package(Python3 COMPONENTS Interpreter)
+    if(Python3_Interpreter_FOUND)
+        add_test(NAME cli COMMAND "${Python3_EXECUTABLE}"
+                "${CMAKE_CURRENT_SOURCE_DIR}/tests/cli_tests.py"
+                "$<TARGET_FILE:MorseCore>" "${CMAKE_CURRENT_SOURCE_DIR}")
+    endif()
+endif()

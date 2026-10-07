@@ -6,6 +6,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#include <errno.h>
+#include <limits.h>
+#include "constants.h"
 
 #include "ui.h"
 #include "file_utils.h"
@@ -16,8 +21,11 @@
 void clearConsole(void)
 {
 #ifdef _WIN32
+    DWORD mode;
+    if (!GetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), &mode)) return;
     system("cls");
 #else
+    if (!isatty(STDOUT_FILENO)) return;
     system("clear");
 #endif
 }
@@ -30,27 +38,52 @@ void waitForEnter(const char language[])
 
 void waitForSeconds(int seconds)
 {
+    if (seconds <= 0) return;
 #ifdef _WIN32
-    Sleep(seconds * 1000);
+    Sleep((DWORD) seconds * 1000U);
 #else
-    sleep(seconds);
+    sleep((unsigned int) seconds);
 #endif
+}
+
+int readInputLine(char input[], int capacity)
+{
+    if (fgets(input, capacity, stdin) == NULL) {
+        input[0] = '\0';
+        return 0;
+    }
+    size_t length = strcspn(input, "\n");
+    if (input[length] == '\n') {
+        input[length] = '\0';
+        if (length > 0 && input[length - 1] == '\r') input[length - 1] = '\0';
+        return 1;
+    }
+    int next = getchar();
+    if (next == '\n' || next == EOF) return 1;
+    while (next != '\n' && next != EOF) next = getchar();
+    input[0] = '\0';
+    return -1;
 }
 
 int getMenuChoice(const char language[])
 {
     char input[20];
-    int choice;
+    char *end;
 
     printf(COLOR_YELLOW "%s" COLOR_RESET, getText(language, TXT_CHOOSE_OPTION));
 
-    fgets(input, sizeof(input), stdin);
-
-    if (sscanf(input, "%d", &choice) != 1) {
+    int status = readInputLine(input, sizeof(input));
+    if (status == 0) return 0;
+    if (status < 0) return -1;
+    errno = 0;
+    long choice = strtol(input, &end, 10);
+    if (end == input || errno == ERANGE || choice < 0 || choice > INT_MAX) {
         return -1;
     }
+    while (isspace((unsigned char) *end)) end++;
+    if (*end != '\0') return -1;
 
-    return choice;
+    return (int) choice;
 }
 
 void printMainMenu(const char language[])
@@ -136,15 +169,14 @@ void printPreview(const char title[], const char content[])
 
 int askToSaveOutput(const char output[], const char language[])
 {
-    char answer;
+    char answer[20];
     char fileName[100];
     char fullPath[200];
 
     printf("\n%s", getText(language, TXT_DO_YOU_WANT_TO_SAVE));
-    scanf(" %c", &answer);
-    getchar();
+    if (readInputLine(answer, sizeof(answer)) != 1) return 0;
 
-    if (answer == 'y' || answer == 'Y') {
+    if (strcmp(answer, "y") == 0 || strcmp(answer, "Y") == 0) {
         generateNextFileName(fileName, MORSE_OUTPUT_PREFIX, DEFAULT_FILE_EXTENSION);
         buildDataFilePath(fullPath, fileName);
 

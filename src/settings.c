@@ -4,6 +4,7 @@
 #include "settings.h"
 #include "app_config.h"
 #include "separator.h"
+#include "language.h"
 
 void loadDefaultSettings(AppSettings *settings)
 {
@@ -25,7 +26,7 @@ int loadSettings(AppSettings *settings)
 
     while (fgets(line, sizeof(line), file) != NULL) {
         char separator;
-        char language[3];
+        char language[100];
 
         if (sscanf(line, "word_separator=%c", &separator) == 1) {
             if (isValidSeparator(separator)) {
@@ -33,7 +34,7 @@ int loadSettings(AppSettings *settings)
             }
         }
 
-        if (sscanf(line, "language=%2s", language) == 1) {
+        if (sscanf(line, "language=%99s", language) == 1 && isSupportedLanguage(language)) {
             strcpy(settings->language, language);
         }
     }
@@ -50,9 +51,8 @@ int saveSettings(const AppSettings *settings)
         return 0;
     }
 
-    fprintf(file, "word_separator=%c\n", settings->wordSeparator);
-    fprintf(file, "language=%s\n", settings->language);
-
-    fclose(file);
-    return 1;
+    int success = fprintf(file, "word_separator=%c\nlanguage=%s\n",
+                          settings->wordSeparator, settings->language) >= 0;
+    if (fclose(file) != 0) success = 0;
+    return success;
 }

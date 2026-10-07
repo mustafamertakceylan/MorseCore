@@ -12,17 +12,22 @@ int readFromFile(const char fileName[], char content[], int maxLength)
     }
 
     int i = 0;
-    char ch;
+    int ch;
 
-    while ((ch = fgetc(file)) != EOF && i < maxLength - 1) {
-        content[i] = ch;
-        i++;
+    while ((ch = fgetc(file)) != EOF) {
+        if (i >= maxLength - 1) {
+            content[0] = '\0';
+            fclose(file);
+            return 0;
+        }
+        content[i++] = (char) ch;
     }
 
     content[i] = '\0';
 
+    int success = !ferror(file);
     fclose(file);
-    return 1;
+    return success;
 }
 
 int writeToFile(const char fileName[], const char content[])
@@ -33,10 +38,11 @@ int writeToFile(const char fileName[], const char content[])
         return 0;
     }
 
-    fprintf(file, "%s", content);
-
-    fclose(file);
-    return 1;
+    int success = fprintf(file, "%s", content) >= 0;
+    if (fclose(file) != 0) {
+        success = 0;
+    }
+    return success;
 }
 
 int fileExists(const char fileName[])

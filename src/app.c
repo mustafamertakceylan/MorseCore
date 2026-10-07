@@ -48,7 +48,14 @@ void runApplication(void)
             {
                 printf(COLOR_CYAN "%s\n" COLOR_RESET, getText(settings.language, TXT_TITLE_TEXT_TO_MORSE));
                 printf("%s", getText(settings.language, TXT_ENTER_TEXT));
-                fgets(text, MAX_TEXT_LENGTH, stdin);
+                int inputStatus = readInputLine(text, MAX_TEXT_LENGTH);
+                if (inputStatus == 0) return;
+                if (inputStatus < 0) {
+                    printError(RESULT_INVALID_INPUT, settings.language);
+                    increaseInvalidInputCount(&sessionStats);
+                    waitForEnter(settings.language);
+                    break;
+                }
 
                 if (textToMorse(text, output, settings.wordSeparator)) {
                     printf(COLOR_GREEN "\n%s\n" COLOR_RESET, getText(settings.language, TXT_MORSE_OUTPUT));
@@ -76,7 +83,14 @@ void runApplication(void)
 
                 printf(COLOR_CYAN "%s\n" COLOR_RESET, getText(settings.language, TXT_TITLE_MORSE_TO_TEXT));
                 printf("%s", getText(settings.language, TXT_ENTER_MORSE_CODE));
-                fgets(text, MAX_TEXT_LENGTH, stdin);
+                int inputStatus = readInputLine(text, MAX_TEXT_LENGTH);
+                if (inputStatus == 0) return;
+                if (inputStatus < 0) {
+                    printError(RESULT_INVALID_INPUT, settings.language);
+                    increaseInvalidInputCount(&sessionStats);
+                    waitForEnter(settings.language);
+                    break;
+                }
 
                 activeSeparator = resolveSeparatorForMorseInput(text, settings.wordSeparator);
 
@@ -107,8 +121,14 @@ void runApplication(void)
                 printf(COLOR_CYAN "%s\n" COLOR_RESET, getText(settings.language, TXT_TITLE_FILE_TEXT_TO_MORSE));
 
                 printf("%s", getText(settings.language, TXT_ENTER_INPUT_FILE_NAME));
-                fgets(inputFileName, sizeof(inputFileName), stdin);
-                inputFileName[strcspn(inputFileName, "\n")] = '\0';
+                int inputStatus = readInputLine(inputFileName, sizeof(inputFileName));
+                if (inputStatus == 0) return;
+                if (inputStatus < 0) {
+                    printError(RESULT_INVALID_INPUT, settings.language);
+                    increaseInvalidInputCount(&sessionStats);
+                    waitForEnter(settings.language);
+                    break;
+                }
 
                 if (isEmptyInput(inputFileName)) {
                     printError(RESULT_EMPTY_INPUT, settings.language);
@@ -174,8 +194,14 @@ void runApplication(void)
                 printf(COLOR_CYAN "%s\n" COLOR_RESET, getText(settings.language, TXT_TITLE_FILE_MORSE_TO_TEXT));
 
                 printf("%s", getText(settings.language, TXT_ENTER_MORSE_FILE_NAME));
-                fgets(inputFileName, sizeof(inputFileName), stdin);
-                inputFileName[strcspn(inputFileName, "\n")] = '\0';
+                int inputStatus = readInputLine(inputFileName, sizeof(inputFileName));
+                if (inputStatus == 0) return;
+                if (inputStatus < 0) {
+                    printError(RESULT_INVALID_INPUT, settings.language);
+                    increaseInvalidInputCount(&sessionStats);
+                    waitForEnter(settings.language);
+                    break;
+                }
 
                 if (isEmptyInput(inputFileName)) {
                     printError(RESULT_EMPTY_INPUT, settings.language);
@@ -323,7 +349,7 @@ static void runSettingsMenu(AppSettings *settings, SessionStats *sessionStats)
 
 static void changeWordSeparator(AppSettings *settings, SessionStats *sessionStats)
 {
-    char newSeparator;
+    char newSeparator[20];
 
     printf(COLOR_CYAN "%s\n" COLOR_RESET, getText(settings->language, TXT_TITLE_CHANGE_SEPARATOR));
     printf("--------------------------------\n");
@@ -332,17 +358,16 @@ static void changeWordSeparator(AppSettings *settings, SessionStats *sessionStat
     printf("--------------------------------\n");
     printf("%s", getText(settings->language, TXT_ENTER_NEW_SEPARATOR));
 
-    scanf(" %c", &newSeparator);
-    getchar();
-
-    if (!isValidSeparator(newSeparator)) {
+    int inputStatus = readInputLine(newSeparator, sizeof(newSeparator));
+    if (inputStatus == 0) return;
+    if (inputStatus < 0 || strlen(newSeparator) != 1 || !isValidSeparator(newSeparator[0])) {
         printError(RESULT_INVALID_SEPARATOR, settings->language);
         increaseInvalidInputCount(sessionStats);
         waitForEnter(settings->language);
         return;
     }
 
-    settings->wordSeparator = newSeparator;
+    settings->wordSeparator = newSeparator[0];
 
     if (saveSettings(settings)) {
         printSeparatorSavedMessage(settings->wordSeparator, settings->language);
@@ -365,14 +390,12 @@ static void changeLanguage(AppSettings *settings, SessionStats *sessionStats)
     printf("--------------------------------\n");
     printf("%s", getText(settings->language, TXT_ENTER_NEW_LANGUAGE));
 
-    scanf("%9s", newLanguage);
-    getchar();
-
-    newLanguage[0] = (char) toupper((unsigned char) newLanguage[0]);
-    newLanguage[1] = (char) toupper((unsigned char) newLanguage[1]);
-    newLanguage[2] = '\0';
-
-    if (!isSupportedLanguage(newLanguage)) {
+    int inputStatus = readInputLine(newLanguage, sizeof(newLanguage));
+    if (inputStatus == 0) return;
+    for (size_t i = 0; newLanguage[i] != '\0'; i++) {
+        newLanguage[i] = (char) toupper((unsigned char) newLanguage[i]);
+    }
+    if (inputStatus < 0 || !isSupportedLanguage(newLanguage)) {
         printError(RESULT_INVALID_INPUT, settings->language);
         increaseInvalidInputCount(sessionStats);
         waitForEnter(settings->language);

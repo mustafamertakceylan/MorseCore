@@ -12,6 +12,8 @@ void waitForEnter(const char language[]);
 void waitForSeconds(int seconds);
 
 int getMenuChoice(const char language[]);
+/* 1: complete line, 0: end of input, -1: line exceeds the buffer. */
+int readInputLine(char input[], int capacity);
 
 void printMainMenu(const char language[]);
 void printSettingsMenu(char wordSeparator, const char language[]);
