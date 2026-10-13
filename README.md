@@ -323,6 +323,20 @@ typedef struct {
 } ConversionStats;
 ```
 
+Statistics are calculated after a successful conversion with an explicit
+`ConversionDirection` (`CONVERSION_TEXT_TO_MORSE` or `CONVERSION_MORSE_TO_TEXT`).
+
+| Field | Meaning |
+|---|---|
+| `inputLength` / `outputLength` | Character count of the actual input/output, including whitespace and Morse formatting. A supported Turkish letter counts as one character in both UTF-8 and Windows-1254. |
+| `wordCount` | Words in the plain text: encoding input or decoding output. Repeated spaces, tabs, and line breaks do not create extra words. |
+| `convertedCharacterCount` | Plain-text letters and digits, excluding whitespace; each Morse letter token represents one converted character. |
+| `spaceCount` | Literal spaces in the plain text, including leading/trailing spaces. Tabs and line breaks are word boundaries but are not literal spaces. |
+
+For example, `Merhaba Dünya` has 13 input characters, 12 converted letters,
+2 words, and 1 space. Decoding the Morse representation of `HELLO WORLD` has
+10 converted letters, 2 words, and 1 space regardless of which word separator is used.
+
 ### `SessionStats`
 
 Used for storing program-wide operation counters during a session.
@@ -358,7 +372,7 @@ Example:
 
 ```c
 initializeSessionStats(&sessionStats);
-calculateConversionStats(text, output, &conversionStats);
+calculateConversionStats(text, output, CONVERSION_TEXT_TO_MORSE, &conversionStats);
 printSessionSummary(&sessionStats, settings.language);
 ```
 
@@ -553,8 +567,8 @@ cmake-build-debug\MorseCore.exe
   interactive lines and files are rejected rather than partially converted.
 - Spaces, tabs, and line breaks between words are encoded as one word separator;
   leading and trailing whitespace is ignored.
-- Conversion statistics currently count input bytes and Morse tokens; decoded
-  word counts and Unicode character counts need a separate statistics revision.
+- Conversion statistics count supported text characters rather than bytes;
+  word, letter/digit, and space counts use the plain-text side of the conversion.
 - The tests cover conversion, Turkish encodings, all four separators, output
   buffer limits, file read/write, settings persistence, invalid input, and EOF.
   CLI tests restore settings and check that existing sample files are unchanged.

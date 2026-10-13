@@ -1,52 +1,52 @@
 #include <stdio.h>
-#include <string.h>
-#include <ctype.h>
 
 #include "stats.h"
 #include "ui.h"
 #include "language.h"
 
-static int countWords(const char input[])
+static int characterByteLength(const unsigned char text[])
+{
+    /* Supported UTF-8 Turkish letters occupy two bytes. ASCII and
+     * Windows-1254 Turkish letters occupy one byte. */
+    if ((text[0] == 0xC3 || text[0] == 0xC4 || text[0] == 0xC5) &&
+        (text[1] & 0xC0) == 0x80) {
+        return 2;
+    }
+    return 1;
+}
+
+static int countCharacters(const char text[])
 {
     int count = 0;
+    const unsigned char *current = (const unsigned char *) text;
+    while (*current != '\0') {
+        count++;
+        current += characterByteLength(current);
+    }
+    return count;
+}
+
+static void countPlainText(const char text[], ConversionStats *stats)
+{
     int inWord = 0;
+    const unsigned char *current = (const unsigned char *) text;
+    stats->wordCount = 0;
+    stats->convertedCharacterCount = 0;
+    stats->spaceCount = 0;
 
-    for (int i = 0; input[i] != '\0'; i++) {
-        if (isspace((unsigned char) input[i]) || input[i] == '/') {
+    while (*current != '\0') {
+        if (*current == ' ') stats->spaceCount++;
+        if (*current == ' ' || *current == '\t' || *current == '\r' || *current == '\n') {
             inWord = 0;
-        } else if (!inWord) {
-            inWord = 1;
-            count++;
+        } else {
+            stats->convertedCharacterCount++;
+            if (!inWord) {
+                stats->wordCount++;
+                inWord = 1;
+            }
         }
+        current += characterByteLength(current);
     }
-
-    return count;
-}
-
-static int countConvertedCharacters(const char input[])
-{
-    int count = 0;
-
-    for (int i = 0; input[i] != '\0'; i++) {
-        if (!isspace((unsigned char) input[i]) && input[i] != '/') {
-            count++;
-        }
-    }
-
-    return count;
-}
-
-static int countSpaces(const char input[])
-{
-    int count = 0;
-
-    for (int i = 0; input[i] != '\0'; i++) {
-        if (input[i] == ' ') {
-            count++;
-        }
-    }
-
-    return count;
 }
 
 void initializeSessionStats(SessionStats *stats)
@@ -58,13 +58,13 @@ void initializeSessionStats(SessionStats *stats)
     stats->savedOutputCount = 0;
 }
 
-void calculateConversionStats(const char input[], const char output[], ConversionStats *stats)
+void calculateConversionStats(const char input[], const char output[],
+                              ConversionDirection direction, ConversionStats *stats)
 {
-    stats->inputLength = strlen(input);
-    stats->outputLength = strlen(output);
-    stats->wordCount = countWords(input);
-    stats->convertedCharacterCount = countConvertedCharacters(input);
-    stats->spaceCount = countSpaces(input);
+    stats->inputLength = countCharacters(input);
+    stats->outputLength = countCharacters(output);
+    const char *plainText = direction == CONVERSION_TEXT_TO_MORSE ? input : output;
+    countPlainText(plainText, stats);
 }
 
 void printConversionStats(const ConversionStats *stats, const char language[])

@@ -44,7 +44,8 @@ target_compile_definitions(MorseCore PRIVATE
 include(CTest)
 if(BUILD_TESTING)
     add_executable(MorseCoreTests tests/core_tests.c
-            src/morse.c src/separator.c src/file_utils.c src/validation.c)
+            src/morse.c src/separator.c src/file_utils.c src/validation.c
+            src/stats.c src/ui.c src/language.c src/error.c)
     add_test(NAME core COMMAND MorseCoreTests)
 
     find_package(Python3 COMPONENTS Interpreter)

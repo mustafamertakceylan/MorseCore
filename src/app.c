@@ -61,7 +61,7 @@ void runApplication(void)
                     printf(COLOR_GREEN "\n%s\n" COLOR_RESET, getText(settings.language, TXT_MORSE_OUTPUT));
                     printf("%s\n", output);
 
-                    calculateConversionStats(text, output, &conversionStats);
+                    calculateConversionStats(text, output, CONVERSION_TEXT_TO_MORSE, &conversionStats);
                     printConversionStats(&conversionStats, settings.language);
                     increaseTextToMorseCount(&sessionStats);
 
@@ -99,7 +99,7 @@ void runApplication(void)
                     printf("%s\n", output);
                     printf("%s: %c\n", getText(settings.language, TXT_DETECTED_SEPARATOR), activeSeparator);
 
-                    calculateConversionStats(text, output, &conversionStats);
+                    calculateConversionStats(text, output, CONVERSION_MORSE_TO_TEXT, &conversionStats);
                     printConversionStats(&conversionStats, settings.language);
                     increaseMorseToTextCount(&sessionStats);
                 } else {
@@ -160,7 +160,7 @@ void runApplication(void)
                                    getText(settings.language, TXT_FILE_CONVERTED_SUCCESSFULLY),
                                    outputFileName);
 
-                            calculateConversionStats(text, output, &conversionStats);
+                            calculateConversionStats(text, output, CONVERSION_TEXT_TO_MORSE, &conversionStats);
                             printConversionStats(&conversionStats, settings.language);
 
                             increaseTextToMorseCount(&sessionStats);
@@ -237,7 +237,7 @@ void runApplication(void)
                                    getText(settings.language, TXT_FILE_CONVERTED_SUCCESSFULLY),
                                    outputFileName);
 
-                            calculateConversionStats(text, output, &conversionStats);
+                            calculateConversionStats(text, output, CONVERSION_MORSE_TO_TEXT, &conversionStats);
                             printConversionStats(&conversionStats, settings.language);
 
                             increaseMorseToTextCount(&sessionStats);

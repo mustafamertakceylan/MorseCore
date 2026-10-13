@@ -47,11 +47,17 @@ class CliTests(unittest.TestCase):
         self.created.add(path)
         return path.stem
 
+    def statistics(self, output):
+        return [tuple(int(value) for value in match) for match in re.findall(
+            r"Input length: (\d+)\nOutput length: (\d+)\nWord count: (\d+)\n"
+            r"Converted characters: (\d+)\nSpace count: (\d+)", output)]
+
     def test_encode_decode_and_save(self):
         output = self.run_cli(f"1\nHELLO WORLD\ny\n\n2\n{HELLO}\n\n0\n")
         self.assertIn(HELLO, output)
         self.assertIn("Text output:\nHELLO WORLD", output)
         self.assertIn("Saved outputs: 1", output)
+        self.assertEqual(self.statistics(output), [(11, 44, 2, 10, 1), (43, 11, 2, 10, 1)])
         saved = [p for p in self.created if p.name.startswith("morse_output_")]
         self.assertEqual(len(saved), 1)
         self.assertEqual(saved[0].read_text().strip(), HELLO)
@@ -61,6 +67,7 @@ class CliTests(unittest.TestCase):
         self.assertIn("-- . .-. .... .- -... .- / -.. ..- -. -.-- .-", output)
         self.assertIn("Text output:\nHELLO WORLD", output)
         self.assertIn("Detected/active separator: #", output)
+        self.assertEqual(self.statistics(output), [(13, 46, 2, 12, 1), (43, 11, 2, 10, 1)])
 
     def test_file_roundtrip_from_other_directory(self):
         name = self.fixture("HELLO\nWORLD")
@@ -70,11 +77,13 @@ class CliTests(unittest.TestCase):
             encoded = [p for p in self.created if p.name.startswith("morse_output_")]
             self.assertEqual(len(encoded), 1)
             self.assertEqual(encoded[0].read_text().strip(), HELLO)
+            self.assertEqual(self.statistics(output), [(11, 44, 2, 10, 0)])
             output = self.run_cli(f"4\n{encoded[0].name}\n\n0\n", cwd)
             self.assertIn("File converted successfully", output)
             decoded = [p for p in self.created if p.name.startswith("decoded_output_")]
             self.assertEqual(len(decoded), 1)
             self.assertEqual(decoded[0].read_text(), "HELLO WORLD")
+            self.assertEqual(self.statistics(output), [(44, 11, 2, 10, 1)])
 
     def test_persistent_settings(self):
         output = self.run_cli("7\n1\n|\n\n2\ntr\n\n0\n0\n")
@@ -84,6 +93,7 @@ class CliTests(unittest.TestCase):
         output = self.run_cli("1\nA B\nn\n\n0\n", EXE.parent)
         self.assertIn("Metni Morse'a Cevir", output)
         self.assertIn(".- | -...", output)
+        self.assertIn("Kelime sayisi: 2\nDonusturulen karakterler: 2\nBosluk sayisi: 1", output)
 
     def test_invalid_input_and_missing_file(self):
         output = self.run_cli("1\nHELLO!\n\n2\n......\n\n3\n../config/settings\n\n4\nqa_missing_file\n\n0\n")
@@ -98,6 +108,21 @@ class CliTests(unittest.TestCase):
         self.assertIn("Output length: 5994", output)
         self.assertIn("Text to Morse operations: 1", output)
         self.assertIn("Invalid inputs: 1", output)
+        self.assertEqual(self.statistics(output), [(999, 5994, 1, 999, 0)])
+
+    def test_statistics_all_separators_and_repeated_spaces(self):
+        inputs = [HELLO.replace("/", separator) for separator in "/|#*"]
+        inputs.append("/ / .- / / -... / /")
+        output = self.run_cli("".join(f"2\n{text}\n\n" for text in inputs) + "0\n")
+        self.assertEqual(self.statistics(output),
+                         [(43, 11, 2, 10, 1)] * 4 + [(19, 8, 2, 2, 6)])
+
+    def test_statistics_utf8_and_whitespace(self):
+        name = self.fixture(" \tHello\r\n\t  World\n")
+        output = self.run_cli(f"1\nÇığ ÖŞÜ 2026\nn\n\n3\n{name}\n\n0\n")
+        # On Windows text-mode file reading translates CRLF to LF.
+        file_length = 17 if sys.platform == "win32" else 18
+        self.assertEqual(self.statistics(output), [(12, 52, 3, 10, 2), (file_length, 44, 2, 10, 3)])
 
     def test_large_file_is_rejected(self):
         name = self.fixture("9" * 1000)
