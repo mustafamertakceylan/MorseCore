@@ -4,6 +4,7 @@
 
 #include "morse.h"
 #include "constants.h"
+#include "ui.h"
 
 char characters[MORSE_COUNT] = {
     'A','B','C','D','E','F','G','H','I','J','K','L','M',
@@ -178,12 +179,14 @@ int morseToText(const char morseInput[], char textOutput[], char wordSeparator)
 
 void printMorseTable(void)
 {
-    printf("\nMorse Table\n");
-    printf("-------------------------\n");
-
-    for (int i = 0; i < MORSE_COUNT; i++) {
-        printf("%c  ->  %s\n", characters[i], morseCodes[i]);
+    const int rows = MORSE_COUNT / 3;
+    for (int row = 0; row < rows; row++) {
+        for (int column = 0; column < 3; column++) {
+            int index = row + column * rows;
+            printf("  %s%c%s  ->  %s%-5s%s   ", COLOR_YELLOW, characters[index], COLOR_MUTED,
+                   COLOR_TEXT, morseCodes[index], COLOR_RESET);
+        }
+        putchar('\n');
     }
-
-    printf("-------------------------\n");
+    printSectionRule();
 }

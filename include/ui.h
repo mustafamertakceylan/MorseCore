@@ -1,11 +1,24 @@
 #ifndef UI_H
 #define UI_H
 
-#define COLOR_RESET  "\033[0m"
-#define COLOR_CYAN   "\033[36m"
-#define COLOR_GREEN  "\033[32m"
-#define COLOR_RED    "\033[31m"
-#define COLOR_YELLOW "\033[33m"
+typedef enum {
+    UI_RESET, UI_ACCENT, UI_SUCCESS, UI_ERROR, UI_KEY, UI_TEXT, UI_MUTED
+} ConsoleColor;
+
+const char *consoleColor(ConsoleColor color);
+#define COLOR_RESET  consoleColor(UI_RESET)
+#define COLOR_CYAN   consoleColor(UI_ACCENT)
+#define COLOR_GREEN  consoleColor(UI_SUCCESS)
+#define COLOR_RED    consoleColor(UI_ERROR)
+#define COLOR_YELLOW consoleColor(UI_KEY)
+#define COLOR_TEXT   consoleColor(UI_TEXT)
+#define COLOR_MUTED  consoleColor(UI_MUTED)
+
+void initializeConsoleUi(void);
+void printSectionHeader(const char title[]);
+void printSectionRule(void);
+void printResult(const char title[], const char content[]);
+void printStatLine(const char label[], int value);
 
 void clearConsole(void);
 void waitForEnter(const char language[]);
@@ -15,7 +28,7 @@ int getMenuChoice(const char language[]);
 /* 1: complete line, 0: end of input, -1: line exceeds the buffer. */
 int readInputLine(char input[], int capacity);
 
-void printMainMenu(const char language[]);
+void printMainMenu(char wordSeparator, const char language[]);
 void printSettingsMenu(char wordSeparator, const char language[]);
 
 void printSeparatorSavedMessage(char newSeparator, const char language[]);

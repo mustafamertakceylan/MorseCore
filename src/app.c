@@ -38,7 +38,7 @@ void runApplication(void)
     do {
         clearConsole();
 
-        printMainMenu(settings.language);
+        printMainMenu(settings.wordSeparator, settings.language);
 
         choice = getMenuChoice(settings.language);
         clearConsole();
@@ -46,7 +46,7 @@ void runApplication(void)
         switch (choice) {
             case 1:
             {
-                printf(COLOR_CYAN "%s\n" COLOR_RESET, getText(settings.language, TXT_TITLE_TEXT_TO_MORSE));
+                printSectionHeader(getText(settings.language, TXT_TITLE_TEXT_TO_MORSE));
                 printf("%s", getText(settings.language, TXT_ENTER_TEXT));
                 int inputStatus = readInputLine(text, MAX_TEXT_LENGTH);
                 if (inputStatus == 0) return;
@@ -58,8 +58,7 @@ void runApplication(void)
                 }
 
                 if (textToMorse(text, output, settings.wordSeparator)) {
-                    printf(COLOR_GREEN "\n%s\n" COLOR_RESET, getText(settings.language, TXT_MORSE_OUTPUT));
-                    printf("%s\n", output);
+                    printResult(getText(settings.language, TXT_MORSE_OUTPUT), output);
 
                     calculateConversionStats(text, output, CONVERSION_TEXT_TO_MORSE, &conversionStats);
                     printConversionStats(&conversionStats, settings.language);
@@ -81,7 +80,7 @@ void runApplication(void)
             {
                 char activeSeparator;
 
-                printf(COLOR_CYAN "%s\n" COLOR_RESET, getText(settings.language, TXT_TITLE_MORSE_TO_TEXT));
+                printSectionHeader(getText(settings.language, TXT_TITLE_MORSE_TO_TEXT));
                 printf("%s", getText(settings.language, TXT_ENTER_MORSE_CODE));
                 int inputStatus = readInputLine(text, MAX_TEXT_LENGTH);
                 if (inputStatus == 0) return;
@@ -95,8 +94,7 @@ void runApplication(void)
                 activeSeparator = resolveSeparatorForMorseInput(text, settings.wordSeparator);
 
                 if (morseToText(text, output, activeSeparator)) {
-                    printf(COLOR_GREEN "\n%s\n" COLOR_RESET, getText(settings.language, TXT_TEXT_OUTPUT));
-                    printf("%s\n", output);
+                    printResult(getText(settings.language, TXT_TEXT_OUTPUT), output);
                     printf("%s: %c\n", getText(settings.language, TXT_DETECTED_SEPARATOR), activeSeparator);
 
                     calculateConversionStats(text, output, CONVERSION_MORSE_TO_TEXT, &conversionStats);
@@ -118,7 +116,7 @@ void runApplication(void)
                 char outputFileName[MAX_FILE_NAME_LENGTH];
                 char outputPath[MAX_FILE_PATH_LENGTH];
 
-                printf(COLOR_CYAN "%s\n" COLOR_RESET, getText(settings.language, TXT_TITLE_FILE_TEXT_TO_MORSE));
+                printSectionHeader(getText(settings.language, TXT_TITLE_FILE_TEXT_TO_MORSE));
 
                 printf("%s", getText(settings.language, TXT_ENTER_INPUT_FILE_NAME));
                 int inputStatus = readInputLine(inputFileName, sizeof(inputFileName));
@@ -156,9 +154,9 @@ void runApplication(void)
                         buildDataFilePath(outputPath, outputFileName);
 
                         if (writeToFile(outputPath, output)) {
-                            printf(COLOR_GREEN "\n%s: data/%s\n" COLOR_RESET,
+                            printf("\n%s[+] %s: data/%s%s\n", COLOR_GREEN,
                                    getText(settings.language, TXT_FILE_CONVERTED_SUCCESSFULLY),
-                                   outputFileName);
+                                   outputFileName, COLOR_RESET);
 
                             calculateConversionStats(text, output, CONVERSION_TEXT_TO_MORSE, &conversionStats);
                             printConversionStats(&conversionStats, settings.language);
@@ -191,7 +189,7 @@ void runApplication(void)
                 char outputPath[MAX_FILE_PATH_LENGTH];
                 char activeSeparator;
 
-                printf(COLOR_CYAN "%s\n" COLOR_RESET, getText(settings.language, TXT_TITLE_FILE_MORSE_TO_TEXT));
+                printSectionHeader(getText(settings.language, TXT_TITLE_FILE_MORSE_TO_TEXT));
 
                 printf("%s", getText(settings.language, TXT_ENTER_MORSE_FILE_NAME));
                 int inputStatus = readInputLine(inputFileName, sizeof(inputFileName));
@@ -233,9 +231,9 @@ void runApplication(void)
                         buildDataFilePath(outputPath, outputFileName);
 
                         if (writeToFile(outputPath, output)) {
-                            printf(COLOR_GREEN "\n%s: data/%s\n" COLOR_RESET,
+                            printf("\n%s[+] %s: data/%s%s\n", COLOR_GREEN,
                                    getText(settings.language, TXT_FILE_CONVERTED_SUCCESSFULLY),
-                                   outputFileName);
+                                   outputFileName, COLOR_RESET);
 
                             calculateConversionStats(text, output, CONVERSION_MORSE_TO_TEXT, &conversionStats);
                             printConversionStats(&conversionStats, settings.language);
@@ -262,7 +260,7 @@ void runApplication(void)
 
             case 5:
             {
-                printf(COLOR_CYAN "%s\n" COLOR_RESET, getText(settings.language, TXT_TITLE_MORSE_TABLE));
+                printSectionHeader(getText(settings.language, TXT_TITLE_MORSE_TABLE));
 
                 printMorseTable();
 
@@ -287,7 +285,7 @@ void runApplication(void)
             case 0:
             {
                 printSessionSummary(&sessionStats, settings.language);
-                printf(COLOR_GREEN "\n%s\n" COLOR_RESET, getText(settings.language, TXT_EXITING_IN_SECONDS));
+                printf("\n%s%s%s\n", COLOR_MUTED, getText(settings.language, TXT_EXITING_IN_SECONDS), COLOR_RESET);
                 fflush(stdout);
                 waitForSeconds(3);
                 break;
@@ -351,11 +349,10 @@ static void changeWordSeparator(AppSettings *settings, SessionStats *sessionStat
 {
     char newSeparator[20];
 
-    printf(COLOR_CYAN "%s\n" COLOR_RESET, getText(settings->language, TXT_TITLE_CHANGE_SEPARATOR));
-    printf("--------------------------------\n");
+    printSectionHeader(getText(settings->language, TXT_TITLE_CHANGE_SEPARATOR));
     printf("%s: %c\n", getText(settings->language, TXT_CURRENT_SEPARATOR_SHORT), settings->wordSeparator);
     printf("%s\n", getText(settings->language, TXT_ALLOWED_SEPARATORS));
-    printf("--------------------------------\n");
+    printSectionRule();
     printf("%s", getText(settings->language, TXT_ENTER_NEW_SEPARATOR));
 
     int inputStatus = readInputLine(newSeparator, sizeof(newSeparator));
@@ -383,11 +380,10 @@ static void changeLanguage(AppSettings *settings, SessionStats *sessionStats)
 {
     char newLanguage[10];
 
-    printf(COLOR_CYAN "%s\n" COLOR_RESET, getText(settings->language, TXT_TITLE_CHANGE_LANGUAGE));
-    printf("--------------------------------\n");
+    printSectionHeader(getText(settings->language, TXT_TITLE_CHANGE_LANGUAGE));
     printf("%s: %s\n", getText(settings->language, TXT_CURRENT_LANGUAGE), settings->language);
     printf("%s\n", getText(settings->language, TXT_ALLOWED_LANGUAGES));
-    printf("--------------------------------\n");
+    printSectionRule();
     printf("%s", getText(settings->language, TXT_ENTER_NEW_LANGUAGE));
 
     int inputStatus = readInputLine(newLanguage, sizeof(newLanguage));

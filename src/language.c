@@ -20,6 +20,13 @@ const char* getText(const char language[], LanguageTextKey key)
         case TXT_MAIN_TITLE:
             return "MorseCore";
 
+        case TXT_SECTION_CONVERT:
+            return isTurkish ? "DONUSTUR" : "CONVERT";
+        case TXT_SECTION_FILES:
+            return isTurkish ? "DOSYALAR" : "FILES";
+        case TXT_SECTION_TOOLS:
+            return isTurkish ? "ARACLAR" : "TOOLS";
+
         case TXT_MENU_TEXT_TO_MORSE:
             return isTurkish ? "Metni Morse'a Cevir" : "Text to Morse";
 

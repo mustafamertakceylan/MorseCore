@@ -41,5 +41,5 @@ const char* getErrorMessage(ResultCode resultCode, const char language[])
 
 void printError(ResultCode resultCode, const char language[])
 {
-    printf(COLOR_RED "%s\n" COLOR_RESET, getErrorMessage(resultCode, language));
+    printf("%s[!] %s%s\n", COLOR_RED, getErrorMessage(resultCode, language), COLOR_RESET);
 }

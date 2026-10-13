@@ -69,26 +69,24 @@ void calculateConversionStats(const char input[], const char output[],
 
 void printConversionStats(const ConversionStats *stats, const char language[])
 {
-    printf(COLOR_CYAN "\n%s\n" COLOR_RESET, getText(language, TXT_CONVERSION_STATISTICS));
-    printf("--------------------------------\n");
-    printf("%s: %d\n", getText(language, TXT_INPUT_LENGTH), stats->inputLength);
-    printf("%s: %d\n", getText(language, TXT_OUTPUT_LENGTH), stats->outputLength);
-    printf("%s: %d\n", getText(language, TXT_WORD_COUNT), stats->wordCount);
-    printf("%s: %d\n", getText(language, TXT_CONVERTED_CHARACTERS), stats->convertedCharacterCount);
-    printf("%s: %d\n", getText(language, TXT_SPACE_COUNT), stats->spaceCount);
-    printf("--------------------------------\n");
+    printSectionHeader(getText(language, TXT_CONVERSION_STATISTICS));
+    printStatLine(getText(language, TXT_INPUT_LENGTH), stats->inputLength);
+    printStatLine(getText(language, TXT_OUTPUT_LENGTH), stats->outputLength);
+    printStatLine(getText(language, TXT_WORD_COUNT), stats->wordCount);
+    printStatLine(getText(language, TXT_CONVERTED_CHARACTERS), stats->convertedCharacterCount);
+    printStatLine(getText(language, TXT_SPACE_COUNT), stats->spaceCount);
+    printSectionRule();
 }
 
 void printSessionSummary(const SessionStats *stats, const char language[])
 {
-    printf(COLOR_CYAN "\n%s\n" COLOR_RESET, getText(language, TXT_SESSION_SUMMARY));
-    printf("--------------------------------\n");
-    printf("%s: %d\n", getText(language, TXT_TEXT_TO_MORSE_OPERATIONS), stats->textToMorseCount);
-    printf("%s: %d\n", getText(language, TXT_MORSE_TO_TEXT_OPERATIONS), stats->morseToTextCount);
-    printf("%s: %d\n", getText(language, TXT_FILE_OPERATIONS), stats->fileOperationCount);
-    printf("%s: %d\n", getText(language, TXT_INVALID_INPUTS), stats->invalidInputCount);
-    printf("%s: %d\n", getText(language, TXT_SAVED_OUTPUTS), stats->savedOutputCount);
-    printf("--------------------------------\n");
+    printSectionHeader(getText(language, TXT_SESSION_SUMMARY));
+    printStatLine(getText(language, TXT_TEXT_TO_MORSE_OPERATIONS), stats->textToMorseCount);
+    printStatLine(getText(language, TXT_MORSE_TO_TEXT_OPERATIONS), stats->morseToTextCount);
+    printStatLine(getText(language, TXT_FILE_OPERATIONS), stats->fileOperationCount);
+    printStatLine(getText(language, TXT_INVALID_INPUTS), stats->invalidInputCount);
+    printStatLine(getText(language, TXT_SAVED_OUTPUTS), stats->savedOutputCount);
+    printSectionRule();
 }
 
 void increaseTextToMorseCount(SessionStats *stats)

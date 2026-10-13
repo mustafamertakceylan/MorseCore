@@ -555,6 +555,10 @@ cmake-build-debug\MorseCore.exe
 ## Notes
 
 - The project is designed for console usage.
+- The console uses a turquoise/white ASCII `MORSE CORE` banner, grouped menus,
+  yellow selection keys, and green/red success and error messages. Windows
+  virtual-terminal colors are enabled when supported. Redirected output stays
+  plain text; setting the `NO_COLOR` environment variable disables colors.
 - Turkish input characters are normalized before Morse conversion.
 - Turkish interface text uses ASCII Turkish for terminal compatibility.
 - The default word separator is `/`.
