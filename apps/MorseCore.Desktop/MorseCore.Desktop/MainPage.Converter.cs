@@ -35,14 +35,14 @@ public sealed partial class MainPage
         var input=new StackPanel { Spacing=8 };
         var output=new StackPanel { Spacing=8 };
         var sourceHeader=new Grid { MinHeight=34 };
-        sourceHeader.ColumnDefinitions.Add(new ColumnDefinition { Width=new GridLength(1,GridUnitType.Star) }); sourceHeader.ColumnDefinitions.Add(new ColumnDefinition { Width=GridLength.Auto }); sourceHeader.Children.Add(Label(T("source"),13,true));
+        sourceHeader.ColumnDefinitions.Add(new ColumnDefinition { Width=new GridLength(1,GridUnitType.Star) }); sourceHeader.ColumnDefinitions.Add(new ColumnDefinition { Width=GridLength.Auto }); sourceHeader.Children.Add(Label(T(decode?"morseInput":"plainText"),13,true));
         var clear=IconAction("clear",()=> { source=""; result=null; revision++; BuildPage(); return Task.CompletedTask; },"\uE894"); Grid.SetColumn(clear,1); sourceHeader.Children.Add(clear); input.Children.Add(sourceHeader);
         var resultHeader=new Grid { MinHeight=34 };
-        resultHeader.ColumnDefinitions.Add(new ColumnDefinition { Width=new GridLength(1,GridUnitType.Star) }); resultHeader.ColumnDefinitions.Add(new ColumnDefinition { Width=GridLength.Auto }); resultHeader.Children.Add(Label(T("result"),13,true));
+        resultHeader.ColumnDefinitions.Add(new ColumnDefinition { Width=new GridLength(1,GridUnitType.Star) }); resultHeader.ColumnDefinitions.Add(new ColumnDefinition { Width=GridLength.Auto }); resultHeader.Children.Add(Label(T(decode?"decodedText":"morseInput"),13,true));
         var resultActions=Row(); resultActions.Spacing=4; Grid.SetColumn(resultActions,1);
         resultActions.Children.Add(IconAction("copy",CopyResult,"\uE8C8")); resultActions.Children.Add(IconAction("save",SaveResult,"\uE74E")); resultHeader.Children.Add(resultActions); output.Children.Add(resultHeader);
-        inputBox=new TextBox { Text=source,PlaceholderText=decode ? "... --- ..." : T("inputPlaceholder"),AcceptsReturn=true,TextWrapping=TextWrapping.Wrap,Height=125,MaxLength=200_000,Padding=new Thickness(12),FontSize=17,FlowDirection=decode ? FlowDirection.LeftToRight : PlainDirection };
-        outputBox=new TextBox { Text=result?.Text ?? "",PlaceholderText=T("outputPlaceholder"),AcceptsReturn=true,TextWrapping=TextWrapping.Wrap,Height=125,IsReadOnly=true,Padding=new Thickness(12),FontSize=17,FlowDirection=decode ? PlainDirection : FlowDirection.LeftToRight };
+        inputBox=new TextBox { Text=source,PlaceholderText=decode ? "... --- ..." : T("inputPlaceholder"),AcceptsReturn=true,TextWrapping=TextWrapping.Wrap,Height=200,MaxLength=200_000,Padding=new Thickness(12),FontSize=17,FlowDirection=decode ? FlowDirection.LeftToRight : PlainDirection };
+        outputBox=new TextBox { Text=result?.Text ?? "",PlaceholderText=T("outputPlaceholder"),AcceptsReturn=true,TextWrapping=TextWrapping.Wrap,Height=200,IsReadOnly=true,Padding=new Thickness(12),FontSize=17,FlowDirection=decode ? PlainDirection : FlowDirection.LeftToRight };
         if(decode) inputBox.FontFamily=new FontFamily("Consolas"); else outputBox.FontFamily=new FontFamily("Consolas");
         Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(inputBox,T("source"));
         Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(outputBox,T("result"));
@@ -61,8 +61,6 @@ public sealed partial class MainPage
         workspace.Children.Add(editors);
         var controls=Row();
         controls.Children.Add(Action("convert",ConvertNow,"\uE8D4",true));
-        controls.Children.Add(Action("play",PlayCurrentMorse,"\uE768"));
-        controls.Children.Add(IconAction("stop",()=> { StopPlayback(); return Task.CompletedTask; },"\uE71A"));
         controls.Children.Add(IconAction("swap",()=>
         {
             if(result==null) return Task.CompletedTask;
@@ -71,7 +69,6 @@ public sealed partial class MainPage
         workspace.Children.Add(controls); WrapActions(controls,workspace);
         statistics=Label("",12,true); workspace.Children.Add(statistics); UpdateStatistics();
         PageContent.Children.Add(Card(workspace));
-        BuildSpeech(ConverterSpeech);
         var note=new Expander { Header=T("conversionNotes"),HorizontalAlignment=HorizontalAlignment.Stretch,Content=Label(T("normalizationNote"),12,true) };
         PageContent.Children.Add(note);
     }
@@ -120,12 +117,7 @@ public sealed partial class MainPage
         string? path=await SavePath("txt",decode ? "text" : "morse");
         if(path!=null) { await File.WriteAllTextAsync(path,snapshot,lifetime.Token); SetStatus(T("saved")); }
     }
-    private Task PlayCurrentMorse()
-    {
-        var options=preferences; string input=source; string? encoded=result?.Text; bool direction=decode;
-        return RunPlayback(()=>direction ? Task.FromResult(input) : encoded!=null ? Task.FromResult(encoded) : Task.Run(()=>MorseEngine.Encode(input,options.Alphabet,options.Separator).Text),options);
-    }
-    private Task PlayMorse(string morse)=>RunPlayback(()=>Task.FromResult(morse),preferences);
+    private Task PlayMorse(string morse,char? separator=null)=>RunPlayback(()=>Task.FromResult(morse),separator is { } value ? preferences with { Separator=value } : preferences);
     private async Task RunPlayback(Func<Task<string>> getMorse,MorseCore.AppCore.Preferences options)
     {
         if(playback!=null) return;

@@ -25,8 +25,8 @@
   </Border>
   <Grid x:Name="Shell" Grid.Row="1" Visibility="Collapsed">
    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-   <Border x:Name="Pane" Width="216" Background="{ThemeResource PaneBrush}" BorderBrush="{ThemeResource LineBrush}" BorderThickness="0,0,1,0">
-    <Grid Padding="10,14,10,12" RowSpacing="18">
+   <Border x:Name="Pane" Width="240" Background="{ThemeResource PaneBrush}" BorderBrush="{ThemeResource LineBrush}" BorderThickness="0,0,1,0">
+    <Grid Padding="10,14,10,12" RowSpacing="14">
      <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
      <StackPanel Spacing="12">
       <Grid Height="40">
@@ -35,16 +35,16 @@
         <Border Width="32" Height="32" CornerRadius="8" Background="#FAF8F2"><Image Source="ms-appx:///Assets/Brand/morsecore.png" Stretch="Uniform"/></Border>
         <TextBlock Text="MorseCore" FontFamily="{StaticResource DisplayFont}" FontSize="24" VerticalAlignment="Center"/>
        </StackPanel>
-       <Button x:Name="PaneToggle" Grid.Column="1" Click="TogglePane" Width="44" Height="40" MinWidth="0" HorizontalAlignment="Right" Padding="0" Background="Transparent" BorderThickness="0" AutomationProperties.AutomationId="PaneToggle">
-        <FontIcon Glyph="&#xE700;" FontSize="18"/>
+       <Button x:Name="PaneToggle" Grid.Column="1" Click="TogglePane" Width="32" Height="32" MinWidth="0" HorizontalAlignment="Right" Padding="0" Background="{ThemeResource CardBrush}" BorderThickness="1" AutomationProperties.AutomationId="PaneToggle">
+        <FontIcon Glyph="&#xE76B;" FontSize="12"/>
        </Button>
       </Grid>
-      <TextBlock x:Name="Tagline" FontSize="13" Margin="8,0" Foreground="{ThemeResource MutedBrush}"/>
      </StackPanel>
-     <StackPanel x:Name="Menu" Grid.Row="1" Spacing="2"/>
+     <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" HorizontalContentAlignment="Stretch">
+      <StackPanel x:Name="Menu" Spacing="4"/>
+     </ScrollViewer>
      <StackPanel Grid.Row="2" Spacing="14">
       <StackPanel x:Name="BottomMenu"/>
-      <TextBlock x:Name="VersionLabel" Text="MORSECORE · 0.3.0" Margin="10,0" FontSize="10" CharacterSpacing="140" Foreground="{ThemeResource MutedBrush}"/>
      </StackPanel>
     </Grid>
    </Border>
@@ -54,11 +54,7 @@
     <ScrollViewer x:Name="ContentScroll" Grid.Row="1" HorizontalScrollBarVisibility="Disabled" HorizontalContentAlignment="Stretch" VerticalScrollBarVisibility="Auto">
      <StackPanel x:Name="PageContent" Spacing="12" Padding="0,0,0,8"><StackPanel.RenderTransform><TranslateTransform/></StackPanel.RenderTransform></StackPanel>
     </ScrollViewer>
-    <Grid Grid.Row="2" ColumnSpacing="12">
-     <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-     <TextBlock x:Name="Status" FontSize="13" Foreground="{ThemeResource MutedBrush}" AutomationProperties.LiveSetting="Polite" MaxLines="3"/>
-     <TextBlock x:Name="OfflineLabel" Grid.Column="1" FontSize="12" Foreground="{ThemeResource MutedBrush}"/>
-    </Grid>
+    <TextBlock x:Name="Status" Grid.Row="2" FontSize="13" Foreground="{ThemeResource MutedBrush}" AutomationProperties.LiveSetting="Polite" MaxLines="3"/>
    </Grid>
   </Grid>
   <Grid x:Name="Splash" Grid.Row="1" Background="{ThemeResource CanvasBrush}">

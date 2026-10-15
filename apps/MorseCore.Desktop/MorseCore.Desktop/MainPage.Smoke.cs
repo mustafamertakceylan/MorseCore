@@ -9,12 +9,14 @@ using Microsoft.UI.Xaml.Automation.Peers;
 using Microsoft.UI.Xaml.Automation.Provider;
 using MorseCore.Interop;
 using MorseCore.AppCore;
+using MorseCore.AppCore.Radio;
 using Windows.Graphics.Imaging;
 
 namespace MorseCore.Desktop;
 
 public sealed partial class MainPage
 {
+    private string? smokeSavePath;
     private async Task Snapshot(string path,UIElement? element=null)
     {
         await Task.Delay(250); Root.UpdateLayout();
@@ -105,7 +107,7 @@ public sealed partial class MainPage
             await Snapshot(Path.Combine(directory,"arabic.png"));
             Check(Grid.GetColumn(Pane)==0 && Shell.FlowDirection==FlowDirection.RightToLeft,"Arabic mirrored navigation column");
             preferences=preferences with { Language="tr",Alphabet=MorseAlphabet.Latin,Theme="light" }; source="Merhaba dünya!"; result=null; ApplyTheme();
-            foreach(string feature in new[]{"files","audio","practice","alphabet","settings"})
+            foreach(string feature in new[]{"files","audio","practice","alphabet","glossary","radio","settings"})
             { Navigate(feature); await Snapshot(Path.Combine(directory,feature+".png")); Check(PageContent.Children.Count>0,feature+" page rendered"); }
             var credits=Descendants(Root).OfType<Expander>().First(e=>AutomationProperties.GetAutomationId(e)=="OpenSourceCredits");
             credits.IsExpanded=true; await Task.Delay(150); Root.UpdateLayout();
@@ -114,17 +116,62 @@ public sealed partial class MainPage
             Check(creditLinks.Any(link=>Equals(link.Content,"EMA Lightning")) && creditLinks.Any(link=>Equals(link.Content,"Antalia-2 Mini")),"Local Turkish AI authors acknowledged in settings");
             ContentScroll.ChangeView(null,ContentScroll.ScrollableHeight,null,true); await Snapshot(Path.Combine(directory,"credits.png"));
             Navigate("practice"); await Task.Delay(100); await ActionButton("start");
-            Check(session!=null && practiceQuestion!=null,"Practice start button");
-            var question=practiceQuestion!;
+            Check(lesson?.Current!=null,"Practice start button");
+            var question=lesson!.Current!;
             Navigate("settings");
             var themeChoice=Descendants(Root).OfType<ComboBox>().First(c=>AutomationProperties.GetAutomationId(c)=="ThemeChoice");
             themeChoice.SelectedIndex=2; await Task.Delay(100);
             Check(preferences.Theme=="dark" && ActualTheme==ElementTheme.Dark && store.Load().Theme=="dark","Theme changes and persists from Settings");
             Navigate("practice");
-            Check(ReferenceEquals(question,practiceQuestion),"Practice question survives navigation and theme changes");
+            Check(ReferenceEquals(question,lesson.Current),"Practice question survives navigation and theme changes");
             var answer=Descendants(Root).OfType<TextBox>().First(b=>Equals(b.Header,T("answer")));
-            answer.Text=MorseEngine.Decode(practiceQuestion!.Morse).Text; await ActionButton("submit");
-            Check(session!.Statistics.Correct==1 && session.Statistics.Answered==1,"Practice submit button and score");
+            answer.Text=lesson.Current!.Answer; await ActionButton("submit");
+            Check(lesson.Correct==1 && lesson.Incorrect==0,"Practice submit button and score");
+            answer.Text="WRONG"; await ActionButton("submit"); await ActionButton("retryMissed");
+            Check(lesson.Current!=null && lesson.Correct==0,"Mistakes can be reviewed separately");
+            await ActionButton("Nav-education");
+            Check(educationChildren?.Visibility==Visibility.Collapsed,"Education group collapses");
+            await ActionButton("Nav-education"); await ActionButton("Nav-glossary");
+            var search=Descendants(Root).OfType<TextBox>().First(b=>Equals(b.Header,T("searchTerms")));
+            search.Text="QRL"; await Task.Delay(70);
+            Check(Descendants(PageContent).OfType<TextBlock>().Any(b=>b.Text=="QRL?"),"Radio glossary search filters real definitions");
+            Navigate("radio");
+            var callInput=Descendants(Root).OfType<TextBox>().First(b=>AutomationProperties.GetAutomationId(b)=="callSign");
+            callInput.Text="TA1PDM"; await Task.Delay(100); await ActionButton("analyzeCall");
+            Check(stationDraft.CountryId=="TR" && stationDraft.ClassId=="A","Station recognition selects Turkish class A and region");
+            Descendants(Root).OfType<TextBox>().First(b=>AutomationProperties.GetAutomationId(b)=="operatorName").Text="Ali";
+            Descendants(Root).OfType<TextBox>().First(b=>AutomationProperties.GetAutomationId(b)=="qth").Text="Ankara";
+            await ActionButton("saveStation");
+            Check(ActiveStation?.CallSign=="TA1PDM" && radioStore.LoadProfiles().Profiles.Count==1,"Station profile saves through UI");
+            radioTab=1; BuildPage(); await ActionButton("prepareMessage");
+            Check(qsoPreview=="QRL? DE TA1PDM K" && qsoMorse.Contains(" / ",StringComparison.Ordinal),"QRL message prepares Latin calls and Morse");
+            var other=Descendants(Root).OfType<TextBox>().First(b=>AutomationProperties.GetAutomationId(b)=="otherCall"); other.Text="DL1ABC"; await Task.Delay(100);
+            Check(qsoPreview=="" && qsoTextBox!.Text=="","Changing QSO data invalidates the visible preview");
+            sentRst="579"; receivedRst="589"; qsoMessage="TNX FER CALL";
+            foreach(QsoStage step in Enum.GetValues<QsoStage>())
+            { qsoStage=step; BuildPage(); await ActionButton("prepareMessage"); Check(qsoPreview.Contains("TA1PDM",StringComparison.Ordinal) && qsoMorse.Length>0,"QSO message action: "+step); }
+            await Snapshot(Path.Combine(directory,"qso.png"));
+            smokeSavePath=Path.Combine(directory,"qso-preview.wav"); File.WriteAllText(smokeSavePath,""); await ActionButton("exportWav");
+            var wavDeadline=DateTimeOffset.UtcNow.AddSeconds(5);
+            while(new FileInfo(Path.Combine(directory,"qso-preview.wav")).Length==0 && DateTimeOffset.UtcNow<wavDeadline) await Task.Delay(50);
+            Check(new FileInfo(Path.Combine(directory,"qso-preview.wav")).Length>44,"QSO WAV button writes to a picker-reserved file");
+            await ActionButton("saveQso");
+            Check(radioStore.Recent(true).Count==1 && radioStore.Recent(false).Count==0,"UI saves a practice QSO separately");
+            var kind=Descendants(Root).OfType<ToggleSwitch>().First(b=>Equals(b.Header,T("practiceRecord"))); kind.IsOn=false;
+            await ActionButton("saveQso");
+            Check(radioStore.Recent(false).Count==1 && radioStore.Recent(false)[0].Utc.Offset==TimeSpan.Zero,"External radio contact logs in UTC");
+            radioTab=2; BuildPage(); await Snapshot(Path.Combine(directory,"qso-log.png"));
+            foreach(bool adif in new[]{false,true})
+            {
+                string path=Path.Combine(directory,adif?"qso-export.adi":"qso-export.csv"); smokeSavePath=path; File.WriteAllText(path,"");
+                await ActionButton(adif?"exportAdif":"exportCsv");
+                var deadline=DateTimeOffset.UtcNow.AddSeconds(5);
+                while(new FileInfo(path).Length==0 && DateTimeOffset.UtcNow<deadline) await Task.Delay(50);
+                Check((await File.ReadAllTextAsync(path)).Contains(adif?"<EOR>":"DL1ABC",StringComparison.Ordinal),"QSO "+(adif?"ADIF":"CSV")+" button handles a picker-reserved target");
+            }
+            preferences=preferences with { Language="ar" }; Rebuild(); radioTab=1; BuildPage(); await Snapshot(Path.Combine(directory,"qso-arabic.png"));
+            Check(qsoTextBox!.FlowDirection==FlowDirection.LeftToRight && qsoCodeBox!.FlowDirection==FlowDirection.LeftToRight,"Arabic QSO calls and Morse stay LTR");
+            preferences=preferences with { Language="tr" }; Rebuild();
 #if MORSE_WINUI
             foreach(string culture in new[]{"tr-TR","en-US","de-DE","ru-RU","ar-SA"}) voices[culture]=MorseCore.AppCore.OfflineSpeech.ForLanguage(culture).Count;
             Check(voices.Count==5 && voices.All(v=>v.Value>0),"Offline neural voice catalog covers five languages");
@@ -134,7 +181,7 @@ public sealed partial class MainPage
             {
                 foreach(bool fromMorse in new[]{false,true})
                 {
-                    page="converter"; decode=fromMorse; source=fromMorse ? "... --- ..." : "Merhaba."; result=null; Rebuild();
+                    page="audio"; audioIsMorse=fromMorse; audioSource=fromMorse ? "... --- ..." : "Merhaba."; Rebuild();
                     await ActionButton("speak");
                     var deadline=DateTimeOffset.UtcNow+TimeSpan.FromSeconds(20);
                     while(speaking && DateTimeOffset.UtcNow<deadline) await Task.Delay(100);
@@ -151,20 +198,18 @@ public sealed partial class MainPage
             preferences=preferences with { Language="ar" }; Rebuild(); await Snapshot(Path.Combine(directory,"collapsed-arabic.png"));
             CheckCollapsedAlignment("ar");
             preferences=preferences with { Language="tr" }; Rebuild();
-            SetCollapsed(false,true); await Task.Delay(350); Check(Math.Abs(Pane.ActualWidth-216)<2,"Animated menu expansion");
+            SetCollapsed(false,true); await Task.Delay(350); Check(Math.Abs(Pane.ActualWidth-240)<2,"Animated menu expansion");
             await ConvertNow();
             foreach(string language in new[]{"en","de","ru","ar","tr"})
             {
-                preferences=preferences with { Language=language }; Rebuild(); await Snapshot(Path.Combine(directory,language+".png")); Check(Menu.Children.Count==5,"Navigation in "+language);
+                preferences=preferences with { Language=language }; Rebuild(); await Snapshot(Path.Combine(directory,language+".png")); Check(Menu.Children.Count==6 && menuButtons.Count==6,"Navigation in "+language);
                 var save=Descendants(Root).OfType<Button>().First(b=>AutomationProperties.GetAutomationId(b)=="save");
                 var host=(FrameworkElement)((FrameworkElement)save.Parent).Parent;
                 var transform=save.TransformToVisual(host);
                 double start=transform.TransformPoint(new Windows.Foundation.Point(0,0)).X;
                 double end=transform.TransformPoint(new Windows.Foundation.Point(save.ActualWidth,0)).X;
                 Check(Math.Min(start,end)>=-1 && Math.Max(start,end)<=host.ActualWidth+1,"Save button fits in "+language);
-                var speak=Descendants(Root).OfType<Button>().First(b=>AutomationProperties.GetAutomationId(b)=="speak");
-                var position=speak.TransformToVisual(ContentScroll).TransformPoint(new Windows.Foundation.Point(0,speak.ActualHeight));
-                Check(position.Y<=ContentScroll.ActualHeight+1,"Speech action visible without scrolling in "+language);
+                Check(!Descendants(Root).OfType<Button>().Any(b=>AutomationProperties.GetAutomationId(b) is "speak" or "play"),"Converter contains only conversion actions in "+language);
                 Check(Root.FlowDirection==FlowDirection.LeftToRight && WindowBar.FlowDirection==FlowDirection.LeftToRight,"Window frame remains LTR in "+language);
                 var brandBounds=TitleBrand.TransformToVisual(WindowBar).TransformBounds(new Windows.Foundation.Rect(0,0,TitleBrand.ActualWidth,TitleBrand.ActualHeight));
                 Check(Math.Abs(brandBounds.X+brandBounds.Width/2-WindowBar.ActualWidth/2)<1 && Math.Abs(brandBounds.Y+brandBounds.Height/2-(WindowBar.ActualHeight-WindowBar.BorderThickness.Bottom)/2)<1,"Logo and name centered in window title bar in "+language);

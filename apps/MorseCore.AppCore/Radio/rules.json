@@ -1,0 +1,176 @@
+{
+  "schema": 1,
+  "reviewedOn": "2026-10-15",
+  "sources": [
+    {"id": "tr-bands", "title": "BTK", "url": "https://www.btk.gov.tr/uploads/regulations/frekans-tahsisinden-muaf-telsiz-cihaz-sistemleri-olcutler.pdf", "section": "Madde 21 / Tablo 25"},
+    {"id": "tr-calls", "title": "KEGM", "url": "https://www.kiyiemniyeti.gov.tr/userfiles/editor/pdf/yonetmelik.pdf", "section": "Madde 6 / 10 / Ek 1"},
+    {"id": "de-bands", "title": "AFuV", "url": "https://www.gesetze-im-internet.de/afuv_2005/anlage_1.html", "section": "Anlage 1 A/B"},
+    {"id": "de-calls", "title": "AFuV", "url": "https://www.gesetze-im-internet.de/afuv_2005/__11.html", "section": "§ 11"},
+    {"id": "de-plan", "title": "Bundesnetzagentur", "url": "https://www.bundesnetzagentur.de/Amateurfunk", "section": "Rufzeichenplan / Vfg. 15/2025"},
+    {"id": "ru-law", "title": "SRR / GKRCh", "url": "https://srr.ru/dokumenty/dokumenty-minkomsvyazi-i-radiochastot/", "section": "10-07-01 / 18-45-02 / 184"},
+    {"id": "uk-rules", "title": "Ofcom OFW611", "url": "https://www.ofcom.org.uk/siteassets/resources/documents/spectrum/emf/emf-amateur-licence-terms-and-conditions.pdf?v=386197", "section": "Condition 6 / Schedule 1 A–C"},
+    {"id": "us-rules", "title": "FCC / 47 CFR 97 (2025)", "url": "https://www.govinfo.gov/content/pkg/CFR-2025-title47-vol5/pdf/CFR-2025-title47-vol5-part97.pdf", "section": "97.119 / 97.301 / 97.305 / 97.313"},
+    {"id": "sa-rules", "title": "CST RR55 / 559-1446 (2025)", "url": "https://www.cst.gov.sa/en/regulations-and-licenses/regulations/Document-1606", "section": "Amateur radio: 19-1 / 20"},
+    {"id": "ae-rules", "title": "TDRA v3", "url": "https://tdra.gov.ae/-/media/About/regulations-and-ruling/EN/Amateur-Radio-Regs-v3-0-pdf.ashx", "section": "Articles 8/9 / Annex 1/2"},
+    {"id": "itu-calls", "title": "ITU Radio Regulations (2024)", "url": "https://search.itu.int/history/HistoryDigitalCollectionDocLibrary/1.49.48.en.102.pdf", "section": "Appendix 42"}
+  ],
+  "countries": [
+    {
+      "id": "TR",
+      "nameKey": "country_TR",
+      "classes": ["A", "B", "C"],
+      "visitorPrefix": "TA",
+      "sourceIds": ["tr-bands", "tr-calls"],
+      "notesKey": "trRules",
+      "bands": [
+        {"band": "160m", "startHz": 1810000, "endHz": 1850000, "powers": [{"classId": "A", "watts": 9, "basis": "output"}], "sourceId": "tr-bands", "conditionsKey": "bandConditions"},
+        {"band": "80m", "startHz": 3500000, "endHz": 3800000, "powers": [{"classId": "A", "watts": 75, "basis": "output"}], "sourceId": "tr-bands", "conditionsKey": "bandConditions"},
+        {"band": "40m", "startHz": 7000000, "endHz": 7100000, "powers": [{"classId": "A", "watts": 75, "basis": "output"}, {"classId": "B", "watts": 5, "basis": "output"}], "sourceId": "tr-bands", "conditionsKey": "trHomebuilt"},
+        {"band": "40m", "startHz": 7100000, "endHz": 7200000, "powers": [{"classId": "A", "watts": 75, "basis": "output"}], "sourceId": "tr-bands", "conditionsKey": "bandConditions"},
+        {"band": "20m", "startHz": 14000000, "endHz": 14350000, "powers": [{"classId": "A", "watts": 75, "basis": "output"}], "sourceId": "tr-bands", "conditionsKey": "bandConditions"},
+        {"band": "17m", "startHz": 18068000, "endHz": 18168000, "powers": [{"classId": "A", "watts": 75, "basis": "output"}], "sourceId": "tr-bands", "conditionsKey": "bandConditions"},
+        {"band": "15m", "startHz": 21000000, "endHz": 21150000, "powers": [{"classId": "A", "watts": 75, "basis": "output"}], "sourceId": "tr-bands", "conditionsKey": "bandConditions"},
+        {"band": "15m", "startHz": 21151000, "endHz": 21450000, "powers": [{"classId": "A", "watts": 75, "basis": "output"}], "sourceId": "tr-bands", "conditionsKey": "bandConditions"},
+        {"band": "12m", "startHz": 24890000, "endHz": 24990000, "powers": [{"classId": "A", "watts": 75, "basis": "output"}], "sourceId": "tr-bands", "conditionsKey": "bandConditions"},
+        {"band": "10m", "startHz": 28000000, "endHz": 29700000, "powers": [{"classId": "A", "watts": 75, "basis": "output"}, {"classId": "B", "watts": 5, "basis": "output"}], "sourceId": "tr-bands", "conditionsKey": "trHomebuilt"},
+        {"band": "6m", "startHz": 50000000, "endHz": 52000000, "powers": [{"classId": "A", "watts": 75, "basis": "output"}, {"classId": "B", "watts": 75, "basis": "output"}], "sourceId": "tr-bands", "conditionsKey": "bandConditions"},
+        {"band": "2m", "startHz": 144000000, "endHz": 146000000, "powers": [{"classId": "A", "watts": 75, "basis": "output"}, {"classId": "B", "watts": 75, "basis": "output"}, {"classId": "C", "watts": 5, "basis": "output"}], "sourceId": "tr-bands", "conditionsKey": "bandConditions"},
+        {"band": "70cm", "startHz": 432000000, "endHz": 432975000, "powers": [{"classId": "A", "watts": 75, "basis": "output"}, {"classId": "B", "watts": 75, "basis": "output"}, {"classId": "C", "watts": 5, "basis": "output"}], "sourceId": "tr-bands", "conditionsKey": "bandConditions"}
+      ]
+    },
+    {
+      "id": "DE",
+      "nameKey": "country_DE",
+      "classes": ["A", "E", "N"],
+      "visitorPrefix": "DL",
+      "sourceIds": ["de-bands", "de-calls", "de-plan"],
+      "notesKey": "deRules",
+      "bands": [
+        {"band": "160m", "startHz": 1810000, "endHz": 1850000, "powers": [{"classId": "A", "watts": 750, "basis": "PEP"}, {"classId": "E", "watts": 100, "basis": "PEP"}], "sourceId": "de-bands", "conditionsKey": "bandConditions"},
+        {"band": "160m", "startHz": 1850000, "endHz": 1890000, "powers": [{"classId": "A", "watts": 75, "basis": "PEP"}, {"classId": "E", "watts": 75, "basis": "PEP"}], "sourceId": "de-bands", "conditionsKey": "bandConditions"},
+        {"band": "160m", "startHz": 1890000, "endHz": 2000000, "powers": [{"classId": "A", "watts": 10, "basis": "PEP"}, {"classId": "E", "watts": 10, "basis": "PEP"}], "sourceId": "de-bands", "conditionsKey": "bandConditions"},
+        {"band": "80m", "startHz": 3500000, "endHz": 3800000, "powers": [{"classId": "A", "watts": 750, "basis": "PEP"}, {"classId": "E", "watts": 100, "basis": "PEP"}], "sourceId": "de-bands", "conditionsKey": "bandConditions"},
+        {"band": "40m", "startHz": 7000000, "endHz": 7200000, "powers": [{"classId": "A", "watts": 750, "basis": "PEP"}], "sourceId": "de-bands", "conditionsKey": "bandConditions"},
+        {"band": "30m", "startHz": 10100000, "endHz": 10150000, "powers": [{"classId": "A", "watts": 150, "basis": "PEP"}], "sourceId": "de-bands", "conditionsKey": "bandConditions"},
+        {"band": "20m", "startHz": 14000000, "endHz": 14350000, "powers": [{"classId": "A", "watts": 750, "basis": "PEP"}], "sourceId": "de-bands", "conditionsKey": "bandConditions"},
+        {"band": "17m", "startHz": 18068000, "endHz": 18168000, "powers": [{"classId": "A", "watts": 750, "basis": "PEP"}], "sourceId": "de-bands", "conditionsKey": "bandConditions"},
+        {"band": "15m", "startHz": 21000000, "endHz": 21450000, "powers": [{"classId": "A", "watts": 750, "basis": "PEP"}, {"classId": "E", "watts": 100, "basis": "PEP"}], "sourceId": "de-bands", "conditionsKey": "bandConditions"},
+        {"band": "12m", "startHz": 24890000, "endHz": 24990000, "powers": [{"classId": "A", "watts": 750, "basis": "PEP"}], "sourceId": "de-bands", "conditionsKey": "bandConditions"},
+        {"band": "10m", "startHz": 28000000, "endHz": 29700000, "powers": [{"classId": "A", "watts": 750, "basis": "PEP"}, {"classId": "E", "watts": 100, "basis": "PEP"}, {"classId": "N", "watts": 10, "basis": "ERP"}], "sourceId": "de-bands", "conditionsKey": "bandConditions"},
+        {"band": "2m", "startHz": 144000000, "endHz": 146000000, "powers": [{"classId": "A", "watts": 750, "basis": "PEP"}, {"classId": "E", "watts": 75, "basis": "PEP"}, {"classId": "N", "watts": 6.1, "basis": "ERP"}], "sourceId": "de-bands", "conditionsKey": "bandConditions"},
+        {"band": "70cm", "startHz": 430000000, "endHz": 440000000, "powers": [{"classId": "A", "watts": 750, "basis": "PEP"}, {"classId": "E", "watts": 75, "basis": "PEP"}, {"classId": "N", "watts": 6.1, "basis": "ERP"}], "sourceId": "de-bands", "conditionsKey": "bandConditions"}
+      ]
+    },
+    {
+      "id": "RU",
+      "nameKey": "country_RU",
+      "classes": ["1", "2", "3", "4"],
+      "visitorPrefix": "R",
+      "sourceIds": ["ru-law", "itu-calls"],
+      "notesKey": "ruRules",
+      "bands": [
+      ]
+    },
+    {
+      "id": "GB",
+      "nameKey": "country_GB",
+      "classes": ["Foundation", "Intermediate", "Full"],
+      "visitorPrefix": "M",
+      "sourceIds": ["uk-rules"],
+      "notesKey": "gbRules",
+      "bands": [
+        {"band": "160m", "startHz": 1810000, "endHz": 1850000, "powers": [{"classId": "Foundation", "watts": 25, "basis": "PEP"}, {"classId": "Intermediate", "watts": 100, "basis": "PEP"}, {"classId": "Full", "watts": 1000, "basis": "PEP"}], "sourceId": "uk-rules", "conditionsKey": "bandConditions"},
+        {"band": "80m", "startHz": 3500000, "endHz": 3800000, "powers": [{"classId": "Foundation", "watts": 25, "basis": "PEP"}, {"classId": "Intermediate", "watts": 100, "basis": "PEP"}, {"classId": "Full", "watts": 1000, "basis": "PEP"}], "sourceId": "uk-rules", "conditionsKey": "bandConditions"},
+        {"band": "40m", "startHz": 7000000, "endHz": 7200000, "powers": [{"classId": "Foundation", "watts": 25, "basis": "PEP"}, {"classId": "Intermediate", "watts": 100, "basis": "PEP"}, {"classId": "Full", "watts": 1000, "basis": "PEP"}], "sourceId": "uk-rules", "conditionsKey": "bandConditions"},
+        {"band": "30m", "startHz": 10100000, "endHz": 10150000, "powers": [{"classId": "Foundation", "watts": 25, "basis": "PEP"}, {"classId": "Intermediate", "watts": 100, "basis": "PEP"}, {"classId": "Full", "watts": 400, "basis": "PEP"}], "sourceId": "uk-rules", "conditionsKey": "bandConditions"},
+        {"band": "20m", "startHz": 14000000, "endHz": 14350000, "powers": [{"classId": "Foundation", "watts": 25, "basis": "PEP"}, {"classId": "Intermediate", "watts": 100, "basis": "PEP"}, {"classId": "Full", "watts": 1000, "basis": "PEP"}], "sourceId": "uk-rules", "conditionsKey": "bandConditions"},
+        {"band": "17m", "startHz": 18068000, "endHz": 18168000, "powers": [{"classId": "Foundation", "watts": 25, "basis": "PEP"}, {"classId": "Intermediate", "watts": 100, "basis": "PEP"}, {"classId": "Full", "watts": 1000, "basis": "PEP"}], "sourceId": "uk-rules", "conditionsKey": "bandConditions"},
+        {"band": "15m", "startHz": 21000000, "endHz": 21450000, "powers": [{"classId": "Foundation", "watts": 25, "basis": "PEP"}, {"classId": "Intermediate", "watts": 100, "basis": "PEP"}, {"classId": "Full", "watts": 1000, "basis": "PEP"}], "sourceId": "uk-rules", "conditionsKey": "bandConditions"},
+        {"band": "12m", "startHz": 24890000, "endHz": 24990000, "powers": [{"classId": "Foundation", "watts": 25, "basis": "PEP"}, {"classId": "Intermediate", "watts": 100, "basis": "PEP"}, {"classId": "Full", "watts": 1000, "basis": "PEP"}], "sourceId": "uk-rules", "conditionsKey": "bandConditions"},
+        {"band": "10m", "startHz": 28000000, "endHz": 29700000, "powers": [{"classId": "Foundation", "watts": 25, "basis": "PEP"}, {"classId": "Intermediate", "watts": 100, "basis": "PEP"}, {"classId": "Full", "watts": 1000, "basis": "PEP"}], "sourceId": "uk-rules", "conditionsKey": "bandConditions"},
+        {"band": "2m", "startHz": 144000000, "endHz": 146000000, "powers": [{"classId": "Foundation", "watts": 25, "basis": "PEP"}, {"classId": "Intermediate", "watts": 100, "basis": "PEP"}, {"classId": "Full", "watts": 1000, "basis": "PEP"}], "sourceId": "uk-rules", "conditionsKey": "bandConditions"},
+        {"band": "70cm", "startHz": 432000000, "endHz": 440000000, "powers": [{"classId": "Foundation", "watts": 25, "basis": "PEP"}, {"classId": "Intermediate", "watts": 100, "basis": "PEP"}, {"classId": "Full", "watts": 400, "basis": "PEP"}], "sourceId": "uk-rules", "conditionsKey": "bandConditions"}
+      ]
+    },
+    {
+      "id": "US",
+      "nameKey": "country_US",
+      "classes": ["Extra", "Advanced", "General", "Technician", "Novice"],
+      "visitorPrefix": "W",
+      "sourceIds": ["us-rules", "itu-calls"],
+      "notesKey": "usRules",
+      "bands": [
+        {"band": "80m", "startHz": 3500000, "endHz": 3525000, "powers": [{"classId": "Extra", "watts": 1500, "basis": "PEP"}], "sourceId": "us-rules", "conditionsKey": "bandConditions"},
+        {"band": "40m", "startHz": 7000000, "endHz": 7025000, "powers": [{"classId": "Extra", "watts": 1500, "basis": "PEP"}], "sourceId": "us-rules", "conditionsKey": "bandConditions"},
+        {"band": "20m", "startHz": 14000000, "endHz": 14025000, "powers": [{"classId": "Extra", "watts": 1500, "basis": "PEP"}], "sourceId": "us-rules", "conditionsKey": "bandConditions"},
+        {"band": "15m", "startHz": 21000000, "endHz": 21025000, "powers": [{"classId": "Extra", "watts": 1500, "basis": "PEP"}], "sourceId": "us-rules", "conditionsKey": "bandConditions"},
+        {"band": "80m", "startHz": 3525000, "endHz": 3600000, "powers": [{"classId": "Extra", "watts": 1500, "basis": "PEP"}, {"classId": "Advanced", "watts": 1500, "basis": "PEP"}, {"classId": "General", "watts": 1500, "basis": "PEP"}, {"classId": "Technician", "watts": 200, "basis": "PEP"}, {"classId": "Novice", "watts": 200, "basis": "PEP"}], "sourceId": "us-rules", "conditionsKey": "bandConditions"},
+        {"band": "40m", "startHz": 7025000, "endHz": 7125000, "powers": [{"classId": "Extra", "watts": 1500, "basis": "PEP"}, {"classId": "Advanced", "watts": 1500, "basis": "PEP"}, {"classId": "General", "watts": 1500, "basis": "PEP"}, {"classId": "Technician", "watts": 200, "basis": "PEP"}, {"classId": "Novice", "watts": 200, "basis": "PEP"}], "sourceId": "us-rules", "conditionsKey": "bandConditions"},
+        {"band": "15m", "startHz": 21025000, "endHz": 21200000, "powers": [{"classId": "Extra", "watts": 1500, "basis": "PEP"}, {"classId": "Advanced", "watts": 1500, "basis": "PEP"}, {"classId": "General", "watts": 1500, "basis": "PEP"}, {"classId": "Technician", "watts": 200, "basis": "PEP"}, {"classId": "Novice", "watts": 200, "basis": "PEP"}], "sourceId": "us-rules", "conditionsKey": "bandConditions"},
+        {"band": "20m", "startHz": 14025000, "endHz": 14150000, "powers": [{"classId": "Extra", "watts": 1500, "basis": "PEP"}, {"classId": "Advanced", "watts": 1500, "basis": "PEP"}, {"classId": "General", "watts": 1500, "basis": "PEP"}], "sourceId": "us-rules", "conditionsKey": "bandConditions"},
+        {"band": "17m", "startHz": 18068000, "endHz": 18168000, "powers": [{"classId": "Extra", "watts": 1500, "basis": "PEP"}, {"classId": "Advanced", "watts": 1500, "basis": "PEP"}, {"classId": "General", "watts": 1500, "basis": "PEP"}], "sourceId": "us-rules", "conditionsKey": "bandConditions"},
+        {"band": "12m", "startHz": 24890000, "endHz": 24990000, "powers": [{"classId": "Extra", "watts": 1500, "basis": "PEP"}, {"classId": "Advanced", "watts": 1500, "basis": "PEP"}, {"classId": "General", "watts": 1500, "basis": "PEP"}], "sourceId": "us-rules", "conditionsKey": "bandConditions"},
+        {"band": "30m", "startHz": 10100000, "endHz": 10150000, "powers": [{"classId": "Extra", "watts": 200, "basis": "PEP"}, {"classId": "Advanced", "watts": 200, "basis": "PEP"}, {"classId": "General", "watts": 200, "basis": "PEP"}], "sourceId": "us-rules", "conditionsKey": "bandConditions"},
+        {"band": "10m", "startHz": 28000000, "endHz": 28300000, "powers": [{"classId": "Extra", "watts": 1500, "basis": "PEP"}, {"classId": "Advanced", "watts": 1500, "basis": "PEP"}, {"classId": "General", "watts": 1500, "basis": "PEP"}, {"classId": "Technician", "watts": 200, "basis": "PEP"}, {"classId": "Novice", "watts": 200, "basis": "PEP"}], "sourceId": "us-rules", "conditionsKey": "bandConditions"},
+        {"band": "2m", "startHz": 144000000, "endHz": 148000000, "powers": [{"classId": "Extra", "watts": 1500, "basis": "PEP"}, {"classId": "Advanced", "watts": 1500, "basis": "PEP"}, {"classId": "General", "watts": 1500, "basis": "PEP"}, {"classId": "Technician", "watts": 1500, "basis": "PEP"}], "sourceId": "us-rules", "conditionsKey": "bandConditions"}
+      ]
+    },
+    {
+      "id": "SA",
+      "nameKey": "country_SA",
+      "classes": ["1", "2"],
+      "visitorPrefix": "HZ",
+      "sourceIds": ["sa-rules", "itu-calls"],
+      "notesKey": "saRules",
+      "bands": [
+        {"band": "160m", "startHz": 1810000, "endHz": 1850000, "powers": [{"classId": "1", "watts": 500, "basis": "output"}], "sourceId": "sa-rules", "conditionsKey": "bandConditions"},
+        {"band": "40m", "startHz": 7000000, "endHz": 7200000, "powers": [{"classId": "1", "watts": 200, "basis": "output"}], "sourceId": "sa-rules", "conditionsKey": "bandConditions"},
+        {"band": "20m", "startHz": 14000000, "endHz": 14350000, "powers": [{"classId": "1", "watts": 200, "basis": "output"}], "sourceId": "sa-rules", "conditionsKey": "bandConditions"},
+        {"band": "17m", "startHz": 18068000, "endHz": 18168000, "powers": [{"classId": "1", "watts": 200, "basis": "output"}], "sourceId": "sa-rules", "conditionsKey": "bandConditions"},
+        {"band": "15m", "startHz": 21000000, "endHz": 21450000, "powers": [{"classId": "1", "watts": 200, "basis": "output"}], "sourceId": "sa-rules", "conditionsKey": "bandConditions"},
+        {"band": "12m", "startHz": 24890000, "endHz": 24990000, "powers": [{"classId": "1", "watts": 200, "basis": "output"}], "sourceId": "sa-rules", "conditionsKey": "bandConditions"},
+        {"band": "10m", "startHz": 28000000, "endHz": 29700000, "powers": [{"classId": "1", "watts": 200, "basis": "output"}], "sourceId": "sa-rules", "conditionsKey": "bandConditions"},
+        {"band": "6m", "startHz": 50000000, "endHz": 54000000, "powers": [{"classId": "1", "watts": 100, "basis": "output"}], "sourceId": "sa-rules", "conditionsKey": "bandConditions"},
+        {"band": "2m", "startHz": 144000000, "endHz": 146000000, "powers": [{"classId": "1", "watts": 200, "basis": "output"}], "sourceId": "sa-rules", "conditionsKey": "bandConditions"},
+        {"band": "1.2cm", "startHz": 24000000000, "endHz": 24050000000, "powers": [{"classId": "1", "watts": 50, "basis": "output"}], "sourceId": "sa-rules", "conditionsKey": "bandConditions"},
+        {"band": "6mm", "startHz": 47000000000, "endHz": 47200000000, "powers": [{"classId": "1", "watts": 50, "basis": "output"}, {"classId": "2", "watts": 50, "basis": "output"}], "sourceId": "sa-rules", "conditionsKey": "bandConditions"},
+        {"band": "4mm", "startHz": 77000000000, "endHz": 78000000000, "powers": [{"classId": "1", "watts": 50, "basis": "output"}, {"classId": "2", "watts": 50, "basis": "output"}], "sourceId": "sa-rules", "conditionsKey": "bandConditions"},
+        {"band": "2mm", "startHz": 134000000000, "endHz": 136000000000, "powers": [{"classId": "1", "watts": 50, "basis": "output"}, {"classId": "2", "watts": 50, "basis": "output"}], "sourceId": "sa-rules", "conditionsKey": "bandConditions"},
+        {"band": "1mm", "startHz": 248000000000, "endHz": 250000000000, "powers": [{"classId": "1", "watts": 50, "basis": "output"}, {"classId": "2", "watts": 50, "basis": "output"}], "sourceId": "sa-rules", "conditionsKey": "bandConditions"}
+      ]
+    },
+    {
+      "id": "AE",
+      "nameKey": "country_AE",
+      "classes": ["A", "B", "Special"],
+      "visitorPrefix": "A6",
+      "sourceIds": ["ae-rules", "itu-calls"],
+      "notesKey": "aeRules",
+      "bands": [
+        {"band": "160m", "startHz": 1810000, "endHz": 1850000, "powers": [{"classId": "A", "watts": 400, "basis": "PEP"}, {"classId": "Special", "watts": 400, "basis": "PEP"}], "sourceId": "ae-rules", "conditionsKey": "bandConditions"},
+        {"band": "80m", "startHz": 3500000, "endHz": 3800000, "powers": [{"classId": "A", "watts": 100, "basis": "PEP"}, {"classId": "Special", "watts": 100, "basis": "PEP"}], "sourceId": "ae-rules", "conditionsKey": "bandConditions"},
+        {"band": "40m", "startHz": 7000000, "endHz": 7200000, "powers": [{"classId": "A", "watts": 500, "basis": "PEP"}, {"classId": "Special", "watts": 500, "basis": "PEP"}], "sourceId": "ae-rules", "conditionsKey": "bandConditions"},
+        {"band": "30m", "startHz": 10100000, "endHz": 10150000, "powers": [{"classId": "A", "watts": 400, "basis": "PEP"}, {"classId": "Special", "watts": 400, "basis": "PEP"}], "sourceId": "ae-rules", "conditionsKey": "bandConditions"},
+        {"band": "20m", "startHz": 14000000, "endHz": 14350000, "powers": [{"classId": "A", "watts": 500, "basis": "PEP"}, {"classId": "Special", "watts": 1000, "basis": "PEP"}], "sourceId": "ae-rules", "conditionsKey": "bandConditions"},
+        {"band": "17m", "startHz": 18068000, "endHz": 18168000, "powers": [{"classId": "A", "watts": 500, "basis": "PEP"}, {"classId": "Special", "watts": 1000, "basis": "PEP"}], "sourceId": "ae-rules", "conditionsKey": "bandConditions"},
+        {"band": "15m", "startHz": 21000000, "endHz": 21450000, "powers": [{"classId": "A", "watts": 500, "basis": "PEP"}, {"classId": "Special", "watts": 1000, "basis": "PEP"}], "sourceId": "ae-rules", "conditionsKey": "bandConditions"},
+        {"band": "12m", "startHz": 24890000, "endHz": 24990000, "powers": [{"classId": "A", "watts": 500, "basis": "PEP"}, {"classId": "Special", "watts": 1000, "basis": "PEP"}], "sourceId": "ae-rules", "conditionsKey": "bandConditions"},
+        {"band": "10m", "startHz": 28000000, "endHz": 29700000, "powers": [{"classId": "A", "watts": 1000, "basis": "PEP"}, {"classId": "Special", "watts": 1000, "basis": "PEP"}], "sourceId": "ae-rules", "conditionsKey": "bandConditions"},
+        {"band": "6m", "startHz": 50000000, "endHz": 54000000, "powers": [{"classId": "A", "watts": 30, "basis": "PEP"}, {"classId": "Special", "watts": 30, "basis": "PEP"}], "sourceId": "ae-rules", "conditionsKey": "bandConditions"},
+        {"band": "2m", "startHz": 144000000, "endHz": 146000000, "powers": [{"classId": "A", "watts": 100, "basis": "PEP"}, {"classId": "B", "watts": 50, "basis": "PEP"}, {"classId": "Special", "watts": 100, "basis": "PEP"}], "sourceId": "ae-rules", "conditionsKey": "bandConditions"},
+        {"band": "70cm", "startHz": 432000000, "endHz": 435000000, "powers": [{"classId": "A", "watts": 10, "basis": "PEP"}, {"classId": "Special", "watts": 10, "basis": "PEP"}], "sourceId": "ae-rules", "conditionsKey": "bandConditions"},
+        {"band": "70cm", "startHz": 435000000, "endHz": 438000000, "powers": [{"classId": "A", "watts": 50, "basis": "PEP"}, {"classId": "Special", "watts": 50, "basis": "PEP"}], "sourceId": "ae-rules", "conditionsKey": "bandConditions"}
+      ]
+    },
+    {
+      "id": "OTHER",
+      "nameKey": "country_OTHER",
+      "classes": ["Other"],
+      "visitorPrefix": "",
+      "sourceIds": [],
+      "notesKey": "otherRules",
+      "bands": [
+      ]
+    }
+  ]
+}

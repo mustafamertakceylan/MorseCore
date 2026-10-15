@@ -93,6 +93,7 @@ try
         catch(InvalidDataException) { checks++; }
     }
     checks+=await UpdateChecks.Run(directory);
+    checks+=await RadioChecks.Run(directory);
     foreach(string language in new[]{"tr-TR","ar-SA","de-DE","ru-RU","en-US"})
         Check(OfflineSpeech.ForLanguage(language).Count>0,"Offline voice coverage: "+language);
     Check(OfflineSpeech.ForLanguage("tr-TR").Select(v=>v.Engine).ToHashSet().SetEquals(["ema","antalia"]),"Two Turkish neural engines");

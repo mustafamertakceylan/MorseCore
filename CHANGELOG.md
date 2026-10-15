@@ -1,7 +1,13 @@
 # Changelog / Değişiklik günlüğü
 
-## 0.4.1 — Unreleased / Yayımlanmadı
+## 0.5.0 — 2026-10-15
 
+- Added station profiles, call recognition, sourced country guides, CW message preparation and separate UTC practice/contact logs with CSV/ADIF export. No RF or hardware control. Russian power matching remains disabled because the current primary annex could not be accessed.
+- İstasyon profilleri, çağrı tanıma, kaynaklı ülke rehberleri, CW mesaj hazırlığı ve CSV/ADIF aktarımlı ayrı UTC eğitim/görüşme günlükleri eklendi. RF/cihaz kontrolü yoktur. Güncel birincil eke erişilemediği için Rusya güç eşleştirmesi kapalıdır.
+- Grouped alphabet, exercises and the radio glossary under Learning; added call/Q-code/prosign exercises and mistake review. Moved playback and TTS to Audio and simplified navigation in all five languages.
+- Alfabe, alıştırmalar ve telsiz sözlüğü Eğitim altında toplandı; çağrı/Q kodu/prosedür işareti alıştırmaları ve yanlış tekrarı eklendi. Çalma/TTS Ses'e taşındı; beş dilde menü sadeleştirildi.
+- Replaced the curved navigation selection border with a separate straight indicator, preserving rounded rows and Arabic mirroring.
+- Kavisli menü seçim kenarı bağımsız düz çizgiyle değiştirildi; yuvarlak satırlar ve Arapça yön düzeni korundu.
 - Added verified in-app Windows update downloads, cancellation and confirmation before handing off to Setup.
 - Uygulama içinden doğrulanan Windows güncelleme indirmesi, iptal ve Setup öncesi onay eklendi.
 - Setup detects compatible Python and offers a bundled, signed official Python installer only with consent; the voice launcher finds it without PATH changes.

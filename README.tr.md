@@ -7,7 +7,7 @@
 **Morse kodunu dönüştürün, dinleyin ve alıştırma yapın.**
 
 ![C23](https://img.shields.io/badge/C-23-225E85?style=flat-square&logo=c&logoColor=white)
-[![Sürüm](https://img.shields.io/badge/Version-0.4.0-5e6a42?style=flat-square)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v0.4.0)
+[![Sürüm](https://img.shields.io/badge/Version-0.5.0-5e6a42?style=flat-square)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v0.5.0)
 [![Lisans](https://img.shields.io/badge/License-Apache%202.0-2A9D8F?style=flat-square)](LICENSE)
 
 [English](README.md) · **Türkçe**
@@ -18,13 +18,13 @@ MorseCore, metin ve dosyaları Morse koduna çevirir; Morse kodunu yeniden metne
 
 ## İndir
 
-**[Windows Setup indir — v0.4.0](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.4.0/MorseCore-0.4.0-Windows-x64-Setup.exe)** · [Taşınabilir ZIP](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.4.0/MorseCore-0.4.0-Windows-x64-Desktop.zip)
+**[Windows Setup indir — v0.5.0](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.5.0/MorseCore-0.5.0-Windows-x64-Setup.exe)** · [Taşınabilir ZIP](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.5.0/MorseCore-0.5.0-Windows-x64-Desktop.zip)
 
 Setup'ı çalıştırıp uygulamayı Başlat menüsünden açın. Taşınabilir ZIP'i kullanıyorsanız tüm dosyaları açıp **MorseCore.Desktop.exe** dosyasını çalıştırın. Bu, imzasız bir önizlemedir; macOS ve Linux arayüzleri planlanmaktadır.
 
 İsteğe bağlı seslendirme için Başlat menüsündeki **Çevrimdışı sesleri kur** kısayolunu veya ZIP'teki **setup-speech.cmd** dosyasını kullanın. Python 3.11–3.13 ve internet bir kez gerekir; sonra seslendirme çevrimdışı çalışır. Modeller ayrıca indirilir. [Ses kurulumu →](docs/offline-speech.tr.md)
 
-Dosya özetleri ve sürüm notları [sürüm sayfasındadır](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v0.4.0).
+Dosya özetleri ve sürüm notları [sürüm sayfasındadır](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v0.5.0).
 
 ## Özellikler
 
@@ -33,6 +33,8 @@ Dosya özetleri ve sürüm notları [sürüm sayfasındadır](https://github.com
 - Masaüstünde Latin/Türkçe, Rusça ve Arapça metinleri dönüştürün.
 - Açık/koyu tema; Türkçe, İngilizce, Almanca, Rusça ve Arapça menüler kullanın.
 - Metni çevrimdışı seslendirin: Türkçede EMA Lightning ve Antalia-2 Mini, diğer dört dilde Piper.
+
+**0.5.0 sürümüne** istasyon profilleri, CW hazırlığı, ayrı eğitim/QSO günlükleri ve telsiz sözlüğü eklendi. Ülke rehberleri tarihli kaynaklara dayanır; Rusya güç eşleştirmesi kapalıdır. [Telsiz rehberi →](docs/amateur-radio.md)
 
 ## Derleme ve çalıştırma
 

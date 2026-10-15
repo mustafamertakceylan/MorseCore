@@ -76,10 +76,4 @@ public sealed partial class MainPage
         catch(IOException) { SetStatus(T("speechError")); }
         finally { speechRequest=null; speaking=false; }
     }
-    private Task<string> ConverterSpeech()
-    {
-        if(!decode) return Task.FromResult(source);
-        string value=source; var options=preferences;
-        return Task.Run(()=>MorseEngine.Decode(value,options.Alphabet,options.Separator).Text);
-    }
 }

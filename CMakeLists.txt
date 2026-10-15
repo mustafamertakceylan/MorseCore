@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.28)
-project(MorseCore VERSION 0.4.1 LANGUAGES C)
+project(MorseCore VERSION 0.5.0 LANGUAGES C)
 
 set(CMAKE_C_STANDARD 23)
 set(CMAKE_C_STANDARD_REQUIRED ON)

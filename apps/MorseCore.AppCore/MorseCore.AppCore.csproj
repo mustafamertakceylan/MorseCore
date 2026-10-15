@@ -8,5 +8,6 @@
   <ItemGroup>
     <ProjectReference Include="../../bindings/dotnet/MorseCore.Interop/MorseCore.Interop.csproj" />
     <EmbeddedResource Include="Strings/*.json" />
+    <EmbeddedResource Include="Radio/*.json" />
   </ItemGroup>
 </Project>

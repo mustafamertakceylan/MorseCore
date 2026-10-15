@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml.Media;
 using MorseCore.AppCore;
+using MorseCore.AppCore.Radio;
 using MorseCore.Interop;
 using Windows.Storage.Pickers;
 
@@ -46,18 +47,22 @@ public sealed partial class MainPage
         PageContent.Children.Add(Card(stack));
     }
     private string audioSource="";
+    private bool audioIsMorse;
+    private string AudioMorse()=>audioIsMorse ? audioSource : MorseEngine.Encode(audioSource,preferences.Alphabet,preferences.Separator).Text;
     private void BuildAudio()
     {
         Heading(T("audio"));
         var stack=new StackPanel { Spacing=18 }; stack.Children.Add(AlphabetChoice());
-        var morse=new TextBox { Header=T("morse"),Text=audioSource,PlaceholderText="... --- ...",AcceptsReturn=true,TextWrapping=TextWrapping.Wrap,Height=140,MaxLength=200_000,FlowDirection=FlowDirection.LeftToRight,FontFamily=new FontFamily("Consolas"),FontSize=20 };
+        stack.Children.Add(Choice(T("audioInputType"),[T("plainText"),T("morseInput")],audioIsMorse?1:0,i=> { if(audioIsMorse==(i==1)) return; audioIsMorse=i==1; BuildPage(); }));
+        stack.Children.Add(Action("useConversion",()=> { audioSource=result?.Text ?? source; audioIsMorse=result!=null ? !decode : decode; BuildPage(); return Task.CompletedTask; }));
+        var morse=new TextBox { Header=T(audioIsMorse?"morseInput":"plainText"),Text=audioSource,PlaceholderText=audioIsMorse?"... --- ...":T("inputPlaceholder"),AcceptsReturn=true,TextWrapping=TextWrapping.Wrap,Height=160,MaxLength=200_000,FlowDirection=audioIsMorse?FlowDirection.LeftToRight:PlainDirection,FontFamily=new FontFamily(audioIsMorse?"Consolas":"Segoe UI"),FontSize=18 };
         morse.TextChanged+=(_,_)=>audioSource=morse.Text; stack.Children.Add(morse);
         var controls=Row();
-        controls.Children.Add(Action("play",()=>PlayMorse(audioSource),"\uE768",true));
+        controls.Children.Add(Action("play",()=>PlayMorse(AudioMorse()),"\uE768",true));
         controls.Children.Add(Action("stop",()=> { StopPlayback(); return Task.CompletedTask; },"\uE71A"));
         controls.Children.Add(Action("exportWav",async()=>
         {
-            string snapshot=audioSource; var options=preferences;
+            string snapshot=AudioMorse(); var options=preferences;
             string? path=await SavePath("wav","morse");
             if(path!=null) { await Task.Run(()=>MorseAudio.WriteWav(path,snapshot,new(options.Wpm,options.Frequency),options.Separator)); SetStatus(T("saved")); }
         },"\uE74E")); stack.Children.Add(controls);
@@ -71,8 +76,8 @@ public sealed partial class MainPage
         PageContent.Children.Add(Card(stack));
         BuildSpeech(async()=>
         {
-            string value=audioSource; var options=preferences;
-            return (await Task.Run(()=>MorseEngine.Decode(value,options.Alphabet,options.Separator))).Text;
+            string value=audioSource; var options=preferences; bool fromMorse=audioIsMorse;
+            return fromMorse ? (await Task.Run(()=>MorseEngine.Decode(value,options.Alphabet,options.Separator))).Text : value;
         });
     }
     private void BuildAlphabet()
@@ -94,42 +99,42 @@ public sealed partial class MainPage
         }
         PageContent.Children.Add(grid);
     }
-    private PracticeQuestion? practiceQuestion;
+    private CwLesson? lesson;
     private string practiceAnswer="",practiceFeedback="";
     private int practiceMode;
     private void BuildPractice()
     {
         Heading(T("practice"),T("practiceNote"));
-        var stack=new StackPanel { Spacing=18 };
-        var mode=Choice(T("mode"),[T("letters"),T("digits"),T("wordPractice")],practiceMode,i=>practiceMode=i); stack.Children.Add(mode);
-        var signal=Label(practiceQuestion?.Morse ?? (session?.Statistics.Answered==10 ? T("practiceEnded") : "· — · ·"),32); signal.FontFamily=new FontFamily("Consolas"); signal.FlowDirection=FlowDirection.LeftToRight;
+        var stack=new StackPanel { Spacing=14 };
+        stack.Children.Add(Choice(T("mode"),[T("letters"),T("digits"),T("wordPractice"),T("qcodes"),T("callSigns"),T("prosigns")],practiceMode,i=>practiceMode=i));
+        var signal=Label(lesson?.Current?.Morse ?? (lesson!=null ? T("practiceEnded") : "· — · ·"),28);
+        signal.FontFamily=new FontFamily("Consolas"); signal.FlowDirection=FlowDirection.LeftToRight;
         stack.Children.Add(signal);
         var answer=new TextBox { Header=T("answer"),Text=practiceAnswer,MaxLength=64,FlowDirection=FlowDirection.LeftToRight };
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(answer,"PracticeAnswer");
         answer.TextChanged+=(_,_)=>practiceAnswer=answer.Text; stack.Children.Add(answer);
-        var feedback=Label(practiceFeedback,16); var counts=Label("",14,true);
-        void Counts()
+        var feedback=Label(practiceFeedback,14); var counts=Label("",13,true);
+        void Refresh()
         {
-            if(session is null) return;
-            var stats=session.Statistics;
-            counts.Text=$"{stats.Correct} {T("correct")} · {stats.Incorrect} {T("incorrect")} · {stats.Skipped} {T("skipped")} · {stats.Accuracy:F0}%";
+            signal.Text=lesson?.Current?.Morse ?? T("practiceEnded");
+            if(lesson!=null) counts.Text=$"{lesson.Correct} {T("correct")} · {lesson.Incorrect} {T("incorrect")} · {lesson.Skipped} {T("skipped")}";
         }
-        Counts();
-        void Next()
+        Refresh();
+        var start=Row();
+        start.Children.Add(Action("start",()=> { lesson=new(CwLearning.Questions(practiceMode,Random.Shared.Next())); lesson.Next(); practiceFeedback=feedback.Text=""; answer.Text=""; Refresh(); return Task.CompletedTask; },primary:true));
+        start.Children.Add(Action("retryMissed",()=> { if(lesson?.Missed.Count>0) { lesson=new(lesson.Missed.ToArray()); lesson.Next(); answer.Text=""; Refresh(); } return Task.CompletedTask; }));
+        stack.Children.Add(start); WrapActions(start,stack);
+        void Submit(string value)
         {
-            var stats=session!.Statistics;
-            Counts();
-            if(stats.Answered==stats.Total) { practiceQuestion=null; signal.Text=T("practiceEnded"); return; }
-            practiceQuestion=session.Next(); signal.Text=practiceQuestion.Morse; answer.Text=""; answer.Focus(FocusState.Programmatic);
+            if(lesson?.Current is not { } question) return;
+            bool correct=lesson.Submit(value);
+            practiceFeedback=feedback.Text=$"{T(correct?"correct":value.Trim().Length==0?"skipped":"incorrect")} · {question.Answer}";
+            lesson.Next(); answer.Text=""; Refresh(); answer.Focus(FocusState.Programmatic);
         }
-        stack.Children.Add(Action("start",()=> { session?.Dispose(); session=new((PracticeMode)mode.SelectedIndex,10,(uint)Random.Shared.Next(1,int.MaxValue)); practiceFeedback=feedback.Text=""; Next(); return Task.CompletedTask; },primary:true));
         var controls=Row();
-        controls.Children.Add(Action("submit",()=>
-        {
-            if(session is null || practiceQuestion is null) return Task.CompletedTask;
-            var verdict=session.Submit(answer.Text); practiceFeedback=feedback.Text=$"{T(verdict.Verdict==PracticeVerdict.Correct?"correct":verdict.Verdict==PracticeVerdict.Skipped?"skipped":"incorrect")} · {verdict.ExpectedAnswer}"; Next(); return Task.CompletedTask;
-        }));
-        controls.Children.Add(Action("skip",()=> { if(session!=null && practiceQuestion!=null) { var verdict=session.Skip(); practiceFeedback=feedback.Text=$"{T("skipped")} · {verdict.ExpectedAnswer}"; Next(); } return Task.CompletedTask; }));
-        controls.Children.Add(Action("play",()=>practiceQuestion!=null ? PlayMorse(signal.Text) : Task.CompletedTask));
-        stack.Children.Add(controls); stack.Children.Add(feedback); stack.Children.Add(counts); PageContent.Children.Add(Card(stack));
+        controls.Children.Add(Action("submit",()=> { Submit(answer.Text); return Task.CompletedTask; }));
+        controls.Children.Add(Action("skip",()=> { Submit(""); return Task.CompletedTask; }));
+        controls.Children.Add(Action("play",()=>lesson?.Current is { } question ? PlayMorse(question.Morse,'/') : Task.CompletedTask));
+        stack.Children.Add(controls); WrapActions(controls,stack); stack.Children.Add(feedback); stack.Children.Add(counts); PageContent.Children.Add(Card(stack));
     }
 }
