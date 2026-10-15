@@ -34,6 +34,6 @@ $taskSums=foreach($taskFile in Get-ChildItem -LiteralPath $taskOutput -File | Wh
     $taskHash=(Get-FileHash -LiteralPath $taskFile.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
     "$taskHash  $($taskFile.Name)"
 }
-$taskSums | Set-Content -LiteralPath (Join-Path $taskOutput 'SHA256SUMS') -Encoding utf8NoBOM
+[System.IO.File]::WriteAllText((Join-Path $taskOutput 'SHA256SUMS'), ($taskSums -join "`n")+"`n", [System.Text.UTF8Encoding]::new($false))
 Write-Output "Desktop Setup: $taskSetup"
 Write-Output 'Unsigned per-user installer. Optional speech models are installed separately.'

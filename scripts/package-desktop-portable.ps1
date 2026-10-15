@@ -39,7 +39,7 @@ try {
     $taskZip=Join-Path $taskOutput "MorseCore-$taskVersion-Windows-x64-Desktop.zip"
     Compress-Archive -Path (Join-Path $taskPayload '*') -DestinationPath $taskZip -CompressionLevel Optimal
     $taskHash=(Get-FileHash -LiteralPath $taskZip -Algorithm SHA256).Hash.ToLowerInvariant()
-    "$taskHash  $([System.IO.Path]::GetFileName($taskZip))" | Set-Content -LiteralPath (Join-Path $taskOutput 'SHA256SUMS') -Encoding utf8NoBOM
+    [System.IO.File]::WriteAllText((Join-Path $taskOutput 'SHA256SUMS'), "$taskHash  $([System.IO.Path]::GetFileName($taskZip))`n", [System.Text.UTF8Encoding]::new($false))
     Write-Output "Desktop ZIP: $taskZip"
     Write-Output "Uncompressed payload: $taskPayload"
 }
