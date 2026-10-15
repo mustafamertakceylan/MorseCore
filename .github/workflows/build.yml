@@ -41,8 +41,13 @@ jobs:
             mingw-w64-ucrt-x86_64-python
             mingw-w64-ucrt-x86_64-binutils
 
+      - name: Set up .NET 10 for headless interop tests
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5
+        with:
+          dotnet-version: "10.0.x"
+
       - name: Configure release build
-        run: cmake --preset release -DPython3_EXECUTABLE="$(cygpath -m "$(command -v python)")"
+        run: cmake --preset release -DMORSECORE_BUILD_DOTNET_BINDINGS=ON "-DCMAKE_C_FLAGS=-Wall -Wextra -Wpedantic -Wconversion -Werror" -DPython3_EXECUTABLE="$(cygpath -m "$(command -v python)")"
 
       - name: Verify release tag
         if: inputs.release-tag != ''
@@ -74,7 +79,7 @@ jobs:
           compression-level: 0
 
   linux:
-    name: Linux / GCC
+    name: Linux / Clang 18 C23
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -86,10 +91,10 @@ jobs:
       - name: Install build tools
         run: |
           sudo apt-get update
-          sudo apt-get install --no-install-recommends -y gcc cmake ninja-build python3
+          sudo apt-get install --no-install-recommends -y clang-18 cmake ninja-build python3
 
       - name: Configure release build
-        run: cmake --preset release -DPython3_EXECUTABLE="$(command -v python3)"
+        run: cmake --preset release -DCMAKE_C_COMPILER=clang-18 "-DCMAKE_C_FLAGS=-Wall -Wextra -Wpedantic -Wconversion -Werror" -DPython3_EXECUTABLE="$(command -v python3)"
 
       - name: Verify release tag
         if: inputs.release-tag != ''

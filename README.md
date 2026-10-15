@@ -6,7 +6,7 @@
 
 Turn text and files into Morse code, decode messages, export audio, and practice reading or listening. Use the console menu or run conversions from scripts.
 
-![C17](https://img.shields.io/badge/C-17-225E85?style=flat-square&logo=c&logoColor=white)
+![C23](https://img.shields.io/badge/C-23-225E85?style=flat-square&logo=c&logoColor=white)
 ![CMake](https://img.shields.io/badge/CMake-3.28%2B-064F8C?style=flat-square&logo=cmake&logoColor=white)
 [![License](https://img.shields.io/badge/License-Apache%202.0-2A9D8F?style=flat-square)](LICENSE)
 
@@ -29,6 +29,7 @@ Turn text and files into Morse code, decode messages, export audio, and practice
 - [Supported input](#supported-input)
 - [Statistics](#statistics)
 - [Portable package](#portable-package)
+- [Native library and .NET integration](#native-library-and-net-integration)
 - [Tests and automation](#tests-and-automation)
 - [Project layout](#project-layout)
 - [License](#license)
@@ -58,7 +59,7 @@ Decoding returns `HELLO WORLD`. Turkish letters are normalized to their Latin eq
 
 ## Build and run
 
-Requirements: **CMake 3.28+**, **GCC with C17 support**, and **Ninja** for the included presets. Python 3 is needed for the integration tests, not for running the application. Make sure the build tools are available in your terminal.
+Requirements: **CMake 3.28+**, **GCC 15+ or Clang 18+ with C23 support**, and **Ninja** for the included presets. Python 3 is needed for the integration tests, not for running the application. Make sure the build tools are available in your terminal.
 
 ```powershell
 git clone https://github.com/mustafamertakceylan/MorseCore.git
@@ -219,7 +220,33 @@ cpack --preset release
 cmake --install cmake-build-release --prefix "C:\Apps\MorseCore"
 ```
 
-CPack writes a ZIP inside `cmake-build-release/`; for version 0.1.0 on Windows AMD64, the filename is `MorseCore-0.1.0-Windows-AMD64.zip`. Extract it into a writable folder and run `MorseCore.exe` or `run.cmd`. The install command is an alternative to extracting the ZIP. Keep the installed folder together; it includes the executable, launcher, documentation, license, and default configuration.
+CPack writes a ZIP inside `cmake-build-release/`; for version 0.2.0 on Windows AMD64, the filename is `MorseCore-0.2.0-Windows-AMD64.zip`. Extract it into a writable folder and run `MorseCore.exe` or `run.cmd`. The install command is an alternative to extracting the ZIP. Keep the installed folder together; it includes the executable, launcher, documentation, license, and default configuration.
+
+## Native library and .NET integration
+
+The C23 engine builds as a shared library alongside the console app. On Windows,
+`MorseCore.Native.dll` exposes a versioned C API for conversions, statistics,
+the alphabet, practice sessions, WAV generation and cancellable playback. The
+console links the same engine code and remains independently runnable.
+
+The package includes `include/morsecore_native.h` and an import library. DLL calls
+use strict UTF-8 and do not create data folders or read console settings. Returned
+handles must be released through the DLL. See the [native API guide](docs/native-api.md).
+
+An optional .NET 10 library provides `LibraryImport` bindings and `SafeHandle`
+ownership for a future WinUI host. Its consumer is a headless test; WinUI screens
+are a later stage.
+
+```powershell
+cmake --preset interop
+cmake --build --preset interop
+ctest --preset interop
+```
+
+The native build needs no .NET SDK. The `interop` preset requires .NET 10. For Clang
+on Windows, open a Visual Studio x64 developer prompt and use `clang-debug`.
+CMake probes final C23 mode, checked arithmetic, atomics and thread-local storage;
+it fails instead of silently falling back to C17.
 
 ## Tests and automation
 
@@ -230,9 +257,9 @@ ctest --preset release
 
 C tests cover conversion, punctuation, dynamic buffers, audio timing/WAV structure, and practice scoring. Python integration tests cover console and CLI flows, batch output protection, settings, and relocated installations. Without Python, integration tests are not registered. Close the application during tests; tests may temporarily change settings before restoring them.
 
-[CI](.github/workflows/ci.yml) is configured for pushes, pull requests, and manual runs. The shared [build workflow](.github/workflows/build.yml) builds and tests Windows with GCC UCRT64 and Ubuntu 24.04 with GCC. Successful Windows jobs are configured to upload a ZIP and `SHA256SUMS` as `MorseCore-Windows-x64`, retained for 14 days.
+[CI](.github/workflows/ci.yml) is configured for pushes, pull requests, and manual runs. The shared [build workflow](.github/workflows/build.yml) builds and tests Windows with GCC UCRT64 and Ubuntu 24.04 with Clang 18. Successful Windows jobs are configured to upload a ZIP and `SHA256SUMS` as `MorseCore-Windows-x64`, retained for 14 days.
 
-The [release workflow](.github/workflows/release.yml) requires a `v<version>` tag matching the CMake project version, currently `v0.1.0`, and successful Windows/Linux checks before publishing a GitHub Release. These workflows have not yet been run remotely; no release is claimed here. Automated audio tests do not prove audible playback on physical hardware.
+The [release workflow](.github/workflows/release.yml) requires a `v<version>` tag matching the CMake project version, currently `v0.2.0`, and successful Windows/Linux checks before publishing a GitHub Release. Local checks and GitHub Actions results are separate; check the repository Actions tab for remote status. Automated audio tests do not prove audible playback on physical hardware.
 
 ## Project layout
 
@@ -243,7 +270,7 @@ tests/                C tests and Python integration tests
 config/settings.txt   Saved language and word separator
 data/                 Console input files, samples, and generated output
 .github/workflows/    CI, shared build checks, and release automation
-CMakeLists.txt        C17 build, test, install, and ZIP package targets
+CMakeLists.txt        C23 core, DLL, console, test and ZIP package targets
 CMakePresets.json     GCC / Ninja debug and release presets
 run.cmd               Windows launcher
 ```

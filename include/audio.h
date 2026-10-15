@@ -2,6 +2,7 @@
 #define AUDIO_H
 
 #include <stdint.h>
+#include <stdatomic.h>
 
 #define AUDIO_MIN_WPM 5
 #define AUDIO_MAX_WPM 60
@@ -24,6 +25,11 @@ typedef struct {
     uint64_t toneCount;
 } AudioAnalysis;
 
+typedef struct { atomic_bool requested; } AudioCancellation;
+void initializeAudioCancellation(AudioCancellation *cancellation);
+void requestAudioCancellation(AudioCancellation *cancellation);
+int audioCancellationRequested(const AudioCancellation *cancellation);
+
 /* PCM16 mono, PARIS timing: one unit is 1.2 / WPM seconds.
  * Dot/dash: 1/3 units; symbol/letter/word gaps: 1/3/7 units.
  * Whitespace separates letters. The selected / | # * separates words.
@@ -32,7 +38,7 @@ typedef struct {
  * WAV generation and playback use bounded streaming buffers, at most 10 min.
  * Public operations return 1 on success, 0 on failure. Paths are UTF-8.
  * Calls are synchronous; audioLastError remains valid until the next call.
- * This module's error state is not thread safe.
+ * Error text is local to the calling thread. Independent calls are thread safe.
  */
 AudioOptions defaultAudioOptions(void);
 int validateAudioOptions(const AudioOptions *options);
@@ -41,6 +47,8 @@ int analyzeMorseAudio(const char *morse, char wordSeparator,
 int writeMorseWav(const char *path, const char *morse, char wordSeparator,
                   const AudioOptions *options);
 int playMorseAudio(const char *morse, char wordSeparator, const AudioOptions *options);
+int playMorseAudioControlled(const char *morse, char wordSeparator, const AudioOptions *options,
+                            const AudioCancellation *cancellation);
 const char *audioLastError(void);
 
 #endif

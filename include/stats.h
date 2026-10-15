@@ -31,10 +31,6 @@ void initializeSessionStats(SessionStats *stats);
  * the input for encoding and the output for decoding. */
 void calculateConversionStats(const char input[], const char output[],
                               ConversionDirection direction, ConversionStats *stats);
-void printConversionStats(const ConversionStats *stats, const char language[]);
-
-void printSessionSummary(const SessionStats *stats, const char language[]);
-
 void increaseTextToMorseCount(SessionStats *stats);
 void increaseMorseToTextCount(SessionStats *stats);
 void increaseFileOperationCount(SessionStats *stats);

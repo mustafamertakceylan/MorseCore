@@ -1,5 +1,5 @@
 #include "audio.h"
-#include "runtime_paths.h"
+#include "platform_io.h"
 
 #include <ctype.h>
 #include <math.h>
@@ -17,7 +17,7 @@
 #define AUDIO_AMPLITUDE 12000.0
 #define AUDIO_PI 3.14159265358979323846
 
-static char lastError[256];
+static thread_local char lastError[256];
 
 static int fail(const char *message)
 {
@@ -26,6 +26,21 @@ static int fail(const char *message)
 }
 
 const char *audioLastError(void) { return lastError; }
+
+void initializeAudioCancellation(AudioCancellation *cancellation)
+{
+    atomic_init(&cancellation->requested, false);
+}
+
+void requestAudioCancellation(AudioCancellation *cancellation)
+{
+    if (cancellation != NULL) atomic_store(&cancellation->requested, true);
+}
+
+int audioCancellationRequested(const AudioCancellation *cancellation)
+{
+    return cancellation != NULL && atomic_load(&cancellation->requested);
+}
 
 AudioOptions defaultAudioOptions(void)
 {
@@ -241,14 +256,17 @@ typedef struct {
 static int failWave(const char *operation, MMRESULT result)
 {
     char message[160];
-    if (waveOutGetErrorTextA(result, message, sizeof(message)) != MMSYSERR_NOERROR)
+    wchar_t wideMessage[160];
+    if (waveOutGetErrorTextW(result, wideMessage, 160) != MMSYSERR_NOERROR ||
+        WideCharToMultiByte(CP_UTF8, 0, wideMessage, -1, message, sizeof(message), NULL, NULL) == 0)
         snprintf(message, sizeof(message), "Windows audio error %u", (unsigned) result);
     snprintf(lastError, sizeof(lastError), "%s: %s", operation, message);
     return 0;
 }
 
 static int playWindowsAudio(const char *morse, char separator,
-                           const AudioOptions *options, const AudioAnalysis *analysis)
+                           const AudioOptions *options, const AudioAnalysis *analysis,
+                           const AudioCancellation *cancellation)
 {
     PlaybackBuffers *buffers = calloc(1, sizeof(*buffers));
     if (buffers == NULL) return fail("Cannot allocate audio playback buffers.");
@@ -294,7 +312,11 @@ static int playWindowsAudio(const char *morse, char separator,
     }
     ULONGLONG deadline = GetTickCount64() + analysis->sampleCount * 1000 / (uint64_t) options->sampleRate + 10000;
     while (success && pending != 0) {
-        DWORD waited = WaitForSingleObject(buffers->event, 2000);
+        if (audioCancellationRequested(cancellation)) {
+            success = fail("Audio operation cancelled.");
+            break;
+        }
+        DWORD waited = WaitForSingleObject(buffers->event, 50);
         if (waited == WAIT_FAILED) { success = fail("Waiting for audio output failed."); break; }
         if (GetTickCount64() > deadline) { success = fail("Audio output timed out."); break; }
         for (unsigned i = 0; i < 2; i++) {
@@ -341,10 +363,17 @@ static int playWindowsAudio(const char *morse, char separator,
 
 int playMorseAudio(const char *morse, char wordSeparator, const AudioOptions *options)
 {
+    return playMorseAudioControlled(morse, wordSeparator, options, NULL);
+}
+
+int playMorseAudioControlled(const char *morse, char wordSeparator, const AudioOptions *options,
+                            const AudioCancellation *cancellation)
+{
     AudioAnalysis analysis;
     if (!analyzeMorseAudio(morse, wordSeparator, options, &analysis)) return 0;
+    if (audioCancellationRequested(cancellation)) return fail("Audio operation cancelled.");
 #ifdef _WIN32
-    return playWindowsAudio(morse, wordSeparator, options, &analysis);
+    return playWindowsAudio(morse, wordSeparator, options, &analysis, cancellation);
 #else
     return fail("Live audio playback is available only on Windows; export a WAV file instead.");
 #endif

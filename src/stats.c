@@ -1,9 +1,6 @@
-#include <stdio.h>
 #include <string.h>
 
 #include "stats.h"
-#include "ui.h"
-#include "language.h"
 
 static int characterByteLength(const unsigned char text[])
 {
@@ -73,28 +70,6 @@ void calculateConversionStats(const char input[], const char output[],
     stats->outputLength = countCharacters(output);
     const char *plainText = direction == CONVERSION_TEXT_TO_MORSE ? input : output;
     countPlainText(plainText, stats);
-}
-
-void printConversionStats(const ConversionStats *stats, const char language[])
-{
-    printSectionHeader(getText(language, TXT_CONVERSION_STATISTICS));
-    printStatLine(getText(language, TXT_INPUT_LENGTH), stats->inputLength);
-    printStatLine(getText(language, TXT_OUTPUT_LENGTH), stats->outputLength);
-    printStatLine(getText(language, TXT_WORD_COUNT), stats->wordCount);
-    printStatLine(getText(language, TXT_CONVERTED_CHARACTERS), stats->convertedCharacterCount);
-    printStatLine(getText(language, TXT_SPACE_COUNT), stats->spaceCount);
-    printSectionRule();
-}
-
-void printSessionSummary(const SessionStats *stats, const char language[])
-{
-    printSectionHeader(getText(language, TXT_SESSION_SUMMARY));
-    printStatLine(getText(language, TXT_TEXT_TO_MORSE_OPERATIONS), stats->textToMorseCount);
-    printStatLine(getText(language, TXT_MORSE_TO_TEXT_OPERATIONS), stats->morseToTextCount);
-    printStatLine(getText(language, TXT_FILE_OPERATIONS), stats->fileOperationCount);
-    printStatLine(getText(language, TXT_INVALID_INPUTS), stats->invalidInputCount);
-    printStatLine(getText(language, TXT_SAVED_OUTPUTS), stats->savedOutputCount);
-    printSectionRule();
 }
 
 void increaseTextToMorseCount(SessionStats *stats)

@@ -8,3 +8,7 @@ build/
 
 # Local progress log
 /MORSECORE_PROGRESS.md
+
+# Managed build output
+**/bin/
+**/obj/

@@ -63,6 +63,14 @@ class PortableTests(unittest.TestCase):
         self.assertEqual(list((home / "data").iterdir()), [])
         for name in (EXE.name, "run.cmd", "README.md", "README.tr.md", "LICENSE", "NOTICE"):
             self.assertTrue((home / name).is_file(), name)
+        self.assertTrue((home / "include/morsecore_native.h").is_file())
+        native = home / ("MorseCore.Native.dll" if os.name == "nt" else "libMorseCore.Native.so")
+        self.assertTrue(native.is_file())
+        # A relocated SDK must load its DLL without a toolchain/runtime on PATH.
+        process = subprocess.run([sys.executable, "-c",
+            "import ctypes,sys; d=ctypes.CDLL(sys.argv[1]); assert d.mc_abi_version()==1", str(native)],
+            cwd=self.cwd, env=self.environment, capture_output=True, timeout=15)
+        self.assertEqual(process.returncode, 0, process.stderr.decode(errors="replace"))
 
     def test_install_relocate_unicode_path_and_keep_settings(self):
         installed = self.base / "Morse Core Türkçe Çalışma"

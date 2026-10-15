@@ -1,11 +1,9 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
 
 #include "morse.h"
 #include "constants.h"
-#include "ui.h"
 
 typedef struct {
     unsigned char character;
@@ -34,7 +32,7 @@ static const MorseEntry alphabet[] = {
 };
 
 #define ALPHABET_SIZE (sizeof(alphabet) / sizeof(alphabet[0]))
-_Static_assert(ALPHABET_SIZE == MORSE_COUNT, "Morse table and count must agree");
+static_assert(ALPHABET_SIZE == MORSE_COUNT, "Morse table and count must agree");
 
 static int isGap(unsigned char ch)
 {
@@ -62,8 +60,9 @@ static unsigned char normalizeLegacy(unsigned char ch)
 
 /* Validate the entire stream before selecting UTF-8 or the deliberately limited
  * Windows-1254 fallback. Invalid UTF-8 is never silently skipped. */
-static int isUtf8(const unsigned char *text, size_t length)
+int morseIsValidUtf8(const unsigned char *text, size_t length)
 {
+    if (text == NULL) return length == 0;
     for (size_t i = 0; i < length;) {
         unsigned char first = text[i++];
         if (first < 0x80) continue;
@@ -91,7 +90,7 @@ static int isUtf8(const unsigned char *text, size_t length)
 
 static ResultCode selectEncoding(const unsigned char *text, size_t length, int *utf8)
 {
-    *utf8 = isUtf8(text, length);
+    *utf8 = morseIsValidUtf8(text, length);
     if (*utf8) return RESULT_SUCCESS;
     for (size_t i = 0; i < length; i++) {
         if (text[i] >= 0x80 && normalizeLegacy(text[i]) == 0) return RESULT_INVALID_INPUT;
@@ -248,18 +247,12 @@ int morseToText(const char morseInput[], char textOutput[], char wordSeparator)
     return boundedConversion(morseInput, textOutput, wordSeparator, 0);
 }
 
-void printMorseTable(void)
+size_t morseAlphabetSize(void) { return ALPHABET_SIZE; }
+
+int morseAlphabetEntry(size_t index, unsigned char *character, const char **code)
 {
-    const size_t rows = (ALPHABET_SIZE + 2) / 3;
-    for (size_t row = 0; row < rows; row++) {
-        for (size_t column = 0; column < 3; column++) {
-            size_t index = row + column * rows;
-            if (index < ALPHABET_SIZE) {
-                printf("  %s%c%s  ->  %s%-7s%s   ", COLOR_YELLOW, alphabet[index].character,
-                       COLOR_MUTED, COLOR_TEXT, alphabet[index].code, COLOR_RESET);
-            }
-        }
-        putchar('\n');
-    }
-    printSectionRule();
+    if (index >= ALPHABET_SIZE || character == NULL || code == NULL) return 0;
+    *character = alphabet[index].character;
+    *code = alphabet[index].code;
+    return 1;
 }

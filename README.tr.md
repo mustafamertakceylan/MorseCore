@@ -6,7 +6,7 @@
 
 Metin ve dosyaları Morse koduna çevirin, mesajları çözün, ses dosyası oluşturun; okuyarak veya dinleyerek alıştırma yapın. Konsol menüsünü kullanın ya da dönüşümleri betiklerden çalıştırın.
 
-![C17](https://img.shields.io/badge/C-17-225E85?style=flat-square&logo=c&logoColor=white)
+![C23](https://img.shields.io/badge/C-23-225E85?style=flat-square&logo=c&logoColor=white)
 ![CMake](https://img.shields.io/badge/CMake-3.28%2B-064F8C?style=flat-square&logo=cmake&logoColor=white)
 [![Lisans](https://img.shields.io/badge/License-Apache%202.0-2A9D8F?style=flat-square)](LICENSE)
 
@@ -29,6 +29,7 @@ Metin ve dosyaları Morse koduna çevirin, mesajları çözün, ses dosyası olu
 - [Desteklenen girdiler](#desteklenen-girdiler)
 - [İstatistikler](#istatistikler)
 - [Taşınabilir paket](#taşınabilir-paket)
+- [DLL ve .NET bağlantısı](#dll-ve-net-bağlantısı)
 - [Testler ve otomasyon](#testler-ve-otomasyon)
 - [Klasör yapısı](#klasör-yapısı)
 - [Lisans](#lisans)
@@ -58,7 +59,7 @@ MorseCore harfleri, rakamları ve desteklenen noktalama işaretlerini nokta ve �
 
 ## Derleme ve çalıştırma
 
-Gereksinimler: **CMake 3.28+**, **C17 destekleyen GCC** ve hazır yapılandırmalar için **Ninja**. Python 3 bütünleşme testlerinde gereklidir; uygulamayı çalıştırmak için gerekmez. Derleme araçlarının terminalden erişilebilir olması gerekir.
+Gereksinimler: **CMake 3.28+**, **C23 destekleyen GCC 15+ veya Clang 18+** ve hazır yapılandırmalar için **Ninja**. Python 3 bütünleşme testlerinde gereklidir; uygulamayı çalıştırmak için gerekmez. Derleme araçlarının terminalden erişilebilir olması gerekir.
 
 ```powershell
 git clone https://github.com/mustafamertakceylan/MorseCore.git
@@ -221,7 +222,34 @@ cpack --preset release
 cmake --install cmake-build-release --prefix "C:\Apps\MorseCore"
 ```
 
-CPack, ZIP dosyasını `cmake-build-release/` içine yazar. Windows AMD64 üzerinde 0.1.0 sürümünün dosya adı `MorseCore-0.1.0-Windows-AMD64.zip` olur. Yazılabilir bir klasöre açıp `MorseCore.exe` veya `run.cmd` çalıştırın. Kurulum komutu, ZIP'i açmaya alternatiftir. Kurulu klasörü bir arada tutun; uygulama, başlatıcı, belgeler, lisans ve varsayılan yapılandırmayı içerir.
+CPack, ZIP dosyasını `cmake-build-release/` içine yazar. Windows AMD64 üzerinde 0.2.0 sürümünün dosya adı `MorseCore-0.2.0-Windows-AMD64.zip` olur. Yazılabilir bir klasöre açıp `MorseCore.exe` veya `run.cmd` çalıştırın. Kurulum komutu, ZIP'i açmaya alternatiftir. Kurulu klasörü bir arada tutun; uygulama, başlatıcı, belgeler, lisans ve varsayılan yapılandırmayı içerir.
+
+## DLL ve .NET bağlantısı
+
+C23 çekirdek, konsolun yanında paylaşılan kitaplık olarak derlenir. Windows'ta
+`MorseCore.Native.dll`; dönüşüm, istatistik, alfabe, alıştırma, WAV üretimi ve
+iptal edilebilir oynatma için sürümlü C API sunar. Konsol aynı çekirdek kodunu
+kullanır ve tek başına çalışmaya devam eder.
+
+Paket `include/morsecore_native.h` başlığını ve bağlama kitaplığını içerir. DLL
+çağrıları katı UTF-8 kullanır; veri klasörü oluşturmaz veya konsol ayarlarını
+okumaz. Dönen nesneler DLL'nin kendi serbest bırakma fonksiyonlarıyla kapatılır.
+Ayrıntılar [native API rehberinde](docs/native-api.tr.md).
+
+İsteğe bağlı .NET 10 kitaplığı, gelecekteki WinUI arayüzü için `LibraryImport`
+bağlantısı ve `SafeHandle` ile kaynak yönetimi sağlar. Tüketicisi arayüzsüz bir
+test uygulamasıdır; WinUI ekranları sonraki aşamadadır.
+
+```powershell
+cmake --preset interop
+cmake --build --preset interop
+ctest --preset interop
+```
+
+Native derleme .NET SDK gerektirmez; `interop` için .NET 10 gerekir. Windows'ta
+Clang kullanırken Visual Studio x64 geliştirici terminalinde `clang-debug`
+yapılandırmasını seçin. CMake; nihai C23 modunu, taşma denetimli aritmetiği,
+atomikleri ve iş parçacığına özel belleği sınar; C17'ye sessizce geri dönmez.
 
 ## Testler ve otomasyon
 
@@ -232,9 +260,9 @@ ctest --preset release
 
 C testleri dönüşümleri, noktalama işaretlerini, dinamik tamponları, ses zamanlamasını/WAV yapısını ve alıştırma puanlamasını kapsar. Python bütünleşme testleri konsol/CLI akışlarını, toplu işlemde çıktı korumasını, ayarları ve taşınmış kurulumları kapsar. Python olmadan bütünleşme testleri eklenmez. Testler sırasında uygulamayı kapatın; testler ayarları geçici olarak değiştirip geri yükleyebilir.
 
-[CI](.github/workflows/ci.yml), push, pull request ve elle çalıştırma için yapılandırılmıştır. Ortak [derleme akışı](.github/workflows/build.yml), Windows'ta GCC UCRT64 ve Ubuntu 24.04'te GCC ile derleme ve test yapacak şekilde ayarlanmıştır. Başarılı Windows işleri ZIP ve `SHA256SUMS` dosyalarını `MorseCore-Windows-x64` adıyla yükleyecek ve 14 gün saklayacak şekilde yapılandırılmıştır.
+[CI](.github/workflows/ci.yml), push, pull request ve elle çalıştırma için yapılandırılmıştır. Ortak [derleme akışı](.github/workflows/build.yml), Windows'ta GCC UCRT64 ve Ubuntu 24.04'te Clang 18 ile derleme ve test yapacak şekilde ayarlanmıştır. Başarılı Windows işleri ZIP ve `SHA256SUMS` dosyalarını `MorseCore-Windows-x64` adıyla yükleyecek ve 14 gün saklayacak şekilde yapılandırılmıştır.
 
-[Release akışı](.github/workflows/release.yml), CMake proje sürümüyle eşleşen bir `v<sürüm>` etiketi, şu anda `v0.1.0`, ve GitHub Release yayımlamadan önce başarılı Windows/Linux kontrolleri gerektirir. Bu akışlar henüz uzakta çalıştırılmamıştır; yayımlanmış bir sürüm olduğu iddia edilmemektedir. Otomatik ses testleri fiziksel donanımda duyulabilir oynatmayı kanıtlamaz.
+[Release akışı](.github/workflows/release.yml), CMake proje sürümüyle eşleşen bir `v<sürüm>` etiketi, şu anda `v0.2.0`, ve GitHub Release yayımlamadan önce başarılı Windows/Linux kontrolleri gerektirir. Yerel kontroller ve GitHub Actions sonuçları ayrıdır; uzaktaki durum için deponun Actions sekmesine bakın. Otomatik ses testleri fiziksel donanımda duyulabilir oynatmayı kanıtlamaz.
 
 ## Klasör yapısı
 
@@ -245,7 +273,7 @@ tests/                C testleri ve Python bütünleşme testleri
 config/settings.txt   Kayıtlı dil ve kelime ayracı
 data/                 Konsol girdileri, örnekler ve üretilen çıktılar
 .github/workflows/    CI, ortak derleme kontrolleri ve release otomasyonu
-CMakeLists.txt        C17 derleme, test, kurulum ve ZIP paketleme hedefleri
+CMakeLists.txt        C23 çekirdek, DLL, konsol, test ve paketleme hedefleri
 CMakePresets.json     GCC / Ninja debug ve release yapılandırmaları
 run.cmd               Windows başlatıcısı
 ```

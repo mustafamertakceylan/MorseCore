@@ -3,7 +3,7 @@
   "configurePresets": [
     {
       "name": "debug",
-      "displayName": "Debug (GCC / Ninja)",
+      "displayName": "C23 debug (GCC / Ninja)",
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/cmake-build-debug",
       "cacheVariables": {
@@ -14,23 +14,87 @@
     },
     {
       "name": "release",
-      "displayName": "Portable release (GCC / Ninja)",
+      "displayName": "C23 portable release (GCC / Ninja)",
       "inherits": "debug",
       "binaryDir": "${sourceDir}/cmake-build-release",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
       }
+    },
+    {
+      "name": "interop",
+      "displayName": "C23 DLL + headless .NET interop",
+      "inherits": "debug",
+      "binaryDir": "${sourceDir}/cmake-build-interop",
+      "cacheVariables": {
+        "MORSECORE_BUILD_DOTNET_BINDINGS": "ON"
+      }
+    },
+    {
+      "name": "clang-debug",
+      "displayName": "C23 Clang debug (VS developer prompt on Windows)",
+      "inherits": "debug",
+      "binaryDir": "${sourceDir}/cmake-build-clang",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "clang"
+      }
     }
   ],
   "buildPresets": [
-    { "name": "debug", "configurePreset": "debug" },
-    { "name": "release", "configurePreset": "release" }
+    {
+      "name": "debug",
+      "configurePreset": "debug"
+    },
+    {
+      "name": "release",
+      "configurePreset": "release"
+    },
+    {
+      "name": "interop",
+      "configurePreset": "interop"
+    },
+    {
+      "name": "clang-debug",
+      "configurePreset": "clang-debug"
+    }
   ],
   "testPresets": [
-    { "name": "debug", "configurePreset": "debug", "output": { "outputOnFailure": true } },
-    { "name": "release", "configurePreset": "release", "output": { "outputOnFailure": true } }
+    {
+      "name": "debug",
+      "configurePreset": "debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "release",
+      "configurePreset": "release",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "interop",
+      "configurePreset": "interop",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "clang-debug",
+      "configurePreset": "clang-debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    }
   ],
   "packagePresets": [
-    { "name": "release", "configurePreset": "release", "generators": ["ZIP"] }
+    {
+      "name": "release",
+      "configurePreset": "release",
+      "generators": [
+        "ZIP"
+      ]
+    }
   ]
 }

@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "console_render.h"
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>

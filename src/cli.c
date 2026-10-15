@@ -31,7 +31,7 @@
 #include "separator.h"
 
 #ifndef MORSECORE_VERSION
-#define MORSECORE_VERSION "0.1.0"
+#define MORSECORE_VERSION "development"
 #endif
 
 typedef struct {
