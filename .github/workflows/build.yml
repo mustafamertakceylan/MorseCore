@@ -53,7 +53,7 @@ jobs:
         if: inputs.release-tag != ''
         env:
           MORSECORE_RELEASE_TAG: ${{ inputs.release-tag }}
-        run: cmake "-DCPACK_CONFIG=cmake-build-release/CPackConfig.cmake" -P scripts/verify_release_tag.cmake
+        run: cmake "-DVERSION_FILE=cmake-build-release/MorseCoreVersion.cmake" -P scripts/verify_release_tag.cmake
 
       - name: Build
         run: cmake --build --preset release --parallel 2
@@ -102,11 +102,10 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
-      - name: Package tested console and native library
+      - name: Verify desktop package checksums
         run: |
-          cpack --config cmake-build-release/CPackConfig.cmake -G ZIP -B dist
           cd dist
-          sha256sum -- *.zip *.exe > SHA256SUMS
+          sha256sum --check --strict SHA256SUMS
 
       - name: Upload Windows packages and checksums
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -143,7 +142,7 @@ jobs:
         if: inputs.release-tag != ''
         env:
           MORSECORE_RELEASE_TAG: ${{ inputs.release-tag }}
-        run: cmake "-DCPACK_CONFIG=cmake-build-release/CPackConfig.cmake" -P scripts/verify_release_tag.cmake
+        run: cmake "-DVERSION_FILE=cmake-build-release/MorseCoreVersion.cmake" -P scripts/verify_release_tag.cmake
 
       - name: Build
         run: cmake --build --preset release --parallel 2

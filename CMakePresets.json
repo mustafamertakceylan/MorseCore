@@ -14,7 +14,7 @@
     },
     {
       "name": "release",
-      "displayName": "C23 portable release (GCC / Ninja)",
+      "displayName": "C23 native release (GCC / Ninja)",
       "inherits": "debug",
       "binaryDir": "${sourceDir}/cmake-build-release",
       "cacheVariables": {
@@ -86,15 +86,6 @@
       "output": {
         "outputOnFailure": true
       }
-    }
-  ],
-  "packagePresets": [
-    {
-      "name": "release",
-      "configurePreset": "release",
-      "generators": [
-        "ZIP"
-      ]
     }
   ]
 }

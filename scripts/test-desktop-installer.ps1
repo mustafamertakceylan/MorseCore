@@ -1,12 +1,15 @@
 #requires -Version 7.0
 param(
     [Parameter(Mandatory)][string]$InstallerPath,
+    [string]$PreviousInstallerPath,
     [switch]$SkipLaunch
 )
 $ErrorActionPreference='Stop'
 if(!$IsWindows) { throw 'Installer verification requires Windows.' }
 $taskRoot=(Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $taskInstaller=(Resolve-Path -LiteralPath $InstallerPath).Path
+$taskInstallerVersion=[Version](Get-Item -LiteralPath $taskInstaller).VersionInfo.ProductVersion
+if($PreviousInstallerPath) { $PreviousInstallerPath=(Resolve-Path -LiteralPath $PreviousInstallerPath).Path }
 $taskId=[Guid]::NewGuid().ToString('N')
 $taskEvidence=Join-Path $taskRoot "cmake-build-installer-tests/$taskId"
 $taskInstall=Join-Path $taskEvidence 'kurulum denemesi Türkçe'
@@ -31,8 +34,22 @@ function Invoke-InstallerProcess([string]$File,[string[]]$Arguments) {
 }
 try {
     $taskBaseArguments=@('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART','/NOCLOSEAPPLICATIONS','/LANG=turkish',('/GROUP="'+$taskGroup+'"'))
+    if($PreviousInstallerPath) {
+        $taskPreviousVersion=[Version](Get-Item -LiteralPath $PreviousInstallerPath).VersionInfo.ProductVersion
+        Assert-InstallerCheck ($taskPreviousVersion -lt $taskInstallerVersion) 'Upgrade baseline is an older application release'
+        $taskCode=Invoke-InstallerProcess $PreviousInstallerPath ($taskBaseArguments+@('/TASKS=""',('/DIR="'+$taskInstall+'"'),('/LOG="'+(Join-Path $taskEvidence 'previous-install.log')+'"')))
+        Assert-InstallerCheck ($taskCode -eq 0) "Previous release $taskPreviousVersion installs successfully"
+        $taskPreviousExecutableVersion=(Get-Item -LiteralPath (Join-Path $taskInstall 'MorseCore.Desktop.exe')).VersionInfo.ProductVersion
+        Assert-InstallerCheck ($taskPreviousExecutableVersion -like "$taskPreviousVersion*") 'Upgrade starts with the actual older desktop executable'
+        'Existing user file from the previous release.' | Set-Content -LiteralPath (Join-Path $taskInstall 'upgrade-user-note.txt')
+    }
     $taskCode=Invoke-InstallerProcess $taskInstaller ($taskBaseArguments+@('/TASKS=""',('/DIR="'+$taskInstall+'"'),('/LOG="'+(Join-Path $taskEvidence 'install.log')+'"')))
     Assert-InstallerCheck ($taskCode -eq 0) "Per-user installation succeeds (exit $taskCode)"
+    $taskInstalledExecutableVersion=(Get-Item -LiteralPath (Join-Path $taskInstall 'MorseCore.Desktop.exe')).VersionInfo.ProductVersion
+    Assert-InstallerCheck ($taskInstalledExecutableVersion -like "$taskInstallerVersion*") 'Installed executable matches the new Setup version'
+    if($PreviousInstallerPath) {
+        Assert-InstallerCheck (Test-Path -LiteralPath (Join-Path $taskInstall 'upgrade-user-note.txt')) 'Upgrade preserves files created before the new release'
+    }
     foreach($taskFile in @('MorseCore.Desktop.exe','MorseCore.Native.dll','coreclr.dll','Microsoft.UI.Xaml.dll','LICENSE','NOTICE','licenses/dependencies.json','third_party/speech/ema-lightning/LICENSE','third_party/speech/antalia-mini/LICENSE','third_party/speech/antalia-mini/NOTICE','third_party/installer/Inno-Setup-LICENSE.txt','scripts/setup-speech.py','setup-speech.cmd','unins000.exe')) {
         Assert-InstallerCheck (Test-Path -LiteralPath (Join-Path $taskInstall $taskFile) -PathType Leaf) "Installed file: $taskFile"
     }
@@ -115,6 +132,9 @@ try {
     Assert-InstallerCheck (!(Test-Path -LiteralPath (Join-Path $taskInstall 'MorseCore.Desktop.exe'))) 'Uninstall removes installed application binaries'
     Assert-InstallerCheck (!(Test-Path -LiteralPath $taskShortcut)) 'Uninstall removes the Start menu shortcut'
     Assert-InstallerCheck (Test-Path -LiteralPath $taskUserFile) 'Uninstall preserves user-created files'
+    if($PreviousInstallerPath) {
+        Assert-InstallerCheck (Test-Path -LiteralPath (Join-Path $taskInstall 'upgrade-user-note.txt')) 'Uninstall after upgrade preserves files from the previous release'
+    }
 }
 catch { $taskFailure=$_.Exception.Message; throw }
 finally {
@@ -127,6 +147,6 @@ finally {
         if($taskCleanupCode -ne 0) { Write-Warning "Test installation cleanup failed: $taskCleanupCode" }
     }
     $taskRegistry.Dispose()
-    @{ Passed=$null -eq $taskFailure; Failure=$taskFailure; Launched=!$SkipLaunch; Checks=$taskChecks.ToArray(); Installer=$taskInstaller; Evidence=$taskEvidence } | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath (Join-Path $taskEvidence 'installer-checks.json') -Encoding utf8NoBOM
+    @{ Passed=$null -eq $taskFailure; Failure=$taskFailure; Launched=!$SkipLaunch; Checks=$taskChecks.ToArray(); Installer=$taskInstaller; PreviousInstaller=$PreviousInstallerPath; Evidence=$taskEvidence } | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath (Join-Path $taskEvidence 'installer-checks.json') -Encoding utf8NoBOM
 }
 Write-Output "$($taskChecks.Count) installer checks passed. Evidence: $taskEvidence"

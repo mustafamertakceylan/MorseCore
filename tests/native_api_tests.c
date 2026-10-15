@@ -8,7 +8,7 @@
 int main(void)
 {
     CHECK(mc_abi_version() == MC_ABI_VERSION);
-    CHECK(strcmp(mc_version(), "0.3.0") == 0);
+    CHECK(strcmp(mc_version(), "0.4.0") == 0);
     mc_result *result = NULL;
     CHECK(mc_encode((const uint8_t *) "SOS", 3, 0, &result) == MC_OK && result != NULL);
     char text[64];

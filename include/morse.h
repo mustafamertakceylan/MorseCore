@@ -11,9 +11,6 @@
 ResultCode textToMorseAlloc(const char *text, char **output, char wordSeparator);
 ResultCode morseToTextAlloc(const char *morseInput, char **output, char wordSeparator);
 
-/* Legacy APIs: input < MAX_TEXT_LENGTH; output buffer MAX_OUTPUT_LENGTH bytes. */
-int textToMorse(const char text[], char morseOutput[], char wordSeparator);
-int morseToText(const char morseInput[], char textOutput[], char wordSeparator);
 /* Read-only alphabet access; code strings have static lifetime. */
 size_t morseAlphabetSize(void);
 int morseAlphabetEntry(size_t index, unsigned char *character, const char **code);

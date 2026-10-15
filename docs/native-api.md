@@ -2,9 +2,9 @@
 
 [Türkçe](native-api.tr.md) · [Public header](../include/morsecore_native.h)
 
-MorseCore 0.3.0 provides ABI v1 through `MorseCore.Native.dll` on Windows and
-`libMorseCore.Native.so` on Linux. The shared engine contains no console renderer,
-settings loader or runtime-home initialization. Loading it has no filesystem side effects.
+MorseCore 0.4.0 provides ABI v1 through `MorseCore.Native.dll` on Windows and
+`libMorseCore.Native.so` on Linux. Loading the shared engine has no filesystem side effects. Application settings and
+user data are managed by the desktop layer.
 
 ## Build
 
@@ -20,8 +20,8 @@ ctest --preset debug
 The `clang-debug` preset uses `clang`. On Windows, invoke it from a Visual Studio
 x64 developer prompt so Clang can find Windows SDK headers, libraries and the linker.
 Microsoft-compatible builds use the static CRT. MinGW builds link compiler runtimes
-statically. Windows system DLLs are still required. The CLI links the common C23 engine
-statically and can run without the native DLL.
+statically. Windows system DLLs are still required. CMake builds the shared engine and tests;
+the desktop application is built separately.
 
 ## ABI and ownership
 
@@ -33,7 +33,7 @@ statically and can run without the native DLL.
 - Status `MC_OK` is zero. Other results are named constants in the header. Status messages
   are borrowed static strings. They do not require freeing.
 - Inputs are explicit byte spans: strict UTF-8, no embedded NUL, no trailing NUL required.
-  A leading BOM is accepted. Unlike the console, the DLL does not accept Windows-1254.
+  A leading BOM is accepted. Windows-1254 is not accepted by the public DLL API.
   Byte lengths and character statistics are different quantities.
 - `mc_encode`, `mc_decode` and `mc_practice_next` return opaque result handles.
   Query `mc_result_copy_text` with NULL/0 to obtain the required capacity **including NUL**;
@@ -100,6 +100,6 @@ ctest --preset interop
 ```
 
 The smoke consumer loads the specified real library and checks conversion, statistics,
-errors, concurrency, practice, WAV and pre-cancellation without audio hardware. In a future
-desktop deployment, put the matching native DLL beside the app. The binding uses safe
+errors, concurrency, practice, WAV and pre-cancellation without audio hardware. Desktop
+packages include the matching native DLL beside the app. The binding uses safe
 native-library search paths. .NET is optional for the C build.

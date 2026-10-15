@@ -7,24 +7,24 @@
 **Convert, listen, and practice Morse code.**
 
 ![C23](https://img.shields.io/badge/C-23-225E85?style=flat-square&logo=c&logoColor=white)
-[![Version](https://img.shields.io/badge/Version-0.3.0-5e6a42?style=flat-square)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v0.3.0)
+[![Version](https://img.shields.io/badge/Version-0.4.0-5e6a42?style=flat-square)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v0.4.0)
 [![License](https://img.shields.io/badge/License-Apache%202.0-2A9D8F?style=flat-square)](LICENSE)
 
 **English** · [Türkçe](README.tr.md)
 
 </div>
 
-MorseCore converts text and files to Morse code and back. Use the Windows desktop app, the console menu, or the command line.
+MorseCore converts text and files to Morse code and back. A Windows desktop app powered by a C23 engine.
 
 ## Download
 
-**[Download for Windows x64 — v0.3.0](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.3.0/MorseCore-0.3.0-Windows-x64-Desktop.zip)**
+**[Download Windows Setup — v0.4.0](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.4.0/MorseCore-0.4.0-Windows-x64-Setup.exe)** · [Portable ZIP](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.4.0/MorseCore-0.4.0-Windows-x64-Desktop.zip)
 
-Extract the whole ZIP and open **MorseCore.Desktop.exe**. Keep its DLLs and subfolders together. This is an unsigned desktop preview; macOS and Linux desktop editions are planned.
+Run Setup and open MorseCore from the Start menu. For the portable ZIP, extract all files and open **MorseCore.Desktop.exe**. This is an unsigned preview; macOS and Linux desktop editions are planned.
 
-For optional speech, run **setup-speech.cmd** with Python 3.11–3.13. Setup downloads models once; speech then works offline. Models are not included in the ZIP. [Speech setup →](docs/offline-speech.md)
+For optional speech, use **Set up offline voices** in the Start menu or **setup-speech.cmd** in the ZIP. Python 3.11–3.13 and internet are needed once; speech then works offline. Models download separately. [Speech setup →](docs/offline-speech.md)
 
-The console app and native DLL are available on the [release page](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v0.3.0), alongside checksums and release notes.
+Checksums and release notes are on the [release page](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v0.4.0).
 
 ## Features
 
@@ -36,17 +36,13 @@ The console app and native DLL are available on the [release page](https://githu
 
 ## Build and run
 
-The C23 core and console need **CMake 3.28+**, **GCC 15+**, and **Ninja**. Clang 18+ is supported through the `clang-debug` preset.
+Use **PowerShell 7**, **.NET 10**, Windows SDK/WinUI tools, **CMake 3.28+**, **GCC 15+** and **Ninja**. See the [desktop guide](docs/desktop.md#run-from-source) for details.
 
 ```powershell
 git clone https://github.com/mustafamertakceylan/MorseCore.git
 cd MorseCore
-cmake --preset debug
-cmake --build --preset debug
-.\run.cmd
+pwsh -File scripts/run-desktop.ps1
 ```
-
-For command-line use, try `.\run.cmd --encode "HELLO WORLD"`; see `.\run.cmd --help` for all options. The console supports Latin/Turkish input.
 
 ## Guides
 

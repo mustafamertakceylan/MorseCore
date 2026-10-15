@@ -60,15 +60,6 @@ static void countPlainText(const char text[], ConversionStats *stats)
     }
 }
 
-void initializeSessionStats(SessionStats *stats)
-{
-    stats->textToMorseCount = 0;
-    stats->morseToTextCount = 0;
-    stats->fileOperationCount = 0;
-    stats->invalidInputCount = 0;
-    stats->savedOutputCount = 0;
-}
-
 void calculateConversionStats(const char input[], const char output[],
                               ConversionDirection direction, ConversionStats *stats)
 {
@@ -76,29 +67,4 @@ void calculateConversionStats(const char input[], const char output[],
     stats->outputLength = countCharacters(output);
     const char *plainText = direction == CONVERSION_TEXT_TO_MORSE ? input : output;
     countPlainText(plainText, stats);
-}
-
-void increaseTextToMorseCount(SessionStats *stats)
-{
-    stats->textToMorseCount++;
-}
-
-void increaseMorseToTextCount(SessionStats *stats)
-{
-    stats->morseToTextCount++;
-}
-
-void increaseFileOperationCount(SessionStats *stats)
-{
-    stats->fileOperationCount++;
-}
-
-void increaseInvalidInputCount(SessionStats *stats)
-{
-    stats->invalidInputCount++;
-}
-
-void increaseSavedOutputCount(SessionStats *stats)
-{
-    stats->savedOutputCount++;
 }

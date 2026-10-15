@@ -1,5 +1,5 @@
 #include "audio.h"
-#include "runtime_paths.h"
+#include "platform_io.h"
 
 #include <stdio.h>
 #include <stdlib.h>

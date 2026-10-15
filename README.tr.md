@@ -7,24 +7,24 @@
 **Morse kodunu dönüştürün, dinleyin ve alıştırma yapın.**
 
 ![C23](https://img.shields.io/badge/C-23-225E85?style=flat-square&logo=c&logoColor=white)
-[![Sürüm](https://img.shields.io/badge/Version-0.3.0-5e6a42?style=flat-square)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v0.3.0)
+[![Sürüm](https://img.shields.io/badge/Version-0.4.0-5e6a42?style=flat-square)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v0.4.0)
 [![Lisans](https://img.shields.io/badge/License-Apache%202.0-2A9D8F?style=flat-square)](LICENSE)
 
 [English](README.md) · **Türkçe**
 
 </div>
 
-MorseCore, metin ve dosyaları Morse koduna çevirir; Morse kodunu yeniden metne dönüştürür. Windows masaüstü arayüzünden, konsol menüsünden veya komut satırından kullanabilirsiniz.
+MorseCore, metin ve dosyaları Morse koduna çevirir; Morse kodunu yeniden metne dönüştürür. C23 motoruyla çalışan bir Windows masaüstü uygulamasıdır.
 
 ## İndir
 
-**[Windows x64 için indir — v0.3.0](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.3.0/MorseCore-0.3.0-Windows-x64-Desktop.zip)**
+**[Windows Setup indir — v0.4.0](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.4.0/MorseCore-0.4.0-Windows-x64-Setup.exe)** · [Taşınabilir ZIP](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.4.0/MorseCore-0.4.0-Windows-x64-Desktop.zip)
 
-ZIP'in tamamını açıp **MorseCore.Desktop.exe** dosyasını çalıştırın. DLL'leri ve alt klasörleri bir arada tutun. Bu, imzasız bir masaüstü önizlemesidir; macOS ve Linux arayüzleri planlanmaktadır.
+Setup'ı çalıştırıp uygulamayı Başlat menüsünden açın. Taşınabilir ZIP'i kullanıyorsanız tüm dosyaları açıp **MorseCore.Desktop.exe** dosyasını çalıştırın. Bu, imzasız bir önizlemedir; macOS ve Linux arayüzleri planlanmaktadır.
 
-İsteğe bağlı seslendirme için Python 3.11–3.13 ile **setup-speech.cmd** dosyasını çalıştırın. Modeller kurulumda bir kez indirilir; ardından seslendirme çevrimdışı çalışır. Modeller ZIP'e dahil değildir. [Ses kurulumu →](docs/offline-speech.tr.md)
+İsteğe bağlı seslendirme için Başlat menüsündeki **Çevrimdışı sesleri kur** kısayolunu veya ZIP'teki **setup-speech.cmd** dosyasını kullanın. Python 3.11–3.13 ve internet bir kez gerekir; sonra seslendirme çevrimdışı çalışır. Modeller ayrıca indirilir. [Ses kurulumu →](docs/offline-speech.tr.md)
 
-Konsol uygulaması, native DLL, dosya özetleri ve sürüm notları [sürüm sayfasındadır](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v0.3.0).
+Dosya özetleri ve sürüm notları [sürüm sayfasındadır](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v0.4.0).
 
 ## Özellikler
 
@@ -36,17 +36,13 @@ Konsol uygulaması, native DLL, dosya özetleri ve sürüm notları [sürüm say
 
 ## Derleme ve çalıştırma
 
-C23 çekirdek ve konsol için **CMake 3.28+**, **GCC 15+** ve **Ninja** gerekir. Clang 18+ için `clang-debug` yapılandırması da desteklenir.
+**PowerShell 7**, **.NET 10**, Windows SDK/WinUI araçları, **CMake 3.28+**, **GCC 15+** ve **Ninja** gerekir. Ayrıntılar [masaüstü rehberindedir](docs/desktop.tr.md#çalıştırma).
 
 ```powershell
 git clone https://github.com/mustafamertakceylan/MorseCore.git
 cd MorseCore
-cmake --preset debug
-cmake --build --preset debug
-.\run.cmd
+pwsh -File scripts/run-desktop.ps1
 ```
-
-Komut satırında `.\run.cmd --encode "HELLO WORLD"` ile başlayın; tüm seçenekler için `.\run.cmd --help` kullanın. Konsol, Latin/Türkçe girdileri destekler.
 
 ## Rehberler
 

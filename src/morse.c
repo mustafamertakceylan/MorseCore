@@ -221,32 +221,6 @@ ResultCode morseToTextAlloc(const char *morseInput, char **output, char wordSepa
     return RESULT_SUCCESS;
 }
 
-static int boundedConversion(const char *input, char *output, char separator, int encode)
-{
-    if (output == NULL) return 0;
-    output[0] = '\0';
-    if (input == NULL || strlen(input) >= MAX_TEXT_LENGTH) return 0;
-    char *allocated = NULL;
-    ResultCode result = encode ? textToMorseAlloc(input, &allocated, separator) :
-        morseToTextAlloc(input, &allocated, separator);
-    if (result != RESULT_SUCCESS) return 0;
-    size_t length = strlen(allocated);
-    if (length >= MAX_OUTPUT_LENGTH) { free(allocated); return 0; }
-    memcpy(output, allocated, length + 1);
-    free(allocated);
-    return 1;
-}
-
-int textToMorse(const char text[], char morseOutput[], char wordSeparator)
-{
-    return boundedConversion(text, morseOutput, wordSeparator, 1);
-}
-
-int morseToText(const char morseInput[], char textOutput[], char wordSeparator)
-{
-    return boundedConversion(morseInput, textOutput, wordSeparator, 0);
-}
-
 size_t morseAlphabetSize(void) { return ALPHABET_SIZE; }
 
 int morseAlphabetEntry(size_t index, unsigned char *character, const char **code)

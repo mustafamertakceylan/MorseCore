@@ -1,6 +1,14 @@
-# Runtime data files
-data/*.txt
-!data/.gitkeep
+# Local IDE files and legacy user data
+/.idea/
+/config/
+/data/
+/output/
+/dist/
+**/.vs/
+**/__pycache__/
+*.py[cod]
+*.pfx
+*.p12
 
 # Build folders
 cmake-build-*/

@@ -2,9 +2,9 @@
 
 [English](native-api.md) · [Dışa açık başlık](../include/morsecore_native.h)
 
-MorseCore 0.3.0, Windows'ta `MorseCore.Native.dll`, Linux'ta `libMorseCore.Native.so`
-üzerinden ABI v1 sunar. Ortak çekirdekte konsol çizimi, ayar yükleme veya veri kökü
-başlatma bulunmaz. Kitaplığı yüklemek dosya veya klasör oluşturmaz.
+MorseCore 0.4.0, Windows'ta `MorseCore.Native.dll`, Linux'ta `libMorseCore.Native.so`
+üzerinden ABI v1 sunar. Kitaplığı yüklemek dosya veya klasör oluşturmaz.
+Uygulama ayarları ve kullanıcı verileri masaüstü katmanında yönetilir.
 
 ## Derleme
 
@@ -21,7 +21,7 @@ ctest --preset debug
 kitaplıklarının ve bağlayıcının bulunabilmesi için Visual Studio x64 geliştirici
 terminalinden çalıştırın. Microsoft uyumlu derlemelerde CRT, MinGW derlemelerinde
 derleyici çalışma zamanı statik bağlanır. Windows sistem DLL'leri yine gereklidir.
-Konsol ortak C23 çekirdeğe statik bağlanır; native DLL olmadan da çalışabilir.
+CMake paylaşılan çekirdeği ve testleri derler; masaüstü uygulaması ayrı derlenir.
 
 ## ABI ve bellek sahipliği
 
@@ -33,8 +33,8 @@ Konsol ortak C23 çekirdeğe statik bağlanır; native DLL olmadan da çalışab
 - Başarı `MC_OK`, yani sıfırdır. Diğer sonuçlar başlıktaki sabitlerle belirtilir.
   Durum mesajları ödünç statik dizgelerdir; serbest bırakılmazlar.
 - Girdi, uzunluğu bayt olarak verilen katı UTF-8'dir. İçinde NUL olamaz; sonunda
-  NUL bulunması gerekmez. Başlangıç BOM'u kabul edilir. Konsoldan farklı olarak
-  DLL Windows-1254 kabul etmez. Bayt uzunluğu ve karakter sayısı ayrı kavramlardır.
+  NUL bulunması gerekmez. Başlangıç BOM'u kabul edilir.
+  Dışa açık DLL API'si Windows-1254 kabul etmez. Bayt uzunluğu ve karakter sayısı ayrı kavramlardır.
 - `mc_encode`, `mc_decode` ve `mc_practice_next` opak sonuç nesneleri döndürür.
   `mc_result_copy_text` NULL/0 ile çağrılınca **NUL dahil** gereken kapasiteyi verir;
   ardından kendi tamponunuzu sağlayın. Küçük tampon değiştirilmez. Kodlanmış

@@ -2,7 +2,7 @@
 
 [Türkçe](desktop.tr.md) · [Home](../README.md)
 
-The Windows interface brings text and file conversion, Morse audio, speech and practice together. This is a development preview for 0.3.0. No signed installer has been released.
+The Windows interface brings text and file conversion, Morse audio, speech and practice together. This is a development preview for 0.4.0. No signed installer has been released.
 
 ## Interface
 
@@ -29,7 +29,7 @@ pwsh -File scripts/run-desktop.ps1
 pwsh -File scripts/run-desktop.ps1 -Configuration Release
 ```
 
-The UI calls the native C23 library. The console application remains independent. Desktop preferences live separately in `%LOCALAPPDATA%/MorseCore/Desktop/settings.json`. `MORSECORE_DESKTOP_HOME` can select another absolute directory. Messages are not saved in preferences.
+The UI calls the native C23 library. Desktop preferences live in `%LOCALAPPDATA%/MorseCore/Desktop/settings.json`. `MORSECORE_DESKTOP_HOME` can select another absolute directory. Messages are not saved in preferences.
 
 ## Alphabets and counters
 

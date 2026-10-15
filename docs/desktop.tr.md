@@ -2,7 +2,7 @@
 
 [English](desktop.md) · [Ana sayfa](../README.tr.md)
 
-Windows arayüzü; metin ve dosya dönüşümünü, Morse sesini, seslendirmeyi ve alıştırmayı aynı yerde toplar. Bu, 0.3.0 için geliştirilen bir önizlemedir. İmzalı bir kurulum sürümü henüz yayımlanmadı.
+Windows arayüzü; metin ve dosya dönüşümünü, Morse sesini, seslendirmeyi ve alıştırmayı aynı yerde toplar. Bu, 0.4.0 için geliştirilen bir önizlemedir. İmzalı bir kurulum sürümü henüz yayımlanmadı.
 
 ## Görünüm ve kullanım
 
@@ -33,7 +33,7 @@ Kökteki `run-gui.cmd` aynı işlemi başlatır. Release derlemesi için:
 pwsh -File scripts/run-desktop.ps1 -Configuration Release
 ```
 
-Arayüz C23 DLL'yi kullanır; konsol uygulaması kendi başına çalışmaya devam eder. Tercihler konsol ayarlarından ayrı olarak `%LOCALAPPDATA%/MorseCore/Desktop/settings.json` dosyasında tutulur. `MORSECORE_DESKTOP_HOME`, bu dosya için başka bir mutlak klasör seçebilir. Mesajlar tercih dosyasına yazılmaz.
+Arayüz C23 DLL'yi kullanır. Tercihler `%LOCALAPPDATA%/MorseCore/Desktop/settings.json` dosyasında tutulur. `MORSECORE_DESKTOP_HOME`, bu dosya için başka bir mutlak klasör seçebilir. Mesajlar tercih dosyasına yazılmaz.
 
 ## Alfabeler ve sayımlar
 

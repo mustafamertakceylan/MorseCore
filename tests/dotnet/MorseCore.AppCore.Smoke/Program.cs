@@ -56,7 +56,7 @@ try
     await File.WriteAllBytesAsync(input,new byte[FileConversion.MaxInputBytes+1]);
     try { await FileConversion.ConvertAsync(input,Path.Combine(directory,"large.txt"),false,MorseAlphabet.Russian,'/'); throw new Exception("Large file accepted"); }
     catch(IOException) { Check(!File.Exists(Path.Combine(directory,"large.txt")),"File size bound"); }
-    foreach(var release in new[]{("v0.3.0",false,false,true),("v0.1.0",false,false,false),("v9.0.0",true,false,false),("v9.0.0",false,true,false),("weird",false,false,false)})
+    foreach(var release in new[]{("v0.4.0",false,false,true),("v0.1.0",false,false,false),("v9.0.0",true,false,false),("v9.0.0",false,true,false),("weird",false,false,false)})
     {
         string body=JsonSerializer.Serialize(new { tag_name=release.Item1,prerelease=release.Item2,draft=release.Item3,html_url="https://github.com/mustafamertakceylan/MorseCore/releases/tag/"+release.Item1 });
         using var client=new HttpClient(new ResponseHandler(HttpStatusCode.OK,body));

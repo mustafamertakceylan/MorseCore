@@ -1,6 +1,5 @@
 #include <stddef.h>
 #include "separator.h"
-#include "app_config.h"
 
 int isValidSeparator(char separator)
 {
@@ -33,5 +32,5 @@ char resolveSeparatorForMorseInput(const char morseInput[], char fallbackSeparat
         return fallbackSeparator;
     }
 
-    return DEFAULT_WORD_SEPARATOR;
+    return '/';
 }

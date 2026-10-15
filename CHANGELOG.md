@@ -1,9 +1,11 @@
 # Changelog / Değişiklik günlüğü
 
-## Unreleased / Yayımlanmamış
+## 0.4.0 — 2026-10-15
 
 - Added a Windows x64 Setup.exe build with five wizard languages, per-user shortcuts/uninstall, persistent optional speech storage and install/reinstall/removal checks. The release workflow includes Setup alongside the portable ZIPs.
 - Beş dilli kurulum sihirbazı, kullanıcıya özel kısayol/kaldırma, kalıcı isteğe bağlı ses paketi ve kurma/yeniden kurma/kaldırma kontrolleriyle Windows x64 Setup.exe derlemesi eklendi. Yayın akışı Setup'ı taşınabilir ZIP'lerle birlikte paketler.
+- Removed the legacy console/CLI application, launcher, console-only helpers/tests and console ZIP. Retained the C23 engine and ABI v1, adapted shared regression tests, and removed IDE/generated user files from Git tracking.
+- Eski konsol/CLI uygulaması, başlatıcısı, konsola özel yardımcılar/testler ve konsol ZIP'i kaldırıldı. C23 motoru ve ABI v1 korundu; ortak testler ayrıştırıldı, IDE ve üretilmiş kullanıcı dosyaları Git takibinden çıkarıldı.
 
 ## 0.3.0 — 2026-10-15
 
