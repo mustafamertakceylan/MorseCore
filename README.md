@@ -2,11 +2,14 @@
 
 # MorseCore
 
+<img src="apps/MorseCore.Desktop/MorseCore.Desktop/Assets/Brand/morsecore.png" width="92" alt="MorseCore logo">
+
 **Convert, listen, and practice Morse code.**
 
-Turn text and files into Morse code, decode messages, export audio, and practice reading or listening. Use the console menu or run conversions from scripts.
+Turn text and files into Morse code, decode messages, export audio, and practice reading or listening. Use the Windows desktop preview, the console menu, or scripted conversions.
 
 ![C23](https://img.shields.io/badge/C-23-225E85?style=flat-square&logo=c&logoColor=white)
+[![Version](https://img.shields.io/badge/Version-0.3.0-5e6a42?style=flat-square)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v0.3.0)
 ![CMake](https://img.shields.io/badge/CMake-3.28%2B-064F8C?style=flat-square&logo=cmake&logoColor=white)
 [![License](https://img.shields.io/badge/License-Apache%202.0-2A9D8F?style=flat-square)](LICENSE)
 
@@ -18,9 +21,11 @@ Turn text and files into Morse code, decode messages, export audio, and practice
 
 ## Contents
 
+- [Download](#download)
 - [What it does](#what-it-does)
 - [Features](#features)
 - [Build and run](#build-and-run)
+- [Desktop preview](#desktop-preview)
 - [Console menu](#console-menu)
 - [Command line](#command-line)
 - [Audio and WAV](#audio-and-wav)
@@ -33,6 +38,17 @@ Turn text and files into Morse code, decode messages, export audio, and practice
 - [Tests and automation](#tests-and-automation)
 - [Project layout](#project-layout)
 - [License](#license)
+- [Acknowledgements](#acknowledgements)
+
+## Download
+
+**[Download the Windows x64 desktop preview](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.3.0/MorseCore-0.3.0-Windows-x64-Desktop.zip)** · [Release notes and checksums](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v0.3.0) · [Changelog](CHANGELOG.md)
+
+Extract the whole ZIP into a writable folder and open **MorseCore.Desktop.exe**. Keep its DLLs and subfolders together. The desktop package includes its .NET/Windows App SDK runtime; building it yourself is optional. It is an unsigned Windows preview, not an MSIX installer.
+
+Speech is optional. Run **setup-speech.cmd** once with Python 3.11–3.13 installed; setup needs internet, then synthesis stays offline. Model weights and speech dependencies are downloaded separately and are not included in the release ZIP. See the [speech guide](docs/offline-speech.md).
+
+For the console app and native DLL, download the separate `MorseCore-0.3.0-Windows-AMD64.zip` asset. macOS and Linux desktop editions remain planned.
 
 ## What it does
 
@@ -54,7 +70,8 @@ Decoding returns `HELLO WORLD`. Turkish letters are normalized to their Latin eq
 | Command line | Automate individual conversions or process a folder of text files |
 | Audio | Play Morse on Windows or export a PCM WAV file |
 | Practice | Answer random letters, digits, or short words by reading or listening |
-| Interface | Use English or Turkish menus, a Morse table, and conversion statistics |
+| Interface | English/Turkish console; five-language Windows desktop preview with light/dark themes |
+| Desktop alphabets | Convert Russian and Arabic text through the native library, with explicit alphabet selection |
 | Portable Windows package | Move the installed folder without rebuilding |
 
 ## Build and run
@@ -72,6 +89,18 @@ cmake --build --preset debug
 On Windows, `run.cmd` also opens by double-click after building. From the source checkout, it uses the checkout root for `data/` and `config/`. It looks for a packaged executable first, then a debug build, then a release build.
 
 Local Windows portability checks cover moved installations, spaces, Unicode names, and long paths. Linux build and test automation is configured; its remote execution is described under [Tests and automation](#tests-and-automation).
+
+## Desktop preview
+
+The 0.3.0 Windows preview adds a collapsible sidebar, light/dark themes in Settings, short transitions, five interface languages and Arabic right-to-left layout. Its custom title bar has a centered logo and native press–drag–release behavior. It connects conversion, file batches, audio, practice and settings to the C23 engine. The converter offers offline Turkish speech through **EMA Lightning** and **Antalia-2 Mini**, and Piper voices for English, German, Russian and Arabic. See the [speech pack setup and licenses](docs/offline-speech.md).
+
+With .NET 10, Windows SDK/WinUI tools and PowerShell 7 installed:
+
+```powershell
+pwsh -File scripts/run-desktop.ps1
+```
+
+See the [desktop guide](docs/desktop.md) for requirements, alphabet normalization, MSIX packaging, tests and the shared macOS/Linux roadmap. Signed installation and real update testing are pending; the Mac and Linux GUI editions are future work.
 
 ## Console menu
 
@@ -181,6 +210,8 @@ New runtime `.txt` files under the checkout's `data/` are ignored by Git; existi
 
 ## Supported input
 
+The console and CLI use the Latin/Turkish alphabet below. The desktop and native profile API also support Russian and Arabic; see the [normalization rules](docs/desktop.md#alphabets-and-counters).
+
 Letters `A–Z` and `a–z`, digits `0–9`, and ASCII whitespace are accepted. Turkish letters in UTF-8 or the supported Windows-1254 subset are normalized:
 
 ```text
@@ -220,7 +251,7 @@ cpack --preset release
 cmake --install cmake-build-release --prefix "C:\Apps\MorseCore"
 ```
 
-CPack writes a ZIP inside `cmake-build-release/`; for version 0.2.0 on Windows AMD64, the filename is `MorseCore-0.2.0-Windows-AMD64.zip`. Extract it into a writable folder and run `MorseCore.exe` or `run.cmd`. The install command is an alternative to extracting the ZIP. Keep the installed folder together; it includes the executable, launcher, documentation, license, and default configuration.
+CPack writes a ZIP inside `cmake-build-release/`; for version 0.3.0 on Windows AMD64, the filename is `MorseCore-0.3.0-Windows-AMD64.zip`. Extract it into a writable folder and run `MorseCore.exe` or `run.cmd`. The install command is an alternative to extracting the ZIP. Keep the installed folder together; it includes the executable, launcher, documentation, license, and default configuration.
 
 ## Native library and .NET integration
 
@@ -233,9 +264,10 @@ The package includes `include/morsecore_native.h` and an import library. DLL cal
 use strict UTF-8 and do not create data folders or read console settings. Returned
 handles must be released through the DLL. See the [native API guide](docs/native-api.md).
 
-An optional .NET 10 library provides `LibraryImport` bindings and `SafeHandle`
-ownership for a future WinUI host. Its consumer is a headless test; WinUI screens
-are a later stage.
+The .NET 10 library provides `LibraryImport` bindings and `SafeHandle` ownership.
+Both the WinUI desktop application and headless integration tests use it. Shared
+XAML screens are also compiled for Uno's desktop target; macOS/Linux device tests
+and platform services are still future work.
 
 ```powershell
 cmake --preset interop
@@ -259,7 +291,7 @@ C tests cover conversion, punctuation, dynamic buffers, audio timing/WAV structu
 
 [CI](.github/workflows/ci.yml) is configured for pushes, pull requests, and manual runs. The shared [build workflow](.github/workflows/build.yml) builds and tests Windows with GCC UCRT64 and Ubuntu 24.04 with Clang 18. Successful Windows jobs are configured to upload a ZIP and `SHA256SUMS` as `MorseCore-Windows-x64`, retained for 14 days.
 
-The [release workflow](.github/workflows/release.yml) requires a `v<version>` tag matching the CMake project version, currently `v0.2.0`, and successful Windows/Linux checks before publishing a GitHub Release. Local checks and GitHub Actions results are separate; check the repository Actions tab for remote status. Automated audio tests do not prove audible playback on physical hardware.
+The [release workflow](.github/workflows/release.yml) requires a `v<version>` tag matching the CMake project version, currently `v0.3.0`, and successful Windows/Linux checks before publishing a GitHub Release. Local checks and GitHub Actions results are separate; check the repository Actions tab for remote status. Automated audio tests do not prove audible playback on physical hardware.
 
 ## Project layout
 
@@ -270,6 +302,8 @@ tests/                C tests and Python integration tests
 config/settings.txt   Saved language and word separator
 data/                 Console input files, samples, and generated output
 .github/workflows/    CI, shared build checks, and release automation
+apps/                WinUI desktop screens and shared application services
+third_party/         Original licenses and third-party attribution
 CMakeLists.txt        C23 core, DLL, console, test and ZIP package targets
 CMakePresets.json     GCC / Ninja debug and release presets
 run.cmd               Windows launcher
@@ -278,3 +312,11 @@ run.cmd               Windows launcher
 ## License
 
 Copyright © 2026 Mustafa Mert Akceylan. Licensed under the [Apache License 2.0](LICENSE). See [NOTICE](NOTICE) for attribution information.
+
+Third-party engines, models, fonts and runtime components keep their own licenses. Speech weights are installed separately. Original Turkish-engine license texts and Antalia's upstream notice are preserved in [third_party/speech](third_party/speech/README.md); desktop ZIPs also include their runtime license inventory.
+
+## Acknowledgements
+
+Thank you to **Canberk Aslan** for [EMA Lightning](https://github.com/canberk7/ema-lightning) and **PatientDesk AI** for [Antalia-2 Mini](https://huggingface.co/cloud0day3/antalia-mini). Their Apache-2.0 projects make MorseCore's two local Turkish speech options possible. MorseCore currently integrates EMA Lightning **1.1.2** and Antalia Mini **1.0.1**, with model revisions pinned in the speech manifest.
+
+Thanks also to the Piper voice community, Erdem Tuna's normalizer-tr, PyTorch, ONNX Runtime, Uno Platform, the Windows App SDK team, and the authors of Atkinson Hyperlegible and Crimson Pro. **Settings → Thanks to open source** includes project and voice-model links. These acknowledgements accompany the original license and attribution files; they do not replace them or imply endorsement.

@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "MorseCore (Windows)": {
+      "commandName": "Project",
+      "compatibleTargetFramework": "windows"
+    },
+    "MorseCore (Shared desktop)": {
+      "commandName": "Project",
+      "compatibleTargetFramework": "desktop"
+    }
+  }
+}

@@ -19,6 +19,9 @@ extern "C" {
 #endif
 
 #define MC_ABI_VERSION UINT32_C(1)
+#define MC_ALPHABET_LATIN UINT32_C(0)
+#define MC_ALPHABET_RUSSIAN UINT32_C(1)
+#define MC_ALPHABET_ARABIC UINT32_C(2)
 #define MC_OK INT32_C(0)
 #define MC_EMPTY_INPUT INT32_C(-1)
 #define MC_INVALID_INPUT INT32_C(-2)
@@ -43,7 +46,7 @@ typedef struct {
 } mc_statistics;
 
 typedef struct {
-    uint32_t character; /* ASCII code point. */
+    uint32_t character; /* Unicode scalar; legacy mc_alphabet_get returns ASCII. */
     uint32_t extension; /* 1 only for ! & ; _ $. */
     char code[8];
 } mc_symbol;
@@ -83,11 +86,18 @@ MC_API int32_t MC_CALL mc_encode(const uint8_t *input, uint64_t length, uint32_t
 MC_API int32_t MC_CALL mc_decode(const uint8_t *input, uint64_t length, uint32_t separator, mc_result **out);
 MC_API void MC_CALL mc_result_destroy(mc_result *result);
 /* required includes NUL; NULL buffer/capacity 0 queries and returns BUFFER_TOO_SMALL.
- * A short buffer is never modified. Returned text has the core's trailing space. */
+ * A short buffer is never modified. Encoded text retains its trailing space. */
 MC_API int32_t MC_CALL mc_result_copy_text(const mc_result *result, char *buffer, uint64_t capacity, uint64_t *required);
 MC_API int32_t MC_CALL mc_result_statistics(const mc_result *result, mc_statistics *out, uint32_t size);
 MC_API uint32_t MC_CALL mc_alphabet_count(void);
 MC_API int32_t MC_CALL mc_alphabet_get(uint32_t index, mc_symbol *out, uint32_t size);
+/* Additive ABI v1 extensions: profile 0 Latin/Turkish, 1 Russian, 2 Arabic.
+ * Profile must be chosen for decoding: a Morse signal carries no alphabet ID.
+ * Existing mc_encode/mc_decode and their alphabet are unchanged. */
+MC_API int32_t MC_CALL mc_encode_alphabet(const uint8_t *input, uint64_t length, uint32_t separator, uint32_t profile, mc_result **out);
+MC_API int32_t MC_CALL mc_decode_alphabet(const uint8_t *input, uint64_t length, uint32_t separator, uint32_t profile, mc_result **out);
+MC_API uint32_t MC_CALL mc_alphabet_profile_count(uint32_t profile);
+MC_API int32_t MC_CALL mc_alphabet_profile_get(uint32_t profile, uint32_t index, mc_symbol *out, uint32_t size);
 
 /* mode: 0 letters, 1 digits, 2 words. Zero questions/unknown modes are invalid.
  * next returns Morse only; INVALID_STATE means active question or end of session.

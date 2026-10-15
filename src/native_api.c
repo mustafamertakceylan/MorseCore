@@ -1,5 +1,6 @@
 #include "morsecore_native.h"
 #include "morse.h"
+#include "morse_profiles.h"
 #include "stats.h"
 #include "separator.h"
 #include "practice.h"
@@ -70,10 +71,11 @@ static int32_t getSeparator(uint32_t value, char *out)
     return MC_OK;
 }
 
-static int32_t convert(const uint8_t *bytes, uint64_t length, uint32_t separator, int decode, mc_result **out)
+static int32_t convert(const uint8_t *bytes, uint64_t length, uint32_t separator, uint32_t profile, int decode, mc_result **out)
 {
     if (out == NULL) return MC_INVALID_ARGUMENT;
     *out = NULL;
+    if (morseProfileSize(profile) == 0) return MC_INVALID_ARGUMENT;
     char actualSeparator;
     int32_t status = getSeparator(separator, &actualSeparator);
     if (status != MC_OK) return status;
@@ -81,7 +83,7 @@ static int32_t convert(const uint8_t *bytes, uint64_t length, uint32_t separator
     status = copyInput(bytes, length, &input);
     if (status != MC_OK) return status;
     if (decode && separator == 0) actualSeparator = resolveSeparatorForMorseInput(input, '/');
-    ResultCode result = decode ? morseToTextAlloc(input, &text, actualSeparator) : textToMorseAlloc(input, &text, actualSeparator);
+    ResultCode result = morseProfileConvert(input, &text, actualSeparator, profile, decode);
     if (result != RESULT_SUCCESS) { free(input); return (int32_t) result; }
     mc_result *converted = malloc(sizeof(*converted));
     if (converted == NULL) { free(input); free(text); return MC_OUT_OF_MEMORY; }
@@ -95,9 +97,24 @@ static int32_t convert(const uint8_t *bytes, uint64_t length, uint32_t separator
 }
 
 int32_t MC_CALL mc_encode(const uint8_t *input, uint64_t length, uint32_t separator, mc_result **out)
-{ return convert(input, length, separator, 0, out); }
+{ return convert(input, length, separator, 0, 0, out); }
 int32_t MC_CALL mc_decode(const uint8_t *input, uint64_t length, uint32_t separator, mc_result **out)
-{ return convert(input, length, separator, 1, out); }
+{ return convert(input, length, separator, 0, 1, out); }
+
+int32_t MC_CALL mc_encode_alphabet(const uint8_t *input, uint64_t length, uint32_t separator, uint32_t profile, mc_result **out)
+{ return convert(input, length, separator, profile, 0, out); }
+int32_t MC_CALL mc_decode_alphabet(const uint8_t *input, uint64_t length, uint32_t separator, uint32_t profile, mc_result **out)
+{ return convert(input, length, separator, profile, 1, out); }
+uint32_t MC_CALL mc_alphabet_profile_count(uint32_t profile) { return (uint32_t)morseProfileSize(profile); }
+int32_t MC_CALL mc_alphabet_profile_get(uint32_t profile, uint32_t index, mc_symbol *out, uint32_t size)
+{
+    if(out==NULL || size<sizeof(*out)) return MC_INVALID_ARGUMENT;
+    uint32_t ch; const char *code;
+    if(!morseProfileEntry(profile,index,&ch,&code)) return MC_INVALID_ARGUMENT;
+    *out=(mc_symbol){0}; out->character=ch;
+    out->extension=ch<128 && strchr("!&;_$",(int)ch)!=NULL ? 1U : 0U;
+    memcpy(out->code,code,strlen(code)+1); return MC_OK;
+}
 
 void MC_CALL mc_result_destroy(mc_result *result)
 {

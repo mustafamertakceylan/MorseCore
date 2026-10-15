@@ -2,11 +2,14 @@
 
 # MorseCore
 
+<img src="apps/MorseCore.Desktop/MorseCore.Desktop/Assets/Brand/morsecore.png" width="92" alt="MorseCore logosu">
+
 **Morse kodunu dönüştürün, dinleyin ve alıştırma yapın.**
 
-Metin ve dosyaları Morse koduna çevirin, mesajları çözün, ses dosyası oluşturun; okuyarak veya dinleyerek alıştırma yapın. Konsol menüsünü kullanın ya da dönüşümleri betiklerden çalıştırın.
+Metin ve dosyaları Morse koduna çevirin, mesajları çözün, ses dosyası oluşturun; okuyarak veya dinleyerek alıştırma yapın. Windows masaüstü önizlemesini, konsol menüsünü veya betiklerle dönüşümü kullanın.
 
 ![C23](https://img.shields.io/badge/C-23-225E85?style=flat-square&logo=c&logoColor=white)
+[![Sürüm](https://img.shields.io/badge/Version-0.3.0-5e6a42?style=flat-square)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v0.3.0)
 ![CMake](https://img.shields.io/badge/CMake-3.28%2B-064F8C?style=flat-square&logo=cmake&logoColor=white)
 [![Lisans](https://img.shields.io/badge/License-Apache%202.0-2A9D8F?style=flat-square)](LICENSE)
 
@@ -18,9 +21,11 @@ Metin ve dosyaları Morse koduna çevirin, mesajları çözün, ses dosyası olu
 
 ## İçindekiler
 
+- [İndir](#indir)
 - [Ne yapar](#ne-yapar)
 - [Özellikler](#özellikler)
 - [Derleme ve çalıştırma](#derleme-ve-çalıştırma)
+- [Masaüstü önizlemesi](#masaüstü-önizlemesi)
 - [Konsol menüsü](#konsol-menüsü)
 - [Komut satırı](#komut-satırı)
 - [Ses ve WAV](#ses-ve-wav)
@@ -33,6 +38,17 @@ Metin ve dosyaları Morse koduna çevirin, mesajları çözün, ses dosyası olu
 - [Testler ve otomasyon](#testler-ve-otomasyon)
 - [Klasör yapısı](#klasör-yapısı)
 - [Lisans](#lisans)
+- [Teşekkürler](#teşekkürler)
+
+## İndir
+
+**[Windows x64 masaüstü önizlemesini indir](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.3.0/MorseCore-0.3.0-Windows-x64-Desktop.zip)** · [Sürüm notları ve dosya özetleri](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v0.3.0) · [Değişiklik günlüğü](CHANGELOG.md)
+
+ZIP'in tamamını yazılabilir bir klasöre açıp **MorseCore.Desktop.exe** dosyasını çalıştırın. DLL'leri ve alt klasörleri bir arada tutun. Masaüstü paketi .NET/Windows App SDK çalışma zamanını içerir; uygulamayı kullanmak için kaynak koddan derlemeniz gerekmez. Bu, imzasız bir Windows önizlemesidir; MSIX kurulum paketi değildir.
+
+Seslendirme isteğe bağlıdır. Python 3.11–3.13 kurulu bir bilgisayarda **setup-speech.cmd** dosyasını bir kez çalıştırın; kurulum internet ister, ardından ses üretimi çevrimdışı kalır. Model ağırlıkları ve ses bağımlılıkları ayrıca indirilir; sürüm ZIP'ine dahil değildir. Ayrıntılar [ses rehberinde](docs/offline-speech.tr.md).
+
+Konsol uygulaması ve native DLL için ayrı `MorseCore-0.3.0-Windows-AMD64.zip` dosyasını indirin. macOS ve Linux masaüstü sürümleri henüz plan aşamasındadır.
 
 ## Ne yapar
 
@@ -54,7 +70,8 @@ MorseCore harfleri, rakamları ve desteklenen noktalama işaretlerini nokta ve �
 | Komut satırı | Tek bir dönüşümü otomatikleştirme veya klasördeki metin dosyalarını topluca işleme |
 | Ses | Windows'ta Morse dinleme veya PCM WAV dosyası oluşturma |
 | Alıştırma | Rastgele harf, rakam veya kısa kelimeleri okuyarak ya da dinleyerek cevaplama |
-| Arayüz | İngilizce/Türkçe menüler, Morse tablosu ve dönüşüm istatistikleri |
+| Arayüz | İngilizce/Türkçe konsol; açık/koyu temalı, beş dilli Windows masaüstü önizlemesi |
+| Masaüstü alfabeleri | Alfabe seçerek native kitaplık üzerinden Rusça ve Arapça metin dönüşümü |
 | Taşınabilir Windows paketi | Kurulu klasörü yeniden derlemeden taşıma |
 
 ## Derleme ve çalıştırma
@@ -72,6 +89,18 @@ cmake --build --preset debug
 Windows'ta derlemeden sonra `run.cmd` dosyasına çift tıklayabilirsiniz. Kaynak klasöründeki başlatıcı, `data/` ve `config/` için proje kökünü kullanır. Önce yanındaki paketlenmiş uygulamayı, sonra debug, ardından release derlemesini arar.
 
 Yerel Windows taşınabilirlik kontrolleri taşınmış kurulumları, boşluklu yolları, Unicode adları ve uzun yolları kapsar. Linux derleme ve test otomasyonu yapılandırılmıştır; uzaktaki çalışma durumu [Testler ve otomasyon](#testler-ve-otomasyon) bölümündedir.
+
+## Masaüstü önizlemesi
+
+0.3.0 Windows önizlemesi; daraltılan menü, Ayarlar'dan seçilen açık/koyu tema, kısa geçişler, beş arayüz dili ve Arapça sağdan sola yerleşim sunar. Özel üst çubukta logo ortadadır; pencere basılı tutarak taşınır ve fare bırakılınca durur. Dönüşüm, dosyalar, ses, alıştırma ve ayarlar C23 motora bağlıdır. Türkçede **EMA Lightning** ve **Antalia-2 Mini**, İngilizce, Almanca, Rusça ve Arapçada Piper ile çevrimdışı seslendirme yapılır. [Ses paketinin kurulumu ve lisansları](docs/offline-speech.tr.md).
+
+.NET 10, Windows SDK/WinUI araçları ve PowerShell 7 kurulduktan sonra:
+
+```powershell
+pwsh -File scripts/run-desktop.ps1
+```
+
+Gereksinimler, alfabe normalizasyonu, MSIX, testler ve ortak macOS/Linux planı için [masaüstü rehberine](docs/desktop.tr.md) bakın. İmzalı kurulum ve gerçek güncelleme testi bekliyor; Mac ve Linux arayüz sürümleri sonraki aşamadır.
 
 ## Konsol menüsü
 
@@ -181,6 +210,8 @@ Projenin `data/` klasöründe sonradan oluşan `.txt` dosyaları Git tarafından
 
 ## Desteklenen girdiler
 
+Konsol ve CLI aşağıdaki Latin/Türkçe alfabeyi kullanır. Masaüstü ve native profil API'si Rusça ve Arapçayı da destekler; [normalizasyon kurallarına](docs/desktop.tr.md#alfabeler-ve-sayımlar) bakın.
+
 `A–Z`, `a–z`, `0–9` ve ASCII boşluk karakterleri kabul edilir. UTF-8 veya desteklenen Windows-1254 alt kümesindeki Türkçe harfler dönüştürülür:
 
 ```text
@@ -222,7 +253,7 @@ cpack --preset release
 cmake --install cmake-build-release --prefix "C:\Apps\MorseCore"
 ```
 
-CPack, ZIP dosyasını `cmake-build-release/` içine yazar. Windows AMD64 üzerinde 0.2.0 sürümünün dosya adı `MorseCore-0.2.0-Windows-AMD64.zip` olur. Yazılabilir bir klasöre açıp `MorseCore.exe` veya `run.cmd` çalıştırın. Kurulum komutu, ZIP'i açmaya alternatiftir. Kurulu klasörü bir arada tutun; uygulama, başlatıcı, belgeler, lisans ve varsayılan yapılandırmayı içerir.
+CPack, ZIP dosyasını `cmake-build-release/` içine yazar. Windows AMD64 üzerinde 0.3.0 sürümünün dosya adı `MorseCore-0.3.0-Windows-AMD64.zip` olur. Yazılabilir bir klasöre açıp `MorseCore.exe` veya `run.cmd` çalıştırın. Kurulum komutu, ZIP'i açmaya alternatiftir. Kurulu klasörü bir arada tutun; uygulama, başlatıcı, belgeler, lisans ve varsayılan yapılandırmayı içerir.
 
 ## DLL ve .NET bağlantısı
 
@@ -236,9 +267,10 @@ Paket `include/morsecore_native.h` başlığını ve bağlama kitaplığını i�
 okumaz. Dönen nesneler DLL'nin kendi serbest bırakma fonksiyonlarıyla kapatılır.
 Ayrıntılar [native API rehberinde](docs/native-api.tr.md).
 
-İsteğe bağlı .NET 10 kitaplığı, gelecekteki WinUI arayüzü için `LibraryImport`
-bağlantısı ve `SafeHandle` ile kaynak yönetimi sağlar. Tüketicisi arayüzsüz bir
-test uygulamasıdır; WinUI ekranları sonraki aşamadadır.
+.NET 10 kitaplığı, `LibraryImport` bağlantısı ve `SafeHandle` ile kaynak yönetimi
+sağlar. WinUI masaüstü uygulaması ve arayüzsüz bütünleşme testleri bu kitaplığı
+kullanır. Ortak XAML ekranları Uno'nun masaüstü hedefinde de derlenir;
+macOS/Linux cihaz testleri ve platform servisleri sonraki aşamadadır.
 
 ```powershell
 cmake --preset interop
@@ -262,7 +294,7 @@ C testleri dönüşümleri, noktalama işaretlerini, dinamik tamponları, ses za
 
 [CI](.github/workflows/ci.yml), push, pull request ve elle çalıştırma için yapılandırılmıştır. Ortak [derleme akışı](.github/workflows/build.yml), Windows'ta GCC UCRT64 ve Ubuntu 24.04'te Clang 18 ile derleme ve test yapacak şekilde ayarlanmıştır. Başarılı Windows işleri ZIP ve `SHA256SUMS` dosyalarını `MorseCore-Windows-x64` adıyla yükleyecek ve 14 gün saklayacak şekilde yapılandırılmıştır.
 
-[Release akışı](.github/workflows/release.yml), CMake proje sürümüyle eşleşen bir `v<sürüm>` etiketi, şu anda `v0.2.0`, ve GitHub Release yayımlamadan önce başarılı Windows/Linux kontrolleri gerektirir. Yerel kontroller ve GitHub Actions sonuçları ayrıdır; uzaktaki durum için deponun Actions sekmesine bakın. Otomatik ses testleri fiziksel donanımda duyulabilir oynatmayı kanıtlamaz.
+[Release akışı](.github/workflows/release.yml), CMake proje sürümüyle eşleşen bir `v<sürüm>` etiketi, şu anda `v0.3.0`, ve GitHub Release yayımlamadan önce başarılı Windows/Linux kontrolleri gerektirir. Yerel kontroller ve GitHub Actions sonuçları ayrıdır; uzaktaki durum için deponun Actions sekmesine bakın. Otomatik ses testleri fiziksel donanımda duyulabilir oynatmayı kanıtlamaz.
 
 ## Klasör yapısı
 
@@ -273,6 +305,8 @@ tests/                C testleri ve Python bütünleşme testleri
 config/settings.txt   Kayıtlı dil ve kelime ayracı
 data/                 Konsol girdileri, örnekler ve üretilen çıktılar
 .github/workflows/    CI, ortak derleme kontrolleri ve release otomasyonu
+apps/                WinUI masaüstü ekranları ve ortak uygulama servisleri
+third_party/         Özgün lisans ve üçüncü taraf atıfları
 CMakeLists.txt        C23 çekirdek, DLL, konsol, test ve paketleme hedefleri
 CMakePresets.json     GCC / Ninja debug ve release yapılandırmaları
 run.cmd               Windows başlatıcısı
@@ -281,3 +315,11 @@ run.cmd               Windows başlatıcısı
 ## Lisans
 
 Telif hakkı © 2026 Mustafa Mert Akceylan. [Apache Lisansı 2.0](LICENSE) kapsamında lisanslanmıştır. Atıf bilgileri için [NOTICE](NOTICE) dosyasına bakın.
+
+Üçüncü taraf motorlar, modeller, fontlar ve çalışma zamanı bileşenleri kendi lisanslarını korur. Ses ağırlıkları ayrıca kurulur. Türkçe motorların özgün lisansları ve Antalia'nın upstream bildirimi [third_party/speech](third_party/speech/README.md) altında saklanır; masaüstü ZIP'leri çalışma zamanı lisans envanterini de içerir.
+
+## Teşekkürler
+
+[EMA Lightning](https://github.com/canberk7/ema-lightning) için **Canberk Aslan'a**, [Antalia-2 Mini](https://huggingface.co/cloud0day3/antalia-mini) için **PatientDesk AI ekibine** teşekkür ederiz. Apache-2.0 lisanslı çalışmaları, MorseCore'un iki yerel Türkçe ses seçeneğini mümkün kılıyor. Bu sürüm EMA Lightning **1.1.2** ve Antalia Mini **1.0.1** kullanır; model revizyonları ses manifestinde sabittir.
+
+Piper ses topluluğuna, Erdem Tuna'nın normalizer-tr projesine, PyTorch, ONNX Runtime, Uno Platform ve Windows App SDK ekiplerine; Atkinson Hyperlegible ve Crimson Pro yazarlarına da teşekkür ederiz. **Ayarlar → Açık kaynağa teşekkürler** bölümünde proje ve ses modeli bağlantıları bulunur. Bu teşekkürler özgün lisans/atıf dosyalarıyla birlikte sunulur; onların yerine geçmez ve geliştiricilerin MorseCore'u onayladığı anlamına gelmez.

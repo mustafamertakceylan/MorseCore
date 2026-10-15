@@ -2,7 +2,7 @@
 
 [Türkçe](native-api.tr.md) · [Public header](../include/morsecore_native.h)
 
-MorseCore 0.2.0 provides ABI v1 through `MorseCore.Native.dll` on Windows and
+MorseCore 0.3.0 provides ABI v1 through `MorseCore.Native.dll` on Windows and
 `libMorseCore.Native.so` on Linux. The shared engine contains no console renderer,
 settings loader or runtime-home initialization. Loading it has no filesystem side effects.
 
@@ -54,11 +54,23 @@ statically and can run without the native DLL.
 |---|---|
 | Conversion and statistics | `mc_encode`, `mc_decode`, `mc_result_copy_text`, `mc_result_statistics` |
 | Reference table | `mc_alphabet_count`, `mc_alphabet_get` |
+| Unicode alphabet profiles | `mc_encode_alphabet`, `mc_decode_alphabet`, `mc_alphabet_profile_count`, `mc_alphabet_profile_get` |
 | Practice | `mc_practice_create`, `mc_practice_next`, `mc_practice_submit`, `mc_practice_stats` |
 | Audio | `mc_audio_defaults`, `mc_audio_analyze`, `mc_write_wav`, `mc_play` |
 | Playback cancellation | `mc_cancel_create`, `mc_cancel_request`, `mc_cancel_destroy` |
 
 Separator zero means `/` for encoding/audio and automatic detection for decoding.
+The four profile functions are additive in 0.3.0; old ABI v1 entry points and
+struct layouts remain unchanged. Profiles are `MC_ALPHABET_LATIN` (0),
+`MC_ALPHABET_RUSSIAN` (1), and `MC_ALPHABET_ARABIC` (2). Unknown profiles return
+`MC_INVALID_ARGUMENT` (count returns zero). Profile symbols contain Unicode
+scalar values, while the legacy alphabet getter remains ASCII. See the
+[normalization rules and sources](desktop.md#alphabets-and-counters).
+
+Statistics count Unicode scalars excluding a leading BOM. For Arabic, skipped
+vowel marks/tatweel are included in input length, excluded from converted characters.
+Plain-text words use ASCII whitespace, NBSP and narrow NBSP as boundaries.
+
 Practice returns Morse questions; the expected answer is returned only after submission.
 An empty answer skips. A failed submission or allocation does not consume the question.
 

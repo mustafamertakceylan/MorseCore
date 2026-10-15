@@ -5,6 +5,7 @@ data/*.txt
 # Build folders
 cmake-build-*/
 build/
+/speech-runtime/
 
 # Local progress log
 /MORSECORE_PROGRESS.md

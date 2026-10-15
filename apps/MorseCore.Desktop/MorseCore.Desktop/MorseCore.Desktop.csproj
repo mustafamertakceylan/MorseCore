@@ -1,0 +1,47 @@
+<Project Sdk="Uno.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('Windows'))">net10.0-windows10.0.26100;net10.0-desktop</TargetFrameworks>
+    <TargetFrameworks Condition="!$([MSBuild]::IsOSPlatform('Windows'))">net10.0-desktop</TargetFrameworks>
+    <OutputType>Exe</OutputType>
+    <UnoSingleProject>true</UnoSingleProject>
+    <ApplicationTitle>MorseCore</ApplicationTitle>
+    <ApplicationId>io.github.mustafamertakceylan.morsecore</ApplicationId>
+    <ApplicationDisplayVersion>0.3.0</ApplicationDisplayVersion>
+    <Version>0.3.0</Version>
+    <ApplicationVersion>0</ApplicationVersion>
+    <ApplicationPublisher>Mustafa Mert Akceylan</ApplicationPublisher>
+    <Description>Text, signals and speech. MorseCore desktop.</Description>
+    <WindowsPackageType>None</WindowsPackageType>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    <NuGetAudit>false</NuGetAudit>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <UnoIconForegroundFile>Assets/Icons/icon_foreground.png</UnoIconForegroundFile>
+    <UnoIconForegroundScale>1.2</UnoIconForegroundScale>
+    <UnoSplashScreenFile>Assets/Splash/splash_screen.png</UnoSplashScreenFile>
+    <UnoSplashScreenColor>#FAF8F2</UnoSplashScreenColor>
+    <NativeLibraryPath Condition="'$(NativeLibraryPath)' == '' and $([MSBuild]::IsOSPlatform('Windows'))">$(MSBuildThisFileDirectory)../../../cmake-build-debug/MorseCore.Native.dll</NativeLibraryPath>
+    <NativeLibraryPath Condition="'$(NativeLibraryPath)' == '' and $([MSBuild]::IsOSPlatform('OSX'))">$(MSBuildThisFileDirectory)../../../cmake-build-debug/libMorseCore.Native.dylib</NativeLibraryPath>
+    <NativeLibraryPath Condition="'$(NativeLibraryPath)' == ''">$(MSBuildThisFileDirectory)../../../cmake-build-debug/libMorseCore.Native.so</NativeLibraryPath>
+    <UnoFeatures>
+      SkiaRenderer;
+    </UnoFeatures>
+  </PropertyGroup>
+  <PropertyGroup Condition="$([System.String]::Copy('$(TargetFramework)').Contains('-windows'))">
+    <DefineConstants>$(DefineConstants);MORSE_WINUI</DefineConstants>
+    <!-- Preserve WinRT metadata until a trimmed deployment passes device tests. -->
+    <PublishTrimmed>false</PublishTrimmed>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../MorseCore.AppCore/MorseCore.AppCore.csproj" />
+    <Content Include="$(NativeLibraryPath)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" Condition="Exists('$(NativeLibraryPath)')">
+      <Link>%(Filename)%(Extension)</Link>
+    </Content>
+    <Content Include="../../../LICENSE;../../../NOTICE" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest">
+      <Link>%(Filename)%(Extension)</Link>
+    </Content>
+    <Content Include="Assets/Fonts/*OFL.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../../../docs/offline-speech.md;../../../docs/offline-speech.tr.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest">
+      <Link>docs/%(Filename)%(Extension)</Link>
+    </Content>
+  </ItemGroup>
+</Project>

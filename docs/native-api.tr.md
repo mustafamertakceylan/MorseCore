@@ -2,7 +2,7 @@
 
 [English](native-api.md) · [Dışa açık başlık](../include/morsecore_native.h)
 
-MorseCore 0.2.0, Windows'ta `MorseCore.Native.dll`, Linux'ta `libMorseCore.Native.so`
+MorseCore 0.3.0, Windows'ta `MorseCore.Native.dll`, Linux'ta `libMorseCore.Native.so`
 üzerinden ABI v1 sunar. Ortak çekirdekte konsol çizimi, ayar yükleme veya veri kökü
 başlatma bulunmaz. Kitaplığı yüklemek dosya veya klasör oluşturmaz.
 
@@ -55,11 +55,23 @@ Konsol ortak C23 çekirdeğe statik bağlanır; native DLL olmadan da çalışab
 |---|---|
 | Dönüşüm ve istatistik | `mc_encode`, `mc_decode`, `mc_result_copy_text`, `mc_result_statistics` |
 | Morse tablosu | `mc_alphabet_count`, `mc_alphabet_get` |
+| Unicode alfabe profilleri | `mc_encode_alphabet`, `mc_decode_alphabet`, `mc_alphabet_profile_count`, `mc_alphabet_profile_get` |
 | Alıştırma | `mc_practice_create`, `mc_practice_next`, `mc_practice_submit`, `mc_practice_stats` |
 | Ses | `mc_audio_defaults`, `mc_audio_analyze`, `mc_write_wav`, `mc_play` |
 | Oynatmayı iptal etme | `mc_cancel_create`, `mc_cancel_request`, `mc_cancel_destroy` |
 
 Sıfır ayraç, kodlama/ses için `/`, çözümleme için otomatik algılama demektir.
+0.3.0'daki dört profil fonksiyonu mevcut ABI v1 çağrılarını ve struct yerleşimini
+değiştirmeden eklenmiştir. Profiller `MC_ALPHABET_LATIN` (0),
+`MC_ALPHABET_RUSSIAN` (1), `MC_ALPHABET_ARABIC` (2) değerleridir. Bilinmeyen profil
+`MC_INVALID_ARGUMENT` döndürür; sayım fonksiyonu sıfır döndürür. Profil sembolü
+Unicode kod noktasıdır; eski alfabe fonksiyonu ASCII kalır.
+[Normalizasyon kuralları ve kaynakları](desktop.tr.md#alfabeler-ve-sayımlar).
+
+İstatistikler başlangıç BOM'u dışında Unicode kod noktalarını sayar. Arapçada
+atlanan hareke/tatvil giriş uzunluğuna dahildir, dönüştürülen karaktere dahil değildir.
+Kelime sınırları ASCII boşluk karakterleri, NBSP ve dar NBSP'dir.
+
 Alıştırma sorusu Morse olarak döner; beklenen cevap ancak yanıtlandıktan sonra
 gösterilir. Boş cevap atlamadır. Başarısız yanıt veya bellek ayırma soruyu tüketmez.
 

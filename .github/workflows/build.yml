@@ -19,7 +19,7 @@ jobs:
   windows:
     name: Windows / GCC UCRT64
     runs-on: windows-2022
-    timeout-minutes: 25
+    timeout-minutes: 35
     defaults:
       run:
         shell: msys2 {0}
@@ -47,7 +47,7 @@ jobs:
           dotnet-version: "10.0.x"
 
       - name: Configure release build
-        run: cmake --preset release -DMORSECORE_BUILD_DOTNET_BINDINGS=ON "-DCMAKE_C_FLAGS=-Wall -Wextra -Wpedantic -Wconversion -Werror" -DPython3_EXECUTABLE="$(cygpath -m "$(command -v python)")"
+        run: cmake --preset release -DMORSECORE_BUILD_DOTNET_BINDINGS=ON "-DDOTNET_EXECUTABLE=$(cygpath -m "$DOTNET_ROOT/dotnet.exe")" "-DCMAKE_C_FLAGS=-Wall -Wextra -Wpedantic -Wconversion -Werror" -DPython3_EXECUTABLE="$(cygpath -m "$(command -v python)")"
 
       - name: Verify release tag
         if: inputs.release-tag != ''
@@ -61,7 +61,30 @@ jobs:
       - name: Run all tests without audio hardware
         run: ctest --preset release --no-tests=error --timeout 180
 
-      - name: Package tested Windows executable
+      - name: Build WinUI and shared desktop screens
+        shell: pwsh
+        working-directory: apps/MorseCore.Desktop
+        env:
+          DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+          DOTNET_GENERATE_ASPNET_CERTIFICATE: "false"
+          DOTNET_ADD_GLOBAL_TOOLS_TO_PATH: "false"
+          DOTNET_CLI_HOME: ${{ github.workspace }}/cmake-build-interop/dotnet-home
+          NUGET_PACKAGES: ${{ github.workspace }}/cmake-build-interop/nuget-packages
+        run: |
+          dotnet build MorseCore.Desktop/MorseCore.Desktop.csproj -c Release -f net10.0-windows10.0.26100 -p:Platform=x64 "-p:NativeLibraryPath=${{ github.workspace }}/cmake-build-release/MorseCore.Native.dll"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          dotnet build MorseCore.Desktop/MorseCore.Desktop.csproj -c Release -f net10.0-desktop -p:Platform=x64 --no-restore "-p:NativeLibraryPath=${{ github.workspace }}/cmake-build-release/MorseCore.Native.dll"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Package tested desktop preview and runtime notices
+        shell: pwsh
+        run: |
+          ./scripts/package-desktop-portable.ps1 -OutputDirectory "${{ github.workspace }}/dist"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $taskReleaseVersion=[regex]::Match((Get-Content CMakeLists.txt -Raw),'project\(MorseCore VERSION (\d+\.\d+\.\d+)').Groups[1].Value
+          Copy-Item -LiteralPath "docs/releases/v$taskReleaseVersion.md" -Destination dist/RELEASE-NOTES.md
+
+      - name: Package tested console and native library
         run: |
           cpack --config cmake-build-release/CPackConfig.cmake -G ZIP -B dist
           cd dist
@@ -74,6 +97,7 @@ jobs:
           path: |
             dist/*.zip
             dist/SHA256SUMS
+            dist/RELEASE-NOTES.md
           if-no-files-found: error
           retention-days: 14
           compression-level: 0

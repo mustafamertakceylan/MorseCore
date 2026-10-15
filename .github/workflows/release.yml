@@ -18,7 +18,7 @@ jobs:
       release-tag: ${{ github.ref_name }}
 
   publish:
-    name: Publish tested Windows package
+    name: Publish tested Windows packages
     needs: checks
     runs-on: ubuntu-24.04
     timeout-minutes: 5
@@ -42,4 +42,4 @@ jobs:
           RELEASE_TAG: ${{ github.ref_name }}
         run: >-
           gh release create "$RELEASE_TAG" dist/*.zip dist/SHA256SUMS
-          --verify-tag --title "MorseCore $RELEASE_TAG" --generate-notes
+          --verify-tag --title "MorseCore $RELEASE_TAG" --notes-file dist/RELEASE-NOTES.md

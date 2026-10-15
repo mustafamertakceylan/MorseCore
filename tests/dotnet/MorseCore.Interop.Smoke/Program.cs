@@ -19,7 +19,7 @@ void Fails(Action operation, int status)
     throw new InvalidOperationException($"Expected native failure {status}");
 }
 
-Check(MorseEngine.NativeVersion == "0.2.0", "Version");
+Check(MorseEngine.NativeVersion == "0.3.0", "Version");
 var converted = MorseEngine.Encode("Merhaba Dünya");
 Check(MorseEngine.Decode(converted.Text).Text == "MERHABA DUNYA", "Turkish UTF-8 roundtrip");
 Check(converted.Statistics == new ConversionStatistics(13, (ulong)converted.Text.Length, 2, 12, 1), "64-bit statistics layout");

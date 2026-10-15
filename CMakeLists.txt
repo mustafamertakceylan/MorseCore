@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.28)
-project(MorseCore VERSION 0.2.0 LANGUAGES C)
+project(MorseCore VERSION 0.3.0 LANGUAGES C)
 
 set(CMAKE_C_STANDARD 23)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -26,7 +26,7 @@ if(NOT MORSECORE_HAS_C23)
 endif()
 
 add_library(MorseCoreCore STATIC
-    src/morse.c src/stats.c src/practice.c src/separator.c src/audio.c src/platform_io.c)
+    src/morse.c src/morse_profiles.c src/stats.c src/practice.c src/separator.c src/audio.c src/platform_io.c)
 target_include_directories(MorseCoreCore PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 set_target_properties(MorseCoreCore PROPERTIES POSITION_INDEPENDENT_CODE ON C_VISIBILITY_PRESET hidden)
 if(WIN32)
@@ -63,7 +63,9 @@ install(TARGETS MorseCore RUNTIME DESTINATION .)
 install(TARGETS MorseCoreNative RUNTIME DESTINATION . LIBRARY DESTINATION . ARCHIVE DESTINATION lib)
 install(FILES include/morsecore_native.h DESTINATION include)
 install(FILES run.cmd README.md README.tr.md LICENSE NOTICE DESTINATION .)
-install(FILES docs/native-api.md docs/native-api.tr.md DESTINATION docs)
+install(FILES CHANGELOG.md DESTINATION .)
+install(DIRECTORY third_party/speech DESTINATION third_party)
+install(FILES docs/native-api.md docs/native-api.tr.md docs/desktop.md docs/desktop.tr.md docs/offline-speech.md docs/offline-speech.tr.md DESTINATION docs)
 install(DIRECTORY DESTINATION data)
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/package-config")
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/package-config/settings.txt" "word_separator=/\nlanguage=EN\n")
@@ -90,11 +92,18 @@ if(MORSECORE_BUILD_DOTNET_BINDINGS)
             "${DOTNET_EXECUTABLE}" build "${CMAKE_CURRENT_SOURCE_DIR}/tests/dotnet/MorseCore.Interop.Smoke/MorseCore.Interop.Smoke.csproj"
             --configuration "$<IF:$<CONFIG:Debug>,Debug,Release>" --artifacts-path "${CMAKE_CURRENT_BINARY_DIR}/dotnet"
             -p:ArtifactsPivots=native --nologo --ignore-failed-sources
+        COMMAND "${CMAKE_COMMAND}" -E env ${MORSECORE_DOTNET_ENV}
+            "${DOTNET_EXECUTABLE}" build "${CMAKE_CURRENT_SOURCE_DIR}/tests/dotnet/MorseCore.AppCore.Smoke/MorseCore.AppCore.Smoke.csproj"
+            --configuration "$<IF:$<CONFIG:Debug>,Debug,Release>" --artifacts-path "${CMAKE_CURRENT_BINARY_DIR}/dotnet"
+            -p:ArtifactsPivots=native --nologo --ignore-failed-sources
         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bindings/dotnet"
         DEPENDS MorseCoreNative VERBATIM)
     if(BUILD_TESTING)
         add_test(NAME dotnet_interop COMMAND "${CMAKE_COMMAND}" -E env ${MORSECORE_DOTNET_ENV}
             "${DOTNET_EXECUTABLE}" "${CMAKE_CURRENT_BINARY_DIR}/dotnet/bin/MorseCore.Interop.Smoke/native/MorseCore.Interop.Smoke.dll"
+            "$<TARGET_FILE:MorseCoreNative>")
+        add_test(NAME dotnet_app_core COMMAND "${CMAKE_COMMAND}" -E env ${MORSECORE_DOTNET_ENV}
+            "${DOTNET_EXECUTABLE}" "${CMAKE_CURRENT_BINARY_DIR}/dotnet/bin/MorseCore.AppCore.Smoke/native/MorseCore.AppCore.Smoke.dll"
             "$<TARGET_FILE:MorseCoreNative>")
     endif()
 endif()
@@ -141,6 +150,7 @@ if(BUILD_TESTING)
     find_package(Python3 COMPONENTS Interpreter)
     if(Python3_Interpreter_FOUND)
         add_test(NAME native_abi COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/native_abi_tests.py" "$<TARGET_FILE:MorseCoreNative>")
+        add_test(NAME unicode_profiles COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/profile_tests.py" "$<TARGET_FILE:MorseCoreNative>")
         add_test(NAME cli COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/cli_tests.py" "$<TARGET_FILE:MorseCore>" "${CMAKE_CURRENT_SOURCE_DIR}")
         add_test(NAME portable COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/portable_tests.py" "$<TARGET_FILE:MorseCore>" "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_COMMAND}" "${CMAKE_CURRENT_BINARY_DIR}")
         add_test(NAME command COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/command_tests.py" "$<TARGET_FILE:MorseCore>")

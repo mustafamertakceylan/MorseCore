@@ -1,0 +1,198 @@
+[
+  {
+    "url": "https://huggingface.co/canberkkkkkk/ema-lightning/resolve/7a6ba1ad216bb2f1da9863f80ac8770a6a807632/ema.pt",
+    "path": "models/ema/ema.pt",
+    "sha256": "95aec03dafbe0e1d69bca774ab597c779464729a14bc99bfcb52480090c7dfe6",
+    "git_blob": "1d7e230a2083a1a2611482ea1c500e74fd472e1f",
+    "bytes": 22285878
+  },
+  {
+    "url": "https://huggingface.co/canberkkkkkk/ema-lightning/resolve/7a6ba1ad216bb2f1da9863f80ac8770a6a807632/decoder.pt",
+    "path": "models/ema/decoder.pt",
+    "sha256": "9595819b173f411340f63d11332695121a97f8bf1f6d8b6fef0b21cf99c7ad67",
+    "git_blob": "bb47277361c3a3bc8f929ae288768e20b5b73cea",
+    "bytes": 12103269
+  },
+  {
+    "url": "https://huggingface.co/canberkkkkkk/ema-lightning/resolve/7a6ba1ad216bb2f1da9863f80ac8770a6a807632/config.json",
+    "path": "models/ema/config.json",
+    "sha256": null,
+    "git_blob": "a4f3b575eff6aa203c2142c6d3facaed48a82935",
+    "bytes": 342
+  },
+  {
+    "url": "https://huggingface.co/canberkkkkkk/ema-lightning/resolve/7a6ba1ad216bb2f1da9863f80ac8770a6a807632/README.md",
+    "path": "models/ema/README.md",
+    "sha256": null,
+    "git_blob": "e91af0deab8a8f8b2c97bd44210d9497c016c684",
+    "bytes": 17785
+  },
+  {
+    "url": "https://huggingface.co/cloud0day3/antalia-mini/resolve/8a79528770af2ed5cb6d3b9ac1248d370429f272/acoustic.safetensors",
+    "path": "models/antalia/acoustic.safetensors",
+    "sha256": "72c36a6855ce95dc1d35960a7b61515136813313406e5b9ae1c2ebe6cd2ad428",
+    "git_blob": "1e770cdb68424ad7cf5cd683656fb953ff263e1c",
+    "bytes": 14757148
+  },
+  {
+    "url": "https://huggingface.co/cloud0day3/antalia-mini/resolve/8a79528770af2ed5cb6d3b9ac1248d370429f272/vocoder.safetensors",
+    "path": "models/antalia/vocoder.safetensors",
+    "sha256": "89ca374cc55864b38a36f9ea87c41e1b17376e5d6d68e3a0458332861509bbf6",
+    "git_blob": "c9f6266e02e9be463655570613b9e832e78c3add",
+    "bytes": 15742616
+  },
+  {
+    "url": "https://huggingface.co/cloud0day3/antalia-mini/resolve/8a79528770af2ed5cb6d3b9ac1248d370429f272/config.json",
+    "path": "models/antalia/config.json",
+    "sha256": null,
+    "git_blob": "1a8701824476cc9c60062361c22e083f6de4aa2d",
+    "bytes": 2338
+  },
+  {
+    "url": "https://huggingface.co/cloud0day3/antalia-mini/resolve/8a79528770af2ed5cb6d3b9ac1248d370429f272/LICENSE",
+    "path": "models/antalia/LICENSE",
+    "sha256": null,
+    "git_blob": "d645695673349e3947e8e5ae42332d0ac3164cd7",
+    "bytes": 11358
+  },
+  {
+    "url": "https://huggingface.co/cloud0day3/antalia-mini/resolve/8a79528770af2ed5cb6d3b9ac1248d370429f272/NOTICE",
+    "path": "models/antalia/NOTICE",
+    "sha256": null,
+    "git_blob": "8a2d98e48516e19862dec1e7d434849b6a005bfd",
+    "bytes": 1263
+  },
+  {
+    "url": "https://huggingface.co/cloud0day3/antalia-mini/resolve/8a79528770af2ed5cb6d3b9ac1248d370429f272/README.md",
+    "path": "models/antalia/README.md",
+    "sha256": null,
+    "git_blob": "0ec1a0497bee105061507935c78d788afa59f347",
+    "bytes": 19115
+  },
+  {
+    "url": "https://huggingface.co/rhasspy/piper-voices/resolve/c10ece1aade47bb51c153c893d14e5bf8e5b7117/ar/ar_JO/kareem/medium/ar_JO-kareem-medium.onnx",
+    "path": "models/ar_JO-kareem-medium.onnx",
+    "sha256": "9e95cab07b679da603bba17c4dec7ab3111320571964ee95c0379603c086491e",
+    "git_blob": "60c623f82460a65d8ab2971f007cc2c944cc5448",
+    "bytes": 63201294
+  },
+  {
+    "url": "https://huggingface.co/rhasspy/piper-voices/resolve/c10ece1aade47bb51c153c893d14e5bf8e5b7117/ar/ar_JO/kareem/medium/ar_JO-kareem-medium.onnx.json",
+    "path": "models/ar_JO-kareem-medium.onnx.json",
+    "sha256": null,
+    "git_blob": "b59e045bb026c7000fb0d4f8269d0cfbff4e8989",
+    "bytes": 5024
+  },
+  {
+    "url": "https://huggingface.co/rhasspy/piper-voices/resolve/c10ece1aade47bb51c153c893d14e5bf8e5b7117/ar/ar_JO/kareem/medium/MODEL_CARD",
+    "path": "licenses/ar_JO-kareem-medium.MODEL_CARD",
+    "sha256": null,
+    "git_blob": "5499b54a46815442889e683c2e4fdaa00a4b1109",
+    "bytes": 283
+  },
+  {
+    "url": "https://huggingface.co/rhasspy/piper-voices/resolve/c10ece1aade47bb51c153c893d14e5bf8e5b7117/de/de_DE/thorsten/high/de_DE-thorsten-high.onnx",
+    "path": "models/de_DE-thorsten-high.onnx",
+    "sha256": "9df1c43c61149ef9b39e618e2b861fbe41e1fcea9390b2dac62e8761573ea4f1",
+    "git_blob": "a53f66a2ba288a220df0ffe542af83c96a0629ef",
+    "bytes": 113895201
+  },
+  {
+    "url": "https://huggingface.co/rhasspy/piper-voices/resolve/c10ece1aade47bb51c153c893d14e5bf8e5b7117/de/de_DE/thorsten/high/de_DE-thorsten-high.onnx.json",
+    "path": "models/de_DE-thorsten-high.onnx.json",
+    "sha256": null,
+    "git_blob": "2329bd2dfa0c3d7aac10f25fb8fabf754a01ffcf",
+    "bytes": 4875
+  },
+  {
+    "url": "https://huggingface.co/rhasspy/piper-voices/resolve/c10ece1aade47bb51c153c893d14e5bf8e5b7117/de/de_DE/thorsten/high/MODEL_CARD",
+    "path": "licenses/de_DE-thorsten-high.MODEL_CARD",
+    "sha256": null,
+    "git_blob": "cec7082b3de0522e4b50d000ccb02a0ffb398862",
+    "bytes": 279
+  },
+  {
+    "url": "https://huggingface.co/rhasspy/piper-voices/resolve/c10ece1aade47bb51c153c893d14e5bf8e5b7117/de/de_DE/kerstin/low/de_DE-kerstin-low.onnx",
+    "path": "models/de_DE-kerstin-low.onnx",
+    "sha256": "d352a7641892cebf2903859af94e9ba81a141110215fe3943bcda7f7da401b7a",
+    "git_blob": "bcc407e33d6beb48c01332eeb2b54eb569813167",
+    "bytes": 63104526
+  },
+  {
+    "url": "https://huggingface.co/rhasspy/piper-voices/resolve/c10ece1aade47bb51c153c893d14e5bf8e5b7117/de/de_DE/kerstin/low/de_DE-kerstin-low.onnx.json",
+    "path": "models/de_DE-kerstin-low.onnx.json",
+    "sha256": null,
+    "git_blob": "b673a5cfc6c61aa724c5a2526cd416db385b7268",
+    "bytes": 4158
+  },
+  {
+    "url": "https://huggingface.co/rhasspy/piper-voices/resolve/c10ece1aade47bb51c153c893d14e5bf8e5b7117/de/de_DE/kerstin/low/MODEL_CARD",
+    "path": "licenses/de_DE-kerstin-low.MODEL_CARD",
+    "sha256": null,
+    "git_blob": "2da47e36d5507784368e1d4dc6b9e7394e6cc3c8",
+    "bytes": 272
+  },
+  {
+    "url": "https://huggingface.co/rhasspy/piper-voices/resolve/c10ece1aade47bb51c153c893d14e5bf8e5b7117/ru/ru_RU/denis/medium/ru_RU-denis-medium.onnx",
+    "path": "models/ru_RU-denis-medium.onnx",
+    "sha256": "15fab56e11a097858ee115545d0f697fc2a316c41a291a5362349fb870411b0a",
+    "git_blob": "033b78cd23a48ab42159be1019edba1ceca0499b",
+    "bytes": 63201294
+  },
+  {
+    "url": "https://huggingface.co/rhasspy/piper-voices/resolve/c10ece1aade47bb51c153c893d14e5bf8e5b7117/ru/ru_RU/denis/medium/ru_RU-denis-medium.onnx.json",
+    "path": "models/ru_RU-denis-medium.onnx.json",
+    "sha256": null,
+    "git_blob": "298fb1cdb5deb29defaeb53df285c6d269839a3d",
+    "bytes": 4823
+  },
+  {
+    "url": "https://huggingface.co/rhasspy/piper-voices/resolve/c10ece1aade47bb51c153c893d14e5bf8e5b7117/ru/ru_RU/denis/medium/MODEL_CARD",
+    "path": "licenses/ru_RU-denis-medium.MODEL_CARD",
+    "sha256": null,
+    "git_blob": "03daf73091666615fa7aeec626792b5003d7fd76",
+    "bytes": 276
+  },
+  {
+    "url": "https://huggingface.co/rhasspy/piper-voices/resolve/c10ece1aade47bb51c153c893d14e5bf8e5b7117/ru/ru_RU/dmitri/medium/ru_RU-dmitri-medium.onnx",
+    "path": "models/ru_RU-dmitri-medium.onnx",
+    "sha256": "f073356ebc4bd0f80c5af58df2953a5988bd5bdab1eb38635ce960b071fbefcb",
+    "git_blob": "9f92b87ee286884cfe34f4f352d037a32d5995c2",
+    "bytes": 63201294
+  },
+  {
+    "url": "https://huggingface.co/rhasspy/piper-voices/resolve/c10ece1aade47bb51c153c893d14e5bf8e5b7117/ru/ru_RU/dmitri/medium/ru_RU-dmitri-medium.onnx.json",
+    "path": "models/ru_RU-dmitri-medium.onnx.json",
+    "sha256": null,
+    "git_blob": "89ff93dea9003ae8a364d48460c660c4f2a1ef01",
+    "bytes": 4824
+  },
+  {
+    "url": "https://huggingface.co/rhasspy/piper-voices/resolve/c10ece1aade47bb51c153c893d14e5bf8e5b7117/ru/ru_RU/dmitri/medium/MODEL_CARD",
+    "path": "licenses/ru_RU-dmitri-medium.MODEL_CARD",
+    "sha256": null,
+    "git_blob": "b93521bf8b51f3995b221201b6f55826e5af6771",
+    "bytes": 277
+  },
+  {
+    "url": "https://huggingface.co/rhasspy/piper-voices/resolve/c10ece1aade47bb51c153c893d14e5bf8e5b7117/en/en_US/joe/medium/en_US-joe-medium.onnx",
+    "path": "models/en_US-joe-medium.onnx",
+    "sha256": "58afce0321b8d9c46d7cdf9c16500cc55a793b4220212dba6b70fb788b3baf06",
+    "git_blob": "8c620f3be0b47774b4dc5a1beea372efc4a76a93",
+    "bytes": 63201294
+  },
+  {
+    "url": "https://huggingface.co/rhasspy/piper-voices/resolve/c10ece1aade47bb51c153c893d14e5bf8e5b7117/en/en_US/joe/medium/en_US-joe-medium.onnx.json",
+    "path": "models/en_US-joe-medium.onnx.json",
+    "sha256": null,
+    "git_blob": "b4ab600fbd71cee986a8e7714bd88996f33be945",
+    "bytes": 4794
+  },
+  {
+    "url": "https://huggingface.co/rhasspy/piper-voices/resolve/c10ece1aade47bb51c153c893d14e5bf8e5b7117/en/en_US/joe/medium/MODEL_CARD",
+    "path": "licenses/en_US-joe-medium.MODEL_CARD",
+    "sha256": null,
+    "git_blob": "f001792ffaccdde85ed0e21079d5636c67136bf0",
+    "bytes": 281
+  }
+]

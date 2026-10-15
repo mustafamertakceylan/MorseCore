@@ -10,6 +10,7 @@ public sealed class MorseNativeException(int status, string message) : Exception
 public sealed record ConversionStatistics(ulong InputCharacters, ulong OutputCharacters, ulong Words, ulong ConvertedCharacters, ulong Spaces);
 public sealed record ConversionResult(string Text, ConversionStatistics Statistics);
 public sealed record MorseSymbol(char Character, string Code, bool IsExtension);
+public enum MorseAlphabet : uint { Latin, Russian, Arabic }
 
 internal static unsafe class Interop
 {
@@ -54,6 +55,30 @@ public static unsafe class MorseEngine
     public static string NativeVersion { get { Interop.EnsureCompatible(); return Interop.String(NativeMethods.mc_version()); } }
     public static ConversionResult Encode(string text, char separator = '/') => Convert(text, separator, false);
     public static ConversionResult Decode(string morse, char separator = '\0') => Convert(morse, separator, true);
+    public static ConversionResult Encode(string text, MorseAlphabet alphabet, char separator = '/') => ConvertProfile(text, separator, alphabet, false);
+    public static ConversionResult Decode(string text, MorseAlphabet alphabet, char separator = '\0') => ConvertProfile(text, separator, alphabet, true);
+    private static ConversionResult ConvertProfile(string text, char separator, MorseAlphabet alphabet, bool decode)
+    {
+        if (!Enum.IsDefined(alphabet)) throw new ArgumentOutOfRangeException(nameof(alphabet));
+        byte[] bytes=Interop.Bytes(text);
+        nint result;
+        fixed(byte* input=bytes)
+            Interop.Check(decode ? NativeMethods.mc_decode_alphabet(input,(ulong)bytes.Length,separator,(uint)alphabet,out result)
+                : NativeMethods.mc_encode_alphabet(input,(ulong)bytes.Length,separator,(uint)alphabet,out result));
+        return Interop.ReadResult(result);
+    }
+    public static IReadOnlyList<MorseSymbol> Alphabet(MorseAlphabet alphabet)
+    {
+        if (!Enum.IsDefined(alphabet)) throw new ArgumentOutOfRangeException(nameof(alphabet));
+        Interop.EnsureCompatible();
+        var symbols=new List<MorseSymbol>();
+        for(uint i=0;i<NativeMethods.mc_alphabet_profile_count((uint)alphabet);i++)
+        {
+            Interop.Check(NativeMethods.mc_alphabet_profile_get((uint)alphabet,i,out NativeSymbol entry,(uint)sizeof(NativeSymbol)));
+            symbols.Add(new((char)entry.Character,Interop.FixedString(entry.Code,8),entry.Extension!=0));
+        }
+        return symbols.AsReadOnly();
+    }
     private static ConversionResult Convert(string text, char separator, bool decode)
     {
         byte[] bytes = Interop.Bytes(text);

@@ -48,6 +48,14 @@ internal static unsafe partial class NativeMethods
     [LibraryImport(Library), UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     internal static partial int mc_decode(byte* input, ulong length, uint separator, out nint result);
     [LibraryImport(Library), UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    internal static partial int mc_encode_alphabet(byte* input, ulong length, uint separator, uint profile, out nint result);
+    [LibraryImport(Library), UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    internal static partial int mc_decode_alphabet(byte* input, ulong length, uint separator, uint profile, out nint result);
+    [LibraryImport(Library), UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    internal static partial uint mc_alphabet_profile_count(uint profile);
+    [LibraryImport(Library), UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    internal static partial int mc_alphabet_profile_get(uint profile, uint index, out NativeSymbol symbol, uint size);
+    [LibraryImport(Library), UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     internal static partial void mc_result_destroy(nint result);
     [LibraryImport(Library), UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     internal static partial int mc_result_copy_text(ResultHandle result, byte* buffer, ulong capacity, out ulong required);
