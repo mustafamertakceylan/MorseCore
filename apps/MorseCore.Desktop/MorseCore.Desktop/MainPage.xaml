@@ -1,18 +1,30 @@
 <Page x:Class="MorseCore.Desktop.MainPage"
  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+ xmlns:local="using:MorseCore.Desktop"
  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
  <Grid x:Name="Root" Background="{ThemeResource CanvasBrush}">
   <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
-  <Border x:Name="WindowBar" Height="40" Background="{ThemeResource PaneBrush}" BorderBrush="{ThemeResource LineBrush}" BorderThickness="0,0,0,1" FlowDirection="LeftToRight">
+  <local:RawBackdrop x:Name="Backdrop" Grid.Row="1"/>
+  <Border x:Name="WindowBar" Height="48" Background="{ThemeResource CanvasBrush}" BorderThickness="0" FlowDirection="LeftToRight">
    <Grid>
-    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-    <Grid x:Name="TitleDragRegion" Grid.ColumnSpan="2" Background="Transparent">
-     <StackPanel x:Name="TitleBrand" Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False">
-      <Border Width="32" Height="32" CornerRadius="8" Background="#FAF8F2"><Image x:Name="TitleLogo" Source="ms-appx:///Assets/Brand/morsecore.png" Stretch="Uniform" AutomationProperties.Name="MorseCore"/></Border>
-      <TextBlock Text="MorseCore" FontFamily="{StaticResource DisplayFont}" FontSize="18" VerticalAlignment="Center"/>
+    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+    <Grid x:Name="TitleDragRegion" Grid.ColumnSpan="3" Background="Transparent">
+     <StackPanel x:Name="TitleBrand" Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False">
+      <Border Width="36" Height="36" CornerRadius="9" Background="#FAF8F2"><Image x:Name="TitleLogo" Source="ms-appx:///Assets/Brand/morsecore.png" Stretch="Uniform" AutomationProperties.Name="MorseCore"/></Border>
+      <TextBlock Text="MorseCore" FontFamily="{StaticResource DisplayFont}" FontSize="22" VerticalAlignment="Center"/>
      </StackPanel>
     </Grid>
-    <Button x:Name="CloseWindowButton" Grid.Column="1" Click="CloseWindow" Width="48" Height="40" MinWidth="48" Padding="0" CornerRadius="0" BorderThickness="0" Background="Transparent" IsTabStop="False" AutomationProperties.AutomationId="WindowClose">
+    <Button x:Name="PaneToggle" Grid.ColumnSpan="3" Click="TogglePane" Width="44" Height="44" MinWidth="0" Margin="10,2,0,2" HorizontalAlignment="Left" Padding="0" Background="Transparent" Foreground="{ThemeResource AccentInkBrush}" BorderThickness="0" IsEnabled="False" Visibility="Collapsed" AutomationProperties.AutomationId="PaneToggle">
+     <Button.Resources>
+      <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="{ThemeResource SystemAccentColor}" Opacity="0.12"/>
+      <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="{ThemeResource SystemAccentColor}" Opacity="0.18"/>
+     </Button.Resources>
+     <FontIcon Glyph="&#xE700;" FontSize="16"/>
+    </Button>
+    <Button x:Name="MinimizeWindowButton" Grid.Column="1" Click="MinimizeWindow" Width="48" Height="48" MinWidth="48" Padding="0" CornerRadius="0" BorderThickness="0" Background="Transparent" AutomationProperties.AutomationId="WindowMinimize">
+     <FontIcon Glyph="&#xE921;" FontSize="12"/>
+    </Button>
+    <Button x:Name="CloseWindowButton" Grid.Column="2" Click="CloseWindow" Width="48" Height="48" MinWidth="48" Padding="0" CornerRadius="0" BorderThickness="0" Background="Transparent" IsTabStop="False" AutomationProperties.AutomationId="WindowClose">
      <Button.Resources>
       <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#B91C1C"/>
       <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="White"/>
@@ -25,39 +37,29 @@
   </Border>
   <Grid x:Name="Shell" Grid.Row="1" Visibility="Collapsed">
    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-   <Border x:Name="Pane" Width="240" Background="{ThemeResource PaneBrush}" BorderBrush="{ThemeResource LineBrush}" BorderThickness="0,0,1,0">
+   <Border x:Name="Pane" Width="240" Background="{ThemeResource PaneSurfaceBrush}" BorderThickness="0">
     <Grid Padding="10,14,10,12" RowSpacing="14">
-     <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
-     <StackPanel Spacing="12">
-      <Grid Height="40">
-       <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-       <StackPanel x:Name="Brand" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-        <Border Width="32" Height="32" CornerRadius="8" Background="#FAF8F2"><Image Source="ms-appx:///Assets/Brand/morsecore.png" Stretch="Uniform"/></Border>
-        <TextBlock Text="MorseCore" FontFamily="{StaticResource DisplayFont}" FontSize="24" VerticalAlignment="Center"/>
-       </StackPanel>
-       <Button x:Name="PaneToggle" Grid.Column="1" Click="TogglePane" Width="32" Height="32" MinWidth="0" HorizontalAlignment="Right" Padding="0" Background="{ThemeResource CardBrush}" BorderThickness="1" AutomationProperties.AutomationId="PaneToggle">
-        <FontIcon Glyph="&#xE76B;" FontSize="12"/>
-       </Button>
-      </Grid>
-     </StackPanel>
-     <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" HorizontalContentAlignment="Stretch">
+     <Grid.RowDefinitions><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+     <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" HorizontalContentAlignment="Stretch">
       <StackPanel x:Name="Menu" Spacing="4"/>
      </ScrollViewer>
-     <StackPanel Grid.Row="2" Spacing="14">
+     <StackPanel Grid.Row="1" Spacing="14">
       <StackPanel x:Name="BottomMenu"/>
      </StackPanel>
     </Grid>
    </Border>
-   <Grid Grid.Column="1" Padding="22,14,22,12" RowSpacing="10">
+   <Border Grid.Column="1" Background="{ThemeResource WorkspaceSurfaceBrush}" CornerRadius="18" Margin="0,0,12,10">
+   <Grid x:Name="Workspace" Padding="24,14,24,12" RowSpacing="14">
     <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
     <TextBlock x:Name="Breadcrumb" FontSize="28" FontFamily="{StaticResource DisplayFont}" VerticalAlignment="Center"/>
     <ScrollViewer x:Name="ContentScroll" Grid.Row="1" HorizontalScrollBarVisibility="Disabled" HorizontalContentAlignment="Stretch" VerticalScrollBarVisibility="Auto">
-     <StackPanel x:Name="PageContent" Spacing="12" Padding="0,0,0,8"><StackPanel.RenderTransform><TranslateTransform/></StackPanel.RenderTransform></StackPanel>
+     <StackPanel x:Name="PageContent" Spacing="16" Padding="0,0,0,8"><StackPanel.RenderTransform><TranslateTransform/></StackPanel.RenderTransform></StackPanel>
     </ScrollViewer>
     <TextBlock x:Name="Status" Grid.Row="2" FontSize="13" Foreground="{ThemeResource MutedBrush}" AutomationProperties.LiveSetting="Polite" MaxLines="3"/>
    </Grid>
+   </Border>
   </Grid>
-  <Grid x:Name="Splash" Grid.Row="1" Background="{ThemeResource CanvasBrush}">
+  <Grid x:Name="Splash" Grid.Row="1" Background="Transparent">
    <StackPanel Width="330" Spacing="20" HorizontalAlignment="Center" VerticalAlignment="Center">
     <Border Width="144" Height="144" CornerRadius="28" Background="#FAF8F2" HorizontalAlignment="Center"><Image Source="ms-appx:///Assets/Brand/morsecore.png" Stretch="Uniform"/></Border>
     <TextBlock Text="MorseCore" FontSize="54" FontFamily="{StaticResource DisplayFont}" HorizontalAlignment="Center"/>

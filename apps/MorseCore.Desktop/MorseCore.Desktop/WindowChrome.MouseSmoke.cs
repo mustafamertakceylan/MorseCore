@@ -16,6 +16,14 @@ internal static partial class WindowChrome
         if(!ClientToScreen(WinRT.Interop.WindowNative.GetWindowHandle(window),ref point)) throw new Win32Exception();
         return point;
     }
+    internal static bool IsClientHitTarget(Window window,PointInt32 point)
+    {
+        var handle=WinRT.Interop.WindowNative.GetWindowHandle(window);
+        var target=WindowFromPoint(point);
+        if(GetAncestor(target,2)!=handle) return false;
+        nint packed=unchecked((nint)((point.Y&0xffff)<<16 | (point.X&0xffff)));
+        return SendMessage(target,0x0084,0,packed)==1;
+    }
 
     // Opt-in input test, restricted to this test process's foreground window.
     internal static async Task<MouseDragResult> CheckMouseDrag(Window window,PointInt32 anchor)

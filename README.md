@@ -1,60 +1,57 @@
 <div align="center">
 
-![MorseCore — animated Morse signal](docs/media/morsecore.gif)
+![MorseCore](docs/media/morsecore.gif)
 
 **Write a message. Hear Morse. Learn by practicing.**
 
-[![Download for Windows](https://img.shields.io/badge/Download-Windows-5e6a42?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.6.0/MorseCore-0.6.0-Windows-x64-Setup.exe)
-[![Version 0.6.0](https://img.shields.io/badge/v0.6.0-Preview-c58c59?style=for-the-badge)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v0.6.0)
+[![Download Windows](https://img.shields.io/badge/Download-Windows-5e6a42?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.7.0/MorseCore-0.7.0-Windows-x64-Setup.exe)
+[![0.7.0](https://img.shields.io/badge/v0.7.0-Preview-c58c59?style=for-the-badge)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v0.7.0)
 
-**English** · [Türkçe](README.tr.md)
+**English** · [Türkçe](README.tr.md) · [Deutsch](README.de.md) · [Русский](README.ru.md) · [العربية](README.ar.md)
 
 </div>
 
 MorseCore is a free Windows app for converting text to Morse code, listening and practicing. Your messages stay on your computer.
 
-![MorseCore's light theme: text on the left, Morse code on the right](docs/media/converter.png)
+![MorseCore in English: text on the left, Morse code on the right](docs/media/converter.en.png)
 
 ### Get started
 
-1. **Download and run Setup**, then open MorseCore from the Start menu.
-2. Type your message in **Converter** and choose **Convert**. Use **Audio** to listen.
-3. Explore **Learning** for the alphabet, exercises and radio abbreviations.
+1. **Run Setup**, then open MorseCore from the Start menu.
+2. Type a message in **Converter** and choose **Convert**. Use **Audio** to listen.
+3. Open **Learning** for the alphabet, exercises and radio abbreviations.
 
-Prefer no installation? Get the [portable ZIP](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.6.0/MorseCore-0.6.0-Windows-x64-Desktop.zip), extract it and open **MorseCore.Desktop.exe**. The current preview is unsigned; Windows may show a publisher warning.
+Prefer no installation? Extract the [portable ZIP](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.7.0/MorseCore-0.7.0-Windows-x64-Desktop.zip) and open **MorseCore.Desktop.exe**. This preview is unsigned; Windows may show a publisher warning.
 
 ### What can you do?
 
-- **Convert** text and text files in both directions, including batches of files.
-- **Listen** to Morse and save it as a WAV audio file.
-- **Practice** letters, words and radio abbreviations, or send Morse yourself and measure your rhythm.
-- **Decode recordings** from WAV files or a Windows audio input. Clean, single-tone Morse is supported.
-- **Keep a radio log:** station profiles, Morse messages, search, editing, ADIF imports and an offline map. Hardware connection is planned; the app does not transmit RF.
-- **Read text aloud offline:** install voices, hear samples and manage packs inside the app. [Voice setup →](docs/offline-speech.md)
+- Convert text and text files in both directions, including batches.
+- Listen to Morse, save WAV files and practice sending with timing feedback.
+- Decode clean, single-tone Morse from WAV files or a Windows audio input.
+- Use **Amateur radio** for station profiles, message preparation and a contact log with ADIF import and an offline map. Hardware connection is planned; the app does not transmit RF.
+- Read text aloud offline. Install a voice once with internet, then listen locally. Thanks to EMA Lightning, Antalia-2 Mini and Piper.
 
 ### Your language, your theme
 
 **Türkçe · English · Deutsch · Русский · العربية**
 
-All five languages have menus and optional speech voices. Text conversion supports Latin/Turkish, Russian and Arabic. Arabic menus run right to left; Morse stays left to right.
+Menus and optional speech voices cover all five languages. Text conversion supports Latin/Turkish, Russian and Arabic. Arabic navigation mirrors; Morse stays left to right.
 
-Choose a cream light theme or a green dark theme in Settings.
+Choose the cream light theme or the green dark theme in Settings. Gentle background motion pauses when inactive; **Reduce motion** turns it off.
 
 <details>
-<summary><b>See more screens</b></summary>
+<summary><b>See the dark theme and contact map</b></summary>
 
-![MorseCore's green dark theme](docs/media/dark.png)
+![English interface in the green dark theme](docs/media/dark.en.png)
 
-![Arabic interface with mirrored navigation and left-to-right Morse](docs/media/arabic.png)
-
-![Radio contacts on the offline map](docs/media/log-map.png)
+![English contact log with the offline map](docs/media/map.en.png)
 
 </details>
 
-**Available now: Windows x64. Coming later: Linux and macOS.** Release dates are not set.
+**Available now: Windows x64. Linux and macOS are planned.** Release dates are not set.
 
 ### Thanks & license
 
 Thanks to **Canberk Aslan** for [EMA Lightning](https://github.com/canberk7/ema-lightning), **PatientDesk AI** for [Antalia-2 Mini](https://huggingface.co/cloud0day3/antalia-mini), and the **Piper** contributors for offline speech.
 
-[Apache 2.0](LICENSE) · [Credits & third-party licenses](NOTICE) · [Release notes](CHANGELOG.md) · [Build from source](docs/desktop.md)
+[Apache 2.0](LICENSE) · [Credits & licenses](NOTICE) · [Release notes](CHANGELOG.md) · [Voice setup](docs/offline-speech.md) · [Build from source](docs/desktop.md)

@@ -1,5 +1,14 @@
 # Changelog / Değişiklik günlüğü
 
+## 0.7.0 — 2026-10-16
+
+- Wider desktop window, responsive forms, clearer cream/green surfaces and short page transitions. Added RAW-style animated corner artwork that stops when inactive or reduced motion is enabled; loading now hides navigation until ready.
+- Daha geniş pencere, genişliğe uyarlanan formlar, belirgin krem/yeşil yüzeyler ve kısa sayfa geçişleri. Etkin olmayan pencerede veya hareket azaltıldığında duran RAW tarzı köşe deseni eklendi; gezinme yükleme bitene kadar gizli.
+- Simplified amateur-radio navigation into My stations, Prepare a contact and Contact log; kept the map directly accessible. Replaced the dense country/band text with a sourced infographic preserving exact frequency, power and special-condition information.
+- Amatör telsiz, İstasyonlarım / Görüşme hazırla / Görüşme günlüğü alt menülerine ayrıldı; harita doğrudan erişilebilir. Yoğun ülke/bant metni, kesin frekans/güç değerlerini ve özel koşulları koruyan kaynaklı infografiğe dönüştürüldü.
+- Added German, Russian and Arabic READMEs alongside English and Turkish, with current screenshots matching each document's language.
+- İngilizce ve Türkçenin yanına Almanca, Rusça ve Arapça README eklendi; güncel ekran görüntüleri belge diliyle eşleştirildi.
+
 ## 0.6.0 — 2026-10-15
 
 - Added a keyboard/touch Morse key with measured timing, speed, rhythm feedback and five-language sending practice.

@@ -11,7 +11,7 @@ public sealed partial class MainPage
     private void BuildConverter()
     {
         Heading(T("converter"),T("converterHint"));
-        var workspace=new StackPanel { Spacing=10 };
+        var workspace=new StackPanel { Spacing=16 };
         var toolbar=new Grid { ColumnSpacing=14,RowSpacing=10 };
         toolbar.RowDefinitions.Add(new RowDefinition { Height=GridLength.Auto }); toolbar.RowDefinitions.Add(new RowDefinition { Height=GridLength.Auto });
         toolbar.ColumnDefinitions.Add(new ColumnDefinition { Width=new GridLength(1,GridUnitType.Star) });
@@ -43,6 +43,7 @@ public sealed partial class MainPage
         resultActions.Children.Add(IconAction("copy",CopyResult,"\uE8C8")); resultActions.Children.Add(IconAction("save",SaveResult,"\uE74E")); resultHeader.Children.Add(resultActions); output.Children.Add(resultHeader);
         inputBox=new TextBox { Text=source,PlaceholderText=decode ? "... --- ..." : T("inputPlaceholder"),AcceptsReturn=true,TextWrapping=TextWrapping.Wrap,Height=200,MaxLength=200_000,Padding=new Thickness(12),FontSize=17,FlowDirection=decode ? FlowDirection.LeftToRight : PlainDirection };
         outputBox=new TextBox { Text=result?.Text ?? "",PlaceholderText=T("outputPlaceholder"),AcceptsReturn=true,TextWrapping=TextWrapping.Wrap,Height=200,IsReadOnly=true,Padding=new Thickness(12),FontSize=17,FlowDirection=decode ? PlainDirection : FlowDirection.LeftToRight };
+        outputBox.Background=Brush("ResultBrush");
         if(decode) inputBox.FontFamily=new FontFamily("Consolas"); else outputBox.FontFamily=new FontFamily("Consolas");
         Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(inputBox,T("source"));
         Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(outputBox,T("result"));

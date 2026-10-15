@@ -1,0 +1,9 @@
+{
+  "stationProfilesHint": "Çağrı işaretini ve belge bilgilerini kaydet. Görüşme hazırlarken bu istasyon kullanılır.",
+  "qsoAssistantHint": "Bir görüşme adımı seç, mesajı hazırla ve Morse olarak dinle. QSO, telsiz görüşmesi demektir; uygulama telsizden yayın yapmaz.",
+  "qsoLogHint": "Kaydettiğin görüşmeleri bul, düzenle veya haritada göster. Alıştırmalar ve gerçek görüşmeler ayrı tutulur.",
+  "stationPicker": "Kayıtlı istasyon",
+  "stationOptional": "İsteğe bağlı bilgiler",
+  "qsoRecordDetails": "Görüşmeyi günlüğe ekle",
+  "radioFiles": "Dosyadan al / dosyaya aktar"
+}

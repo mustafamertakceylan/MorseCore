@@ -19,9 +19,11 @@ public sealed partial class MainPage : Page
     private readonly HttpClient http=new();
     private readonly List<Button> menuButtons=[];
     private readonly Dictionary<Button,Border> navigationIndicators=[];
-    private bool educationExpanded;
-    private StackPanel? educationChildren;
-    private string page="converter", source="", version="0.6.0";
+    private static readonly string[] EducationPages=["alphabet","practice","keying","glossary"];
+    private static readonly string[] RadioPages=["stationProfiles","qsoAssistant","qsoLog"];
+    private bool educationExpanded,radioExpanded;
+    private StackPanel? educationChildren,radioChildren;
+    private string page="converter", source="", version="0.7.0";
     private ConversionResult? result;
     private bool decode, working, initialized, disposed, nativeReady;
     private int revision;
@@ -51,6 +53,7 @@ public sealed partial class MainPage : Page
         store=new(preferencesPath); radioStore=new(Path.Combine(Path.GetDirectoryName(preferencesPath)!,"Radio"));
         preferences=store.Load(); text=new(preferences.Language);
         InitializeComponent(); InitializeChrome(); ApplyTheme();
+        InitializeBackdrop();
         LoadingTitle.Text=T("loading"); LoadingDetail.Text=T("loadingSettings");
         Loaded+=Initialize;
         ActualThemeChanged+=(_,_)=> { if(initialized && !disposed && preferences.Theme=="system") DispatcherQueue.TryEnqueue(Rebuild); };
@@ -66,6 +69,7 @@ public sealed partial class MainPage : Page
         var minimumSplash=Task.Delay(TimeSpan.FromSeconds(2),lifetime.Token);
 #if DEBUG
         var splashTimer=System.Diagnostics.Stopwatch.StartNew();
+        smokeLoadingControlsHidden=PaneToggle.Visibility==Visibility.Collapsed && Shell.Visibility==Visibility.Collapsed;
         if(SmokeDirectory is { } captureDirectory) await Snapshot(Path.Combine(captureDirectory,"loading.png"));
 #endif
         if(preferences.CheckUpdates && SmokeDirectory is null)
@@ -80,17 +84,20 @@ public sealed partial class MainPage : Page
         if(disposed) return;
         nativeReady=ready;
         LoadingProgress.Value=85; Rebuild(); LoadingProgress.Value=100;
-        Shell.Visibility=Visibility.Visible;
         SetStatus(ready ? store.LoadWarning is null ? T("ready") : T("settingsRecovered") : T("nativeUnavailable"));
         if(update!=null && ready) SetStatus($"{T("updateAvailable")} · {update.Version}");
         try { await minimumSplash; }
         catch(OperationCanceledException) { return; }
         if(disposed) return;
 #if DEBUG
+        smokeLoadingControlsHidden &= PaneToggle.Visibility==Visibility.Collapsed && Shell.Visibility==Visibility.Collapsed;
+        if(SmokeDirectory is { } readyDirectory) await Snapshot(Path.Combine(readyDirectory,"loading-ready.png"));
         double splashVisibleMilliseconds=splashTimer.Elapsed.TotalMilliseconds;
 #endif
         await DismissSplash();
         if(disposed) return;
+        Shell.Visibility=Visibility.Visible;
+        PaneToggle.Visibility=Visibility.Visible; PaneToggle.IsEnabled=true;
         AnimateContent();
 #if DEBUG
         if(SmokeDirectory is { } directory) { await RunUiSmoke(directory,splashVisibleMilliseconds); return; }
@@ -128,8 +135,11 @@ public sealed partial class MainPage : Page
         text=new(preferences.Language);
         Shell.FlowDirection=text.IsRtl ? FlowDirection.RightToLeft : FlowDirection.LeftToRight;
         ApplyTheme();
+        UpdateBackdropMotion();
         ToolTipService.SetToolTip(CloseWindowButton,T("closeApp"));
         Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(CloseWindowButton,T("closeApp"));
+        ToolTipService.SetToolTip(MinimizeWindowButton,T("minimizeApp"));
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(MinimizeWindowButton,T("minimizeApp"));
         BuildNavigation();
         SetCollapsed(preferences.Collapsed,false); BuildPage();
         if(languageChanged) SetStatus(T(working || batchWorking ? "busy" : "ready"));
@@ -139,31 +149,41 @@ public sealed partial class MainPage : Page
         Menu.Children.Clear(); BottomMenu.Children.Clear(); menuButtons.Clear(); navigationIndicators.Clear();
         AddMenu("converter","\uE8D4"); AddMenu("files","\uE8B7"); AddMenu("audio","\uE8D6");
         AddMenu("education","\uE7BE");
-        educationChildren=new StackPanel { Spacing=2,Visibility=educationExpanded && !preferences.Collapsed ? Visibility.Visible : Visibility.Collapsed };
-        foreach(string key in new[]{"alphabet","practice","keying","glossary"})
+        educationChildren=AddMenuChildren(EducationPages,educationExpanded);
+        AddMenu("radio","\uE704");
+        radioChildren=AddMenuChildren(RadioPages,radioExpanded);
+        AddMenu("settings","\uE713",true);
+    }
+    private StackPanel AddMenuChildren(string[] pages,bool expanded)
+    {
+        var children=new StackPanel { Spacing=2,Visibility=expanded && !preferences.Collapsed ? Visibility.Visible : Visibility.Collapsed };
+        foreach(string key in pages)
         {
             var title=Label(T(key),13); title.Margin=new Thickness(4,0,4,0);
             var child=new Button { Content=title,HorizontalAlignment=HorizontalAlignment.Stretch,HorizontalContentAlignment=HorizontalAlignment.Left,Padding=new Thickness(8,9,8,9),Margin=new Thickness(24,0,0,0),
-                Background=Brush(page==key ? "CardBrush" : "PaneBrush"),BorderThickness=new Thickness(0),BorderBrush=Brush("LineBrush"),CornerRadius=new CornerRadius(8) };
+                Background=page==key ? Brush("CardBrush") : new SolidColorBrush(Microsoft.UI.Colors.Transparent),BorderThickness=new Thickness(0),BorderBrush=Brush("LineBrush"),CornerRadius=new CornerRadius(8) };
             child.Margin=new Thickness(5,0,5,0);
             title.Foreground=Brush(page==key ? "AccentInkBrush" : "MutedBrush");
             title.FontWeight=page==key ? Microsoft.UI.Text.FontWeights.SemiBold : Microsoft.UI.Text.FontWeights.Normal;
             Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(child,"Nav-"+key);
             Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(child,T(key));
-            child.Click+=(_,_)=>Navigate(key); educationChildren.Children.Add(child);
+            child.Click+=(_,_)=>Navigate(key); children.Children.Add(child);
         }
-        Menu.Children.Add(new Border { Child=educationChildren,BorderBrush=Brush("LineBrush"),BorderThickness=text.IsRtl?new Thickness(0,0,1,0):new Thickness(1,0,0,0),Margin=text.IsRtl?new Thickness(0,0,24,0):new Thickness(24,0,0,0) }); AddMenu("radio","\uE704"); AddMenu("settings","\uE713",true);
+        Menu.Children.Add(new Border { Child=children,BorderBrush=Brush("LineBrush"),BorderThickness=text.IsRtl?new Thickness(0,0,1,0):new Thickness(1,0,0,0),Margin=text.IsRtl?new Thickness(0,0,24,0):new Thickness(24,0,0,0) });
+        return children;
     }
     private void AddMenu(string key,string glyph,bool bottom=false)
     {
         var panel=new StackPanel { Orientation=Orientation.Horizontal,Spacing=11 };
         panel.Children.Add(new FontIcon { Glyph=glyph,FontSize=18,Width=20 });
         var title=Label(T(key),14); title.FontWeight=Microsoft.UI.Text.FontWeights.SemiBold; panel.Children.Add(title);
-        bool selected=key==page || key=="education" && (page is "practice" or "keying" or "alphabet" or "glossary");
-        if(key=="education") panel.Children.Add(new FontIcon { Glyph=educationExpanded?"\uE70E":"\uE70D",FontSize=10,Margin=new Thickness(4,0,0,0) });
+        bool group=key is "education" or "radio";
+        bool expanded=key=="education" ? educationExpanded : radioExpanded;
+        bool selected=key==page || key=="education" && EducationPages.Contains(page) || key=="radio" && RadioPages.Contains(page);
+        if(group) panel.Children.Add(new FontIcon { Glyph=expanded?"\uE70E":"\uE70D",FontSize=10,Margin=new Thickness(4,0,0,0) });
         var ink=Brush(selected ? "AccentInkBrush" : "MutedBrush");
         ((FontIcon)panel.Children[0]).Foreground=ink; ((TextBlock)panel.Children[1]).Foreground=ink;
-        var button=new Button { Content=panel,HorizontalAlignment=HorizontalAlignment.Stretch,HorizontalContentAlignment=HorizontalAlignment.Left,Padding=new Thickness(12),BorderThickness=new Thickness(0),Foreground=ink,Background=Brush(selected && key!="education" ? "CardBrush" : "PaneBrush"),Tag=key };
+        var button=new Button { Content=panel,HorizontalAlignment=HorizontalAlignment.Stretch,HorizontalContentAlignment=HorizontalAlignment.Left,Padding=new Thickness(12),BorderThickness=new Thickness(0),Foreground=ink,Background=selected && !group ? Brush("CardBrush") : new SolidColorBrush(Microsoft.UI.Colors.Transparent),Tag=key };
         var indicator=new Border { Width=2,Height=22,CornerRadius=new CornerRadius(0),Background=Brush("AccentInkBrush"),HorizontalAlignment=HorizontalAlignment.Left,VerticalAlignment=VerticalAlignment.Center,IsHitTestVisible=false };
         var item=new Grid(); item.Children.Add(button); item.Children.Add(indicator); navigationIndicators.Add(button,indicator);
         button.Resources["ButtonBackgroundPointerOver"]=Brush("CanvasBrush");
@@ -173,17 +193,18 @@ public sealed partial class MainPage : Page
         Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(button,T(key));
         button.Click+=(_,_)=>
         {
-            if(key!="education") { Navigate(key); return; }
+            if(!group) { Navigate(key); return; }
             if(preferences.Collapsed)
             {
                 var flyout=new MenuFlyout();
-                foreach(string child in new[]{"alphabet","practice","keying","glossary"})
+                foreach(string child in key=="education" ? EducationPages : RadioPages)
                 {
                     var entry=new MenuFlyoutItem { Text=T(child) }; entry.Click+=(_,_)=>Navigate(child); flyout.Items.Add(entry);
                 }
                 flyout.ShowAt(button); return;
             }
-            educationExpanded=!educationExpanded; BuildNavigation(); SetCollapsed(preferences.Collapsed,false);
+            if(key=="education") educationExpanded=!educationExpanded; else radioExpanded=!radioExpanded;
+            BuildNavigation(); SetCollapsed(preferences.Collapsed,false);
         };
         (bottom ? BottomMenu : Menu).Children.Add(item); menuButtons.Add(button);
     }
@@ -194,10 +215,12 @@ public sealed partial class MainPage : Page
     }
     private void Navigate(string key)
     {
+        if(key=="radio") key="stationProfiles";
         if(page==key) return;
         StopPlayback(); revision++;
-        if(key is "practice" or "keying" or "alphabet" or "glossary") educationExpanded=true;
-        page=key; Rebuild(); ContentScroll.ChangeView(null,0,null,true); AnimateContent();
+        if(EducationPages.Contains(key)) educationExpanded=true;
+        if(RadioPages.Contains(key)) radioExpanded=true;
+        page=key; Rebuild(); ContentScroll.ChangeView(null,0,null,true);
     }
     private void BuildPage()
     {
@@ -213,9 +236,10 @@ public sealed partial class MainPage : Page
             case "keying": BuildKeying(); break;
             case "alphabet": BuildAlphabet(); break;
             case "glossary": BuildGlossary(); break;
-            case "radio": BuildRadio(); break;
+            case "stationProfiles": case "qsoAssistant": case "qsoLog": BuildRadio(); break;
             case "settings": BuildSettings(); break;
         }
+        AnimateContent();
     }
     private void SetStatus(string value) { if(!disposed) Status.Text=value; }
     private async Task Guard(Func<Task> operation)
@@ -224,7 +248,12 @@ public sealed partial class MainPage : Page
         catch(OperationCanceledException) { SetStatus(T("cancelled")); }
         catch(MorseNativeException e) { SetStatus(e.Status switch { -1=>T("missingInput"),-3=>T("unsupported"),-4=>T("invalidMorse"),_=>T("error") }); }
         catch(Exception e) when(e is IOException or InvalidDataException or UnauthorizedAccessException or ArgumentException or InvalidOperationException or NotSupportedException or System.ComponentModel.Win32Exception or System.Runtime.InteropServices.COMException or DllNotFoundException or EntryPointNotFoundException or TypeInitializationException)
-        { SetStatus(T("error")); }
+        {
+#if DEBUG
+            if(SmokeDirectory!=null) smokeOperationFailure=e.ToString();
+#endif
+            SetStatus(T("error"));
+        }
     }
     private void SavePreferences()
     {
@@ -234,10 +263,10 @@ public sealed partial class MainPage : Page
     private void TogglePane(object sender,RoutedEventArgs e)=>SetCollapsed(!preferences.Collapsed,true);
     private void SetCollapsed(bool collapsed,bool animate)
     {
-        paneAnimation?.Stop(); paneAnimation=null;
+        var previous=paneAnimation; paneAnimation=null; previous?.Stop();
         preferences=preferences with { Collapsed=collapsed };
-        Brand.Visibility=collapsed ? Visibility.Collapsed : Visibility.Visible;
         if(educationChildren!=null) educationChildren.Visibility=!collapsed && educationExpanded ? Visibility.Visible : Visibility.Collapsed;
+        if(radioChildren!=null) radioChildren.Visibility=!collapsed && radioExpanded ? Visibility.Visible : Visibility.Collapsed;
         foreach(var button in menuButtons)
         {
             ((StackPanel)button.Content).Children[1].Visibility=collapsed ? Visibility.Collapsed : Visibility.Visible;
@@ -250,18 +279,15 @@ public sealed partial class MainPage : Page
             bool selected=Equals(button.Tag,page);
             navigationIndicators[button].Visibility=!collapsed && selected ? Visibility.Visible : Visibility.Collapsed;
         }
-        Grid.SetColumn(PaneToggle,collapsed ? 0 : 1); Grid.SetColumnSpan(PaneToggle,collapsed ? 2 : 1);
-        PaneToggle.HorizontalAlignment=collapsed ? HorizontalAlignment.Center : HorizontalAlignment.Right;
-        ((FontIcon)PaneToggle.Content).Glyph=collapsed!=text.IsRtl ? "\uE76C" : "\uE76B";
         ToolTipService.SetToolTip(PaneToggle,T(collapsed ? "openPane" : "closePane"));
         Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(PaneToggle,T(collapsed ? "openPane" : "closePane"));
         double width=collapsed ? 72 : 240;
         if(animate && MotionAllowed())
         {
             var storyboard=new Storyboard();
-            var animation=new DoubleAnimation { From=Pane.ActualWidth,To=width,Duration=new Duration(TimeSpan.FromMilliseconds(170)),EnableDependentAnimation=true,EasingFunction=new CubicEase { EasingMode=EasingMode.EaseOut } };
+            var animation=new DoubleAnimation { From=Pane.ActualWidth,To=width,Duration=new Duration(TimeSpan.FromMilliseconds(210)),EnableDependentAnimation=true,EasingFunction=new CubicEase { EasingMode=EasingMode.EaseOut } };
             Storyboard.SetTarget(animation,Pane); Storyboard.SetTargetProperty(animation,"Width"); storyboard.Children.Add(animation);
-            storyboard.Completed+=(_,_)=> { storyboard.Stop(); Pane.Width=width; if(ReferenceEquals(paneAnimation,storyboard)) paneAnimation=null; };
+            storyboard.Completed+=(_,_)=> { if(!ReferenceEquals(paneAnimation,storyboard)) return; paneAnimation=null; storyboard.Stop(); Pane.Width=width; };
             paneAnimation=storyboard; storyboard.Begin();
         }
         else Pane.Width=width;
@@ -269,14 +295,16 @@ public sealed partial class MainPage : Page
     }
     private void AnimateContent()
     {
-        contentAnimation?.Stop(); contentAnimation=null;
-        if(!MotionAllowed()) { PageContent.Opacity=1; ((TranslateTransform)PageContent.RenderTransform).Y=0; return; }
+        var previous=contentAnimation; contentAnimation=null; previous?.Stop();
+        var offset=(TranslateTransform)PageContent.RenderTransform;
+        PageContent.Opacity=1; offset.X=offset.Y=0;
+        if(!MotionAllowed()) return;
         var storyboard=new Storyboard();
-        var fade=new DoubleAnimation { From=0,To=1,Duration=new Duration(TimeSpan.FromMilliseconds(170)) };
+        var fade=new DoubleAnimation { From=0.35,To=1,Duration=new Duration(TimeSpan.FromMilliseconds(200)) };
         Storyboard.SetTarget(fade,PageContent); Storyboard.SetTargetProperty(fade,"Opacity"); storyboard.Children.Add(fade);
-        var slide=new DoubleAnimation { From=9,To=0,Duration=new Duration(TimeSpan.FromMilliseconds(190)),EasingFunction=new CubicEase { EasingMode=EasingMode.EaseOut } };
-        Storyboard.SetTarget(slide,PageContent.RenderTransform); Storyboard.SetTargetProperty(slide,"Y"); storyboard.Children.Add(slide);
-        storyboard.Completed+=(_,_)=> { storyboard.Stop(); PageContent.Opacity=1; ((TranslateTransform)PageContent.RenderTransform).Y=0; if(ReferenceEquals(contentAnimation,storyboard)) contentAnimation=null; };
+        var slide=new DoubleAnimation { From=text.IsRtl ? -22 : 22,To=0,Duration=new Duration(TimeSpan.FromMilliseconds(240)),EasingFunction=new CubicEase { EasingMode=EasingMode.EaseOut } };
+        Storyboard.SetTarget(slide,offset); Storyboard.SetTargetProperty(slide,"X"); storyboard.Children.Add(slide);
+        storyboard.Completed+=(_,_)=> { if(!ReferenceEquals(contentAnimation,storyboard)) return; storyboard.Stop(); PageContent.Opacity=1; offset.X=offset.Y=0; contentAnimation=null; };
         contentAnimation=storyboard; storyboard.Begin();
     }
     private TextBlock Label(string value,double size=15,bool muted=false)=>new() { Text=value,FontSize=size,Foreground=Brush(muted ? "MutedBrush" : "InkBrush"),VerticalAlignment=VerticalAlignment.Center };
@@ -294,7 +322,7 @@ public sealed partial class MainPage : Page
         Breadcrumb.Text=title;
         if(subtitle!=null) PageContent.Children.Add(Label(subtitle,13,true));
     }
-    private Border Card(UIElement child)=>new() { Child=child,Background=Brush("CardBrush"),BorderBrush=Brush("LineBrush"),BorderThickness=new Thickness(1),CornerRadius=new CornerRadius(16),Padding=new Thickness(16) };
+    private Border Card(UIElement child)=>new() { Child=child,Background=Brush("CardBrush"),BorderBrush=Brush("LineBrush"),BorderThickness=new Thickness(1),CornerRadius=new CornerRadius(16),Padding=new Thickness(20) };
     private StackPanel Row()=>new() { Orientation=Orientation.Horizontal,Spacing=10 };
     private void WrapActions(StackPanel row,FrameworkElement host)
     {
@@ -369,5 +397,7 @@ public sealed partial class MainPage : Page
     {
         if(disposed) return;
         disposed=true; lifetime.Cancel(); CleanupKeying(); CleanupAudioDecoder(); CleanupVoicePacks(); StopPlayback(); http.Dispose(); lifetime.Dispose();
+        paneAnimation?.Stop(); contentAnimation?.Stop();
+        CleanupBackdrop();
     }
 }

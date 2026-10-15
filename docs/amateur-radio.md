@@ -5,10 +5,10 @@
 **Kaynak kontrolü: 15 Ekim 2026.** Bu sürüm çağrı işareti tanıma, CW mesajı hazırlama, Morse sesi/WAV ve yerel QSO günlüğü sağlar. Telsize bağlanmaz ve RF yayını yapmaz.
 
 1. **Amatör telsiz → İstasyonlarım:** Çağrını gir, tanımayı çalıştır ve belge sınıfını belgenle karşılaştır. Birden fazla istasyon kaydedebilirsin. Ön ek tanıma, tahsis/sahiplik/geçerlilik sorgusu değildir.
-2. **QSO hazırlığı:** İstasyon/frekans satırını açarak çalışma ülkesini, yerel yetki sınıfını ve sabit/taşınabilir/araç kullanımını seç. Yurt dışında yetki veya CEPT denkliği varsayılmaz; onayladığın tam çalışma çağrısı gerekir. Türkiye bölge eki önerisi bildirim koşullarını ortadan kaldırmaz.
+2. **Amatör telsiz → Görüşme hazırla:** İstasyon/frekans satırını açarak çalışma ülkesini, yerel yetki sınıfını ve sabit/taşınabilir/araç kullanımını seç. Yurt dışında yetki veya CEPT denkliği varsayılmaz; onayladığın tam çalışma çağrısı gerekir. Türkiye bölge eki önerisi bildirim koşullarını ortadan kaldırmaz.
 3. Önce dinle ve frekansın kullanımda olup olmadığını sor. CQ, yanıt, gerçek RST, mesaj ve kapanış adımları için metin oluştur. `<AR>`, `<SK>`, `<BT>`, `<AS>`, `<KN>` ve `<HH>` bitişik prosedür işaretleridir. QSO şablonları uluslararası Latin CW içindir; ad/konum alanlarını Latin harflerle yaz.
-4. Kayıtlar varsayılan olarak eğitimdir. Gerçek telsiz görüşmesini ayrıca seç. UTC kayıtları ve ayarlar `%LOCALAPPDATA%\MorseCore\Desktop\Radio` altında tutulur; özel uygulama veri dizini kullanılıyorsa onun `Radio` alt dizini kullanılır.
-5. **QSO günlüğü:** Eğitim ve gerçek görüşmeler ayrı listelenir/dışa aktarılır. ADIF 3.1.4 `.adi` temel ASCII bağlantı alanlarını içerir. UTF-8 CSV notları korur; tablo yazılımlarında formül gibi çalışabilecek metinler güvenli biçimde kaçışlanır. Mevcut dosyanın değiştirilmesine yalnız Kaydet penceresinden onay verebilirsin. Bozuk istasyon dosyasının üzerine sessizce yazılmaz.
+4. **Görüşmeyi günlüğe ekle** bölümünden kayıt oluştur. Kayıtlar varsayılan olarak eğitimdir. Gerçek telsiz görüşmesini ayrıca seç. UTC kayıtları ve ayarlar `%LOCALAPPDATA%\MorseCore\Desktop\Radio` altında tutulur; özel uygulama veri dizini kullanılıyorsa onun `Radio` alt dizini kullanılır.
+5. **Amatör telsiz → Görüşme günlüğü:** Eğitim ve gerçek görüşmeler ayrı listelenir. **Konum haritası** düğmesi doğrudan bu sayfadadır; yalnız locator veya koordinat girilmiş görüşmeler gösterilir. İçe/dışa aktarma **Dosyadan al / dosyaya aktar** bölümündedir. ADIF 3.1.4 `.adi` temel ASCII bağlantı alanlarını içerir. UTF-8 CSV notları korur; tablo yazılımlarında formül gibi çalışabilecek metinler güvenli biçimde kaçışlanır. Mevcut dosyanın değiştirilmesine yalnız Kaydet penceresinden onay verebilirsin. Bozuk istasyon dosyasının üzerine sessizce yazılmaz.
 
 **Eğitim** altında Morse alfabesi, altı alıştırma türü, yanlış tekrarları, Q kodları/kısaltmalar/prosedür işaretleri ve fonetik alfabe bulunur. Dönüştürücü yalnız dönüştürür; Morse çalma ve çevrimdışı seslendirme **Ses** sayfasındadır.
 
@@ -16,7 +16,9 @@
 
 **Sources checked: 15 October 2026.** This version provides call recognition, CW preparation, Morse audio/WAV and a local QSO log. It neither connects to radio hardware nor transmits RF.
 
-Save a station, identify its call and confirm the class against the actual licence. Open the station/frequency summary in **QSO preparation** to choose the operating country, local class and setup. Foreign privileges are never assumed; enter a confirmed full operating call. Turkish area suffix suggestions do not replace notification requirements.
+Expand **Amateur radio** in the sidebar to find **My stations**, **Prepare a contact** and **Contact log**. Save a station, identify its call and confirm the class against the actual licence. Open the station/frequency summary in **Prepare a contact** to choose the operating country, local class and setup. Foreign privileges are never assumed; enter a confirmed full operating call. Turkish area suffix suggestions do not replace notification requirements.
+
+Open **Add this contact to the log** to save a contact. In **Contact log**, the **Contact map** button is directly visible; only recorded coordinates or locators are plotted. File actions are under **Import / export files**. Optional station details and the country/band guide expand when needed.
 
 Listen, check whether the frequency is occupied, then prepare CQ, reply, observed RST, message and closing templates. Names and locations in international CW templates use Latin letters. Prosigns are sent as joined signals. Training and actual radio contacts have separate UTC logs and exports. ADI exports basic ASCII contact fields; UTF-8 CSV preserves notes and neutralises spreadsheet formulas. Only a save-dialog selection authorises replacing an existing export. Unreadable station files are preserved.
 

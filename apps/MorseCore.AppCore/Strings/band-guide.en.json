@@ -1,0 +1,16 @@
+{
+  "guide.title": "CW bands and power limits",
+  "guide.country": "Country",
+  "guide.ranges": "Reference ranges",
+  "guide.intro": "Each card shows a frequency interval. Read the power limit and special conditions together; one band may have several intervals.",
+  "guide.scope": "These are selected CW references, not permission to transmit. Check your licence and the country conditions separately.",
+  "guide.start": "Lower limit · included",
+  "guide.end": "Upper limit · excluded",
+  "guide.power": "Power limit",
+  "guide.condition": "Special condition",
+  "guide.details": "Country conditions and sources",
+  "guide.empty": "No ranges are listed for this country and class. This does not mean transmission is prohibited; check the official source.",
+  "guide.scale": "Each line shows only its own card's interval; cards do not share a common scale.",
+  "guide.pep": "Peak envelope power (PEP)",
+  "guide.erp": "Effective radiated power (ERP)"
+}

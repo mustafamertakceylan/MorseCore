@@ -13,7 +13,7 @@ public sealed partial class MainPage
     private LogQuery? appliedLogQuery;
     private readonly List<string?> logCursors=[null];
     private int logPageIndex;
-    private bool logShowMap,logLoading;
+    private bool logShowMap,logLoading,logFiltersExpanded,logFilesExpanded;
     private QsoRecord? logDraft;
     private AdifDocument? importDocument;
     private ImportPreview? importPreview;
@@ -46,8 +46,8 @@ public sealed partial class MainPage
         var bandInput=RadioInput("logbook.band",logBand,v=>logBand=v,true,30);
         var fromInput=RadioInput("logbook.from",logFrom,v=>logFrom=v,true,10);
         var throughInput=RadioInput("logbook.through",logThrough,v=>logThrough=v,true,10);
-        filters.Children.Add(callInput); filters.Children.Add(bandInput);
-        var dates=Row(); dates.Children.Add(fromInput); dates.Children.Add(throughInput); filters.Children.Add(dates); WrapActions(dates,filters);
+        filters.Children.Add(Columns(260,2,callInput,bandInput));
+        filters.Children.Add(Columns(260,2,fromInput,throughInput));
         filters.Children.Add(Label(T("logbook.dateHint"),12,true));
         var filterActions=Row();
         filterActions.Children.Add(Action("logbook.search",()=>
@@ -57,8 +57,12 @@ public sealed partial class MainPage
             appliedLogQuery=CurrentLogQuery(); ResetLogPage(); BuildPage(); return Task.CompletedTask;
         },"\uE721",true));
         filterActions.Children.Add(Action("logbook.reset",()=> { logCall=logBand=logFrom=logThrough=""; appliedLogQuery=null; ResetLogPage(); BuildPage(); return Task.CompletedTask; }));
-        filterActions.Children.Add(Action("logbook.map",()=> { logShowMap=!logShowMap; BuildPage(); return Task.CompletedTask; },"\uE707")); filters.Children.Add(filterActions); WrapActions(filterActions,filters);
-        PageContent.Children.Add(new Expander { Header=T("logbook.filters"),Content=filters,IsExpanded=appliedLogQuery!=null,HorizontalAlignment=HorizontalAlignment.Stretch });
+        filters.Children.Add(filterActions); WrapActions(filterActions,filters);
+        var search=new Expander { Header=T("logbook.filters"),Content=filters,IsExpanded=logFiltersExpanded || appliedLogQuery!=null,HorizontalAlignment=HorizontalAlignment.Stretch,HorizontalContentAlignment=HorizontalAlignment.Stretch };
+        search.Expanding+=(_,_)=>logFiltersExpanded=true; search.Collapsed+=(_,_)=>logFiltersExpanded=false;
+        PageContent.Children.Add(Action("logbook.map",()=> { logShowMap=!logShowMap; BuildPage(); return Task.CompletedTask; },"\uE707",logShowMap));
+        PageContent.Children.Add(search);
+        var files=new StackPanel { Spacing=10 };
         var actions=Row();
         foreach(bool adif in new[]{false,true})
             actions.Children.Add(Action(adif?"exportAdif":"exportCsv",async()=>
@@ -66,8 +70,12 @@ public sealed partial class MainPage
                 bool practice=showPracticeLog; string? path=await SavePath(adif?"adi":"csv",practice?"morsecore-practice":"morsecore-qso");
                 if(path!=null) { await Task.Run(()=>radioStore.ExportAsync(path,practice,adif,lifetime.Token,replaceExisting:true)); SetStatus(T("saved")); }
             },"\uE74E"));
-        actions.Children.Add(Action("logbook.import",OpenAdifImport,"\uE8B5")); PageContent.Children.Add(actions); WrapActions(actions,PageContent);
-        PageContent.Children.Add(Label(T("logbook.browseHint")+" "+T("logbook.exportAll"),12,true));
+        actions.Children.Add(Action("logbook.import",OpenAdifImport,"\uE8B5")); files.Children.Add(actions); WrapActions(actions,files);
+        files.Children.Add(Label(T("logbook.browseHint")+" "+T("logbook.exportAll"),12,true));
+        var transfer=new Expander { Header=T("radioFiles"),Content=files,IsExpanded=logFilesExpanded,HorizontalAlignment=HorizontalAlignment.Stretch,HorizontalContentAlignment=HorizontalAlignment.Stretch };
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(transfer,"LogFileActions");
+        transfer.Expanding+=(_,_)=>logFilesExpanded=true; transfer.Collapsed+=(_,_)=>logFilesExpanded=false;
+        PageContent.Children.Add(transfer);
         if(importDocument!=null && importPreview!=null) BuildImportPreview();
         if(logDraft!=null) BuildLogEditor();
         var host=new StackPanel { Spacing=10 }; PageContent.Children.Add(host);
@@ -115,16 +123,17 @@ public sealed partial class MainPage
         string frequency=original.FrequencyHz==0?"":(original.FrequencyHz/1_000_000m).ToString("0.######",CultureInfo.InvariantCulture);
         string latitude=original.Latitude?.ToString("R",CultureInfo.InvariantCulture)??"",longitude=original.Longitude?.ToString("R",CultureInfo.InvariantCulture)??"";
         var stack=new StackPanel { Spacing=10 }; stack.Children.Add(Label(T("logbook.edit"),18));
-        var inputs=new Dictionary<string,TextBox>();
+        var inputs=new Dictionary<string,TextBox>(); var fields=new List<FrameworkElement>();
         void Input(string key,string value,bool ltr=true,int maximum=80)
-        { var input=RadioInput(key,value,_=> { },ltr,maximum); inputs.Add(key,input); stack.Children.Add(input); }
+        { var input=RadioInput(key,value,_=> { },ltr,maximum); inputs.Add(key,input); fields.Add(input); }
         Input("logbook.utc",utc,maximum:19); Input("callSign",draft.OwnCall,maximum:32); Input("otherCall",draft.OtherCall,maximum:32);
         Input("qsoFrequency",frequency,maximum:18); Input("logbook.band",draft.Band,maximum:30);
         Input("sentRst",draft.SentRst,maximum:3); Input("receivedRst",draft.ReceivedRst,maximum:3);
-        var countries=RadioCatalog.Data.Countries; var operatingCountryInput=Choice(T("operatingCountry"),countries.Select(CountryName),Math.Max(0,Array.FindIndex(countries,c=>c.Id==draft.CountryId)),_=> { }); stack.Children.Add(operatingCountryInput);
-        var practice=new ToggleSwitch { Header=T("practiceRecord"),IsOn=draft.Practice,OnContent=T("practice"),OffContent=T("externalQso") }; practice.Toggled+=(_,_)=>draft=draft with { Practice=practice.IsOn }; stack.Children.Add(practice);
+        var countries=RadioCatalog.Data.Countries; var operatingCountryInput=Choice(T("operatingCountry"),countries.Select(CountryName),Math.Max(0,Array.FindIndex(countries,c=>c.Id==draft.CountryId)),_=> { }); fields.Add(operatingCountryInput);
+        var practice=new ToggleSwitch { Header=T("practiceRecord"),IsOn=draft.Practice,OnContent=T("practice"),OffContent=T("externalQso") }; practice.Toggled+=(_,_)=>draft=draft with { Practice=practice.IsOn }; fields.Add(practice);
         Input("qsoNote",draft.Note,false,4000); Input("logbook.grid",draft.GridSquare,maximum:12);
-        Input("logbook.latitude",latitude,maximum:24); Input("logbook.longitude",longitude,maximum:24); stack.Children.Add(Label(T("logbook.locationHint"),12,true));
+        Input("logbook.latitude",latitude,maximum:24); Input("logbook.longitude",longitude,maximum:24);
+        stack.Children.Add(Columns(260,2,fields.ToArray())); stack.Children.Add(Label(T("logbook.locationHint"),12,true));
         var error=Label("",13,true); stack.Children.Add(error); var actions=Row();
         actions.Children.Add(Action("logbook.save",async()=>
         {

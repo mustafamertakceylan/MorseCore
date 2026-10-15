@@ -32,10 +32,9 @@ public sealed partial class MainPage
             .ToDictionary(group=>group.Key,group=>group.First().Character.ToString(),StringComparer.Ordinal);
         var stack=new StackPanel { Spacing=16 };
         stack.Children.Add(AlphabetChoice());
-        var options=Row();
-        var speed=new NumberBox { Header=T("keyingTargetSpeed"),Minimum=5,Maximum=60,Value=keyingWpm,Width=180,SpinButtonPlacementMode=NumberBoxSpinButtonPlacementMode.Compact };
+        var speed=new NumberBox { Header=T("keyingTargetSpeed"),Minimum=5,Maximum=60,Value=keyingWpm,SpinButtonPlacementMode=NumberBoxSpinButtonPlacementMode.Compact };
         var sound=new ToggleSwitch { Header=T("keyingSidetone"),IsOn=keyingSound,OnContent=T("keyingOn"),OffContent=T("keyingOff") };
-        options.Children.Add(speed); options.Children.Add(sound); stack.Children.Add(options); WrapActions(options,stack);
+        stack.Children.Add(Columns(260,2,speed,sound));
         var expected=new TextBox { Header=T("keyingReference"),Text=keyingExpected,MaxLength=64,FlowDirection=PlainDirection,PlaceholderText="SOS" };
         expected.TextChanged+=(_,_)=>keyingExpected=expected.Text;
         stack.Children.Add(expected);
@@ -192,7 +191,8 @@ public sealed partial class MainPage
             keyingTimer.Stop(); Refresh(); return Task.CompletedTask;
         },"\uE71A"));
         stack.Children.Add(controls); WrapActions(controls,stack);
-        stack.Children.Add(transcript); stack.Children.Add(symbols); stack.Children.Add(resultLabel); stack.Children.Add(timings); stack.Children.Add(feedback);
+        symbols.Background=Brush("ResultBrush"); symbols.MinHeight=transcript.MinHeight=90;
+        stack.Children.Add(Columns(300,2,transcript,symbols)); stack.Children.Add(resultLabel); stack.Children.Add(timings); stack.Children.Add(feedback);
         var note=Label(T("keyingMeasurementNote"),13,true); note.TextWrapping=TextWrapping.Wrap; stack.Children.Add(note);
         PageContent.Children.Add(Card(stack));
         // Retain completed results when navigating back, but each new press starts a fresh session.

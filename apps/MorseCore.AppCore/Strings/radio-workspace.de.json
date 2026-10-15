@@ -1,0 +1,9 @@
+{
+  "stationProfilesHint": "Speichere dein Rufzeichen und deine Zulassungsdaten. Diese Station wird zur Vorbereitung von Kontakten verwendet.",
+  "qsoAssistantHint": "Wähle einen Gesprächsschritt, erstelle den Text und höre ihn in Morse. QSO bedeutet Funkkontakt; die App sendet nicht über Funk.",
+  "qsoLogHint": "Suche und bearbeite gespeicherte Kontakte oder zeige sie auf der Karte. Übungen und echte Kontakte bleiben getrennt.",
+  "stationPicker": "Gespeicherte Station",
+  "stationOptional": "Optionale Angaben",
+  "qsoRecordDetails": "Kontakt ins Logbuch eintragen",
+  "radioFiles": "Dateien importieren / exportieren"
+}

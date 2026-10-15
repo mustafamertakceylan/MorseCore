@@ -131,6 +131,7 @@ public sealed partial class MainPage
             await Operate(async(service,progress,token)=> { await service.InstallPythonAsync(progress,token); runtimeReady=true; if(Current()) { runtimeState.Text=T("voicesRuntimeReady"); runtimeInstall.Visibility=Visibility.Collapsed; } },"voicesRuntimeReady");
         }
 
+        var packageCards=new List<FrameworkElement>();
         foreach(var package in VoicePackageCatalog.Packages.Where(p=>p.Voice.Language==preferences.SpeechLanguage))
         {
             var voice=package.Voice;
@@ -140,7 +141,6 @@ public sealed partial class MainPage
             panel.Children.Add(Label(T(voice.Engine=="piper"?"voicesLicensePiper":"voicesLicenseApache"),12,true));
             if(voice.Language=="ar-SA") panel.Children.Add(Label(T("voicesArabicLicense"),12,true));
             var state=Label("",13,true); panel.Children.Add(state);
-            var actions=Row();
             var install=Action("voicesInstall",async()=>
             {
                 string consent=T("voicesInstallConsent")+"\n\n"+voice.Name+" · "+(package.DownloadBytes/(1024d*1024)).ToString("0.0")+" MiB\n"+T("voicesDependencySize");
@@ -164,9 +164,10 @@ public sealed partial class MainPage
                 await Operate(async(service,progress,token)=> { progress.Report(new("remove")); await service.RemoveAsync(voice.Id,token); },"voicesRemoved");
             },"\uE74D");
             var source=Action("voicesSource",async()=> { await Launcher.LaunchUriAsync(package.Source); },"\uE8A7");
-            foreach(var button in new[]{install,choose,preview,remove,source}) { actions.Children.Add(button); interactive.Add(button); }
-            panel.Children.Add(actions); WrapActions(actions,panel);
-            PageContent.Children.Add(Card(panel));
+            var buttons=new[]{install,choose,preview,remove,source};
+            foreach(var button in buttons) { button.HorizontalAlignment=HorizontalAlignment.Stretch; interactive.Add(button); }
+            panel.Children.Add(Columns(140,3,buttons));
+            packageCards.Add(Card(panel));
             refreshers.Add(()=>
             {
                 bool installed=OfflineSpeech.IsInstalled(home,voice);
@@ -179,6 +180,7 @@ public sealed partial class MainPage
             });
             Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(panel,"VoicePack-"+voice.Id);
         }
+        PageContent.Children.Add(Columns(340,2,packageCards.ToArray()));
         Refresh();
         _=ProbeRuntime();
         async Task ProbeRuntime()

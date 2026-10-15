@@ -17,14 +17,23 @@ namespace MorseCore.Desktop;
 public sealed partial class MainPage
 {
     private string? smokeSavePath;
-    private async Task Snapshot(string path,UIElement? element=null)
+    private string? smokeOperationFailure;
+    private bool smokeLoadingControlsHidden;
+    private async Task Snapshot(string path,UIElement? element=null,bool contentOnly=false)
     {
         await Task.Delay(250); Root.UpdateLayout();
         var bitmap=new RenderTargetBitmap(); await bitmap.RenderAsync(element ?? Root);
         var pixels=await bitmap.GetPixelsAsync();
         using var stream=File.Create(path);
         var encoder=await BitmapEncoder.CreateAsync(BitmapEncoder.PngEncoderId,stream.AsRandomAccessStream());
-        encoder.SetPixelData(BitmapPixelFormat.Bgra8,BitmapAlphaMode.Premultiplied,(uint)bitmap.PixelWidth,(uint)bitmap.PixelHeight,96,96,pixels.ToArray());
+        byte[] data=pixels.ToArray(); int height=bitmap.PixelHeight;
+        if(contentOnly)
+        {
+            // Exclude native caption capture artifacts; keep the original application pixels unchanged.
+            int top=Math.Clamp((int)Math.Round(WindowBar.ActualHeight*XamlRoot!.RasterizationScale),0,height-1);
+            data=data.AsSpan(top*bitmap.PixelWidth*4).ToArray(); height-=top;
+        }
+        encoder.SetPixelData(BitmapPixelFormat.Bgra8,BitmapAlphaMode.Premultiplied,(uint)bitmap.PixelWidth,(uint)height,96,96,data);
         await encoder.FlushAsync();
     }
     private async Task RunUiSmoke(string directory,double splashVisibleMilliseconds)
@@ -49,39 +58,77 @@ public sealed partial class MainPage
             Root.UpdateLayout();
             await Invoke(Descendants(Root).OfType<Button>().First(b=>AutomationProperties.GetAutomationId(b)==id));
         }
+        async Task ExpandSection(string id)
+        {
+            Descendants(Root).OfType<Expander>().First(e=>AutomationProperties.GetAutomationId(e)==id).IsExpanded=true;
+            await Task.Delay(60); Root.UpdateLayout();
+        }
+        async Task GuideSnapshot(string name)
+        {
+            var guide=Descendants(PageContent).OfType<Expander>().First(e=>AutomationProperties.GetAutomationId(e)=="CountryRules");
+            double y=guide.TransformToVisual(ContentScroll).TransformPoint(new Windows.Foundation.Point(0,0)).Y+ContentScroll.VerticalOffset;
+            ContentScroll.ChangeView(null,y,null,true); await Snapshot(Path.Combine(directory,name));
+        }
         async Task WaitFor(Func<bool> condition,string description)
         {
             var deadline=DateTimeOffset.UtcNow.AddSeconds(5);
             while(!condition() && DateTimeOffset.UtcNow<deadline) await Task.Delay(50);
             Check(condition(),description);
         }
+        double PaneCenter(FrameworkElement element)
+        {
+            var bounds=element.TransformToVisual(Pane).TransformBounds(new Windows.Foundation.Rect(0,0,element.ActualWidth,element.ActualHeight));
+            return bounds.X+bounds.Width/2;
+        }
         void CheckCollapsedAlignment(string language)
         {
             Root.UpdateLayout();
-            double Center(FrameworkElement element)
+            double center=PaneCenter((FontIcon)((StackPanel)menuButtons[0].Content).Children[0]);
+            Check(menuButtons.All(b=>Math.Abs(PaneCenter((FontIcon)((StackPanel)b.Content).Children[0])-center)<1),"Collapsed navigation and settings icons align in "+language);
+            var toggle=PaneToggle.TransformToVisual(WindowBar).TransformBounds(new Windows.Foundation.Rect(0,0,PaneToggle.ActualWidth,PaneToggle.ActualHeight));
+            Check(PaneToggle.IsEnabled && toggle.X>=0 && toggle.Right<100 && toggle.Y>=0 && toggle.Bottom<=WindowBar.ActualHeight,"Top-left menu toggle remains accessible with the sidebar collapsed in "+language);
+            // Nested controls snap independently at fractional DPI. Keep the absolute center within two screen pixels.
+            Check(Math.Abs(center-(Pane.ActualWidth-Pane.BorderThickness.Right+Pane.BorderThickness.Left)/2)*XamlRoot!.RasterizationScale<=2,$"Collapsed icons stay centered in {language} (center {center:0.###}, pane {Pane.ActualWidth:0.###})");
+        }
+        void CheckPageWidth(string state)
+        {
+            Root.UpdateLayout();
+            bool Shown(FrameworkElement element)
             {
-                var bounds=element.TransformToVisual(Pane).TransformBounds(new Windows.Foundation.Rect(0,0,element.ActualWidth,element.ActualHeight));
-                return bounds.X+bounds.Width/2;
+                for(DependencyObject? node=element;node!=null && node!=PageContent;node=VisualTreeHelper.GetParent(node))
+                    if(node is UIElement { Visibility:Visibility.Collapsed }) return false;
+                return true;
             }
-            double center=Center((FontIcon)PaneToggle.Content);
-            Check(menuButtons.All(b=>Math.Abs(Center((FontIcon)((StackPanel)b.Content).Children[0])-center)<1),"Collapsed navigation and settings icons align with menu toggle in "+language);
-            Check(Math.Abs(center-(Pane.ActualWidth-Pane.BorderThickness.Right+Pane.BorderThickness.Left)/2)<1,"Collapsed icons stay centered in "+language);
+            var overflow=Descendants(PageContent).OfType<FrameworkElement>()
+                .Where(e=>e is TextBox or ComboBox or NumberBox or Button or Expander)
+                .Where(e=>e.ActualWidth>0 && Shown(e))
+                .Where(e=>
+                {
+                    var bounds=e.TransformToVisual(PageContent).TransformBounds(new Windows.Foundation.Rect(0,0,e.ActualWidth,e.ActualHeight));
+                    return bounds.Left < -2 || bounds.Right>PageContent.ActualWidth+2;
+                }).Select(e=>AutomationProperties.GetAutomationId(e) is { Length:>0 } id ? id : e.GetType().Name).ToArray();
+            Check(overflow.Length==0,"Page controls fit within the workspace in "+state+": "+string.Join(", ",overflow));
         }
         try
         {
             Check(Splash.Visibility==Visibility.Collapsed && LoadingProgress.Value==100,"Loading screen completes before main interaction");
+            Check(smokeLoadingControlsHidden,"Menu button and navigation remain hidden throughout loading, including the ready frame");
+            Check(PaneToggle.Visibility==Visibility.Visible && Shell.Visibility==Visibility.Visible && PaneToggle.IsEnabled,"Navigation appears only after the loading overlay is dismissed");
+            Check(!Backdrop.IsHitTestVisible && !Backdrop.IsTabStop && Descendants(Backdrop).OfType<Viewbox>().Count(c=>c.ActualWidth>0 && c.ActualHeight>0)==4,"All four RAW background corners render without intercepting pointer or keyboard input");
             Check(splashVisibleMilliseconds>=1950,"Welcome screen remains visible for at least two seconds before dismissal");
 #if MORSE_WINUI
             var presenter=(Microsoft.UI.Windowing.OverlappedPresenter)App.MainWindow.AppWindow.Presenter;
             Check(App.MainWindow.ExtendsContentIntoTitleBar && App.MainWindow.AppWindow.TitleBar.PreferredHeightOption==Microsoft.UI.Windowing.TitleBarHeightOption.Collapsed && App.MainWindow.AppWindow.TitleBar.Height==0,"System caption controls hidden");
-            Check(!presenter.IsResizable && !presenter.IsMaximizable && !presenter.IsMinimizable,"Fixed window presenter flags");
+            Check(!presenter.IsResizable && !presenter.IsMaximizable && presenter.IsMinimizable,"Window size stays fixed while minimizing is enabled");
             var fixedSize=App.MainWindow.AppWindow.Size;
             App.MainWindow.AppWindow.Resize(new Windows.Graphics.SizeInt32(fixedSize.Width+80,fixedSize.Height+60)); await Task.Delay(150);
             Check(App.MainWindow.AppWindow.Size.Equals(fixedSize),"Window dimensions stay locked after a resize request");
             presenter.Maximize(); await Task.Delay(150);
             Check(presenter.State==Microsoft.UI.Windowing.OverlappedPresenterState.Restored && App.MainWindow.AppWindow.Size.Equals(fixedSize),"Maximize request cannot change fixed window");
-            presenter.Minimize(); await Task.Delay(150);
-            Check(presenter.State==Microsoft.UI.Windowing.OverlappedPresenterState.Restored,"Minimize request is restored");
+            await ActionButton("WindowMinimize"); await Task.Delay(250);
+            Check(presenter.State==Microsoft.UI.Windowing.OverlappedPresenterState.Minimized,"Custom minimize button keeps the window in the taskbar");
+            presenter.Restore(); App.MainWindow.Activate(); await Task.Delay(200);
+            Check(presenter.State==Microsoft.UI.Windowing.OverlappedPresenterState.Restored && App.MainWindow.AppWindow.Size.Equals(fixedSize),"Restoring after minimize preserves the fixed window size");
             var originalPosition=App.MainWindow.AppWindow.Position;
             if(Environment.GetEnvironmentVariable("MORSECORE_DESKTOP_MOUSE_SMOKE")=="1")
             {
@@ -96,12 +143,18 @@ public sealed partial class MainPage
                 Check(mouse.SecondMovedWhileHeld && mouse.SecondStoppedOnRelease,"A second mouse drag also stops on release");
                 Check(mouse.EnteredLoops>0 && mouse.EnteredLoops==mouse.ExitedLoops,"Native mouse move loops all exit without another click");
                 Check(App.MainWindow.AppWindow.Size.Equals(fixedSize),"Mouse dragging preserves fixed dimensions");
+                var menuBounds=PaneToggle.TransformToVisual(Root).TransformBounds(new Windows.Foundation.Rect(0,0,PaneToggle.ActualWidth,PaneToggle.ActualHeight));
+                Check(WindowChrome.IsClientHitTarget(App.MainWindow,WindowChrome.ScreenPoint(App.MainWindow,menuBounds.X+menuBounds.Width/2,menuBounds.Y+menuBounds.Height/2,XamlRoot.RasterizationScale)),"Header menu button is a native client target, not a window drag target");
                 mouseDragTested=true;
             }
             App.MainWindow.AppWindow.Move(originalPosition);
 #endif
             preferences=preferences with { Theme="light",Language="tr",Alphabet=MorseAlphabet.Latin,ReduceMotion=true,Collapsed=false,CheckUpdates=false };
             ApplyTheme(); source="Merhaba dünya!"; Rebuild(); await ConvertNow();
+            await ActionButton("PaneToggle"); await Task.Delay(250);
+            Check(preferences.Collapsed && store.Load().Collapsed && Math.Abs(Pane.ActualWidth-72)<2,"Header menu button collapses the sidebar and saves its state");
+            await ActionButton("PaneToggle"); await Task.Delay(250);
+            Check(!preferences.Collapsed && !store.Load().Collapsed && Math.Abs(Pane.ActualWidth-240)<2,"Header menu button restores the expanded sidebar");
             Check(result?.Text=="-- . .-. .... .- -... .- / -.. ..- -. -.-- .- -.-.-- ","Turkish conversion through native DLL");
             Check(result!.Statistics.InputCharacters==14 && result.Statistics.Words==2,"Unicode character and word counters");
             await Snapshot(Path.Combine(directory,"light.png"));
@@ -154,16 +207,42 @@ public sealed partial class MainPage
             var search=Descendants(Root).OfType<TextBox>().First(b=>Equals(b.Header,T("searchTerms")));
             search.Text="QRL"; await Task.Delay(70);
             Check(Descendants(PageContent).OfType<TextBlock>().Any(b=>b.Text=="QRL?"),"Radio glossary search filters real definitions");
-            Navigate("radio");
+            if(radioExpanded) await ActionButton("Nav-radio");
+            await ActionButton("Nav-radio");
+            Check(radioChildren?.Visibility==Visibility.Visible && radioChildren.Children.Count==3,"Radio expands into three sidebar destinations");
+            await ActionButton("Nav-qsoAssistant");
+            Check(page=="qsoAssistant" && Breadcrumb.Text==T("qsoAssistant") && Descendants(PageContent).OfType<TextBlock>().Any(b=>b.Text==T("stationRequired")),"Contact preparation explains the missing station");
+            await ActionButton("stationProfiles");
+            Check(page=="stationProfiles" && Breadcrumb.Text==T("stationProfiles"),"Missing-station action opens the station subpage");
+            Check(!Descendants(PageContent).OfType<ComboBox>().Any(c=>c.ItemsSource is string[] items && items.SequenceEqual(RadioPages.Select(T))),"Radio subpages no longer repeat the sidebar as a page selector");
             var callInput=Descendants(Root).OfType<TextBox>().First(b=>AutomationProperties.GetAutomationId(b)=="callSign");
             callInput.Text="TA1PDM"; await Task.Delay(100); await ActionButton("analyzeCall");
             Check(stationDraft.CountryId=="TR" && stationDraft.ClassId=="A","Station recognition selects Turkish class A and region");
+            await ExpandSection("StationOptional");
             Descendants(Root).OfType<TextBox>().First(b=>AutomationProperties.GetAutomationId(b)=="operatorName").Text="Ali";
             Descendants(Root).OfType<TextBox>().First(b=>AutomationProperties.GetAutomationId(b)=="qth").Text="Ankara";
             await ActionButton("saveStation");
             Check(ActiveStation?.CallSign=="TA1PDM" && radioStore.LoadProfiles().Profiles.Count==1,"Station profile saves through UI");
-            radioTab=1; BuildPage(); await ActionButton("prepareMessage");
+            preferences=preferences with { Theme="light" }; ApplyTheme(); Rebuild();
+            await ExpandSection("CountryRules");
+            Check(Descendants(PageContent).OfType<Border>().Any(b=>AutomationProperties.GetAutomationId(b)=="BandGuideCard" && AutomationProperties.GetName(b)=="20m: 14 MHz – 14.35 MHz; 75 W; "+T("powerOutput")),"Band infographic shows exact Turkish class A frequency limits and transmitter output");
+            await GuideSnapshot("band-guide-light.png");
+            stationDraft=stationDraft with { ClassId="B" }; BuildPage(); await ExpandSection("CountryRules");
+            Check(Descendants(PageContent).OfType<Border>().Any(b=>AutomationProperties.GetName(b)=="40m: 7 MHz – 7.1 MHz; 5 W; "+T("powerOutput")) && Descendants(PageContent).OfType<TextBlock>().Any(b=>b.Text==T("trHomebuilt")),"Class B infographic preserves the 5 W home-built equipment condition");
+            stationDraft=stationDraft with { CountryId="DE",ClassId="N" }; preferences=preferences with { Language="de",Theme="dark" }; Rebuild(); await ExpandSection("CountryRules");
+            Check(Descendants(PageContent).OfType<Border>().Any(b=>AutomationProperties.GetName(b)=="2m: 144 MHz – 146 MHz; 6.1 W; "+T("guide.erp")),"German class N uses ERP without rounding its 6.1 W limit");
+            await GuideSnapshot("band-guide-german.png");
+            stationDraft=stationDraft with { ClassId="A" }; BuildPage(); await ExpandSection("CountryRules");
+            Check(Descendants(PageContent).OfType<Border>().Any(b=>AutomationProperties.GetName(b)=="20m: 14 MHz – 14.35 MHz; 750 W; "+T("guide.pep")),"German class A uses PEP rather than ERP or transmitter output");
+            stationDraft=stationDraft with { CountryId="RU",ClassId="1" }; BuildPage(); await ExpandSection("CountryRules");
+            Check(!Descendants(PageContent).OfType<Border>().Any(b=>AutomationProperties.GetAutomationId(b)=="BandGuideCard") && Descendants(PageContent).OfType<TextBlock>().Any(b=>b.Text==T("guide.empty")),"Missing country coverage shows an explanation without invented band limits");
+            stationDraft=stationDraft with { CountryId="TR",ClassId="" }; BuildPage(); await ExpandSection("CountryRules");
+            Check(!Descendants(PageContent).OfType<Border>().Any(b=>AutomationProperties.GetAutomationId(b)=="BandGuideCard") && Descendants(PageContent).OfType<TextBlock>().Any(b=>b.Text==T("selectClass")),"Band guide asks for a licence class before showing its ranges");
+            preferences=preferences with { Language="tr" }; LoadStation(ActiveStation!); countryRulesExpanded=false; Rebuild();
+            await ActionButton("Nav-qsoAssistant"); await ActionButton("prepareMessage");
             Check(qsoPreview=="QRL? DE TA1PDM K" && qsoMorse.Contains(" / ",StringComparison.Ordinal),"QRL message prepares Latin calls and Morse");
+            await ActionButton("Nav-qsoLog"); await ActionButton("Nav-qsoAssistant");
+            Check(qsoPreview=="QRL? DE TA1PDM K" && qsoTextBox!.Text==qsoPreview,"Prepared message survives navigation between radio subpages");
             var other=Descendants(Root).OfType<TextBox>().First(b=>AutomationProperties.GetAutomationId(b)=="otherCall"); other.Text="DL1ABC"; await Task.Delay(100);
             Check(qsoPreview=="" && qsoTextBox!.Text=="","Changing QSO data invalidates the visible preview");
             sentRst="579"; receivedRst="589"; qsoMessage="TNX FER CALL";
@@ -174,12 +253,17 @@ public sealed partial class MainPage
             var wavDeadline=DateTimeOffset.UtcNow.AddSeconds(5);
             while(new FileInfo(Path.Combine(directory,"qso-preview.wav")).Length==0 && DateTimeOffset.UtcNow<wavDeadline) await Task.Delay(50);
             Check(new FileInfo(Path.Combine(directory,"qso-preview.wav")).Length>44,"QSO WAV button writes to a picker-reserved file");
-            await ActionButton("saveQso");
+            await ExpandSection("QsoRecord"); await ActionButton("saveQso");
             Check(radioStore.Recent(true).Count==1 && radioStore.Recent(false).Count==0,"UI saves a practice QSO separately");
             var kind=Descendants(Root).OfType<ToggleSwitch>().First(b=>Equals(b.Header,T("practiceRecord"))); kind.IsOn=false;
             await ActionButton("saveQso");
             Check(radioStore.Recent(false).Count==1 && radioStore.Recent(false)[0].Utc.Offset==TimeSpan.Zero,"External radio contact logs in UTC");
-            radioTab=2; BuildPage(); await Snapshot(Path.Combine(directory,"qso-log.png"));
+            await ActionButton("Nav-qsoLog"); await Snapshot(Path.Combine(directory,"qso-log.png"));
+            Check(PageContent.Children.OfType<Button>().Any(b=>AutomationProperties.GetAutomationId(b)=="logbook.map"),"Contact map is directly accessible outside search filters");
+            await ActionButton("Nav-radio");
+            Check(radioChildren?.Visibility==Visibility.Collapsed && page=="qsoLog","Collapsing the radio group preserves the current page");
+            await ActionButton("Nav-radio");
+            await ExpandSection("LogFileActions");
             foreach(bool adif in new[]{false,true})
             {
                 string path=Path.Combine(directory,adif?"qso-export.adi":"qso-export.csv"); smokeSavePath=path; File.WriteAllText(path,"");
@@ -202,7 +286,7 @@ public sealed partial class MainPage
             await ActionButton("logbook.save");
             await WaitFor(()=>logDraft==null,"Saving an edited QSO closes its editor");
             Check(radioStore.Recent(showPracticeLog).Single() is { GridSquare:"KN40",Note:"UI edit test" } updated && updated.Id==editedId,"QSO editing preserves identity and saves location and notes");
-            Descendants(PageContent).OfType<Expander>().First(e=>Equals(e.Header,T("logbook.filters"))).IsExpanded=true; Root.UpdateLayout();
+            Descendants(PageContent).OfType<Expander>().First(e=>Equals(e.Header,T("logbook.filters"))).IsExpanded=false; Root.UpdateLayout();
             await ActionButton("logbook.map");
             await WaitFor(()=>Descendants(PageContent).OfType<Microsoft.UI.Xaml.Shapes.Ellipse>().Any(),"Offline contact map plots a recorded locator");
             Check(Descendants(PageContent).OfType<Canvas>().All(c=>c.FlowDirection==FlowDirection.LeftToRight),"Contact map uses geographic LTR coordinates");
@@ -216,8 +300,17 @@ public sealed partial class MainPage
             Check(radioStore.Query(new(Practice:showPracticeLog,Call:"G4ABCD")).Total==1,"Imported ADIF contact can be found in the log");
             Check(radioStore.PreviewImport(AdifImport.Parse("<QSO_DATE:8>20261016<TIME_ON:6>120000<CALL:6>G4ABCD<STATION_CALLSIGN:6>TA1PDM<FREQ:6>14.025<MODE:2>CW<EOR>",new("TA1PDM","TR",showPracticeLog)).Records).Duplicates==1,"Importing the same exact contact is recognized as a duplicate");
             logShowMap=false; appliedLogQuery=null; ResetLogPage();
-            preferences=preferences with { Language="ar" }; Rebuild(); radioTab=1; BuildPage(); await Snapshot(Path.Combine(directory,"qso-arabic.png"));
+            preferences=preferences with { Language="ar" }; Rebuild(); await ActionButton("Nav-qsoAssistant"); await Snapshot(Path.Combine(directory,"qso-arabic.png"));
             Check(qsoTextBox!.FlowDirection==FlowDirection.LeftToRight && qsoCodeBox!.FlowDirection==FlowDirection.LeftToRight,"Arabic QSO calls and Morse stay LTR");
+            await ExpandSection("CountryRules");
+            await GuideSnapshot("band-guide-arabic.png");
+            Check(Descendants(PageContent).OfType<Border>().Any(b=>AutomationProperties.GetName(b)=="20m: 14 MHz – 14.35 MHz; 75 W; "+T("powerOutput")),"Arabic infographic keeps the same numeric frequency and power references");
+            ContentScroll.ChangeView(null,0,null,true); countryRulesExpanded=false;
+            SetCollapsed(true,false);
+            await Task.Delay(120);
+            Check(radioChildren?.Visibility==Visibility.Collapsed,"Collapsed sidebar hides radio children in Arabic");
+            CheckCollapsedAlignment("ar radio"); SetCollapsed(false,false); await Task.Delay(120);
+            Check(radioChildren?.Visibility==Visibility.Visible && radioChildren.FlowDirection==FlowDirection.RightToLeft,"Arabic radio sidebar restores mirrored subpages after expansion");
             preferences=preferences with { Language="tr" }; Rebuild();
             audioWorkspace=1; Navigate("audio"); BuildPage();
             string decoderWave=Path.Combine(directory,"decoder-sos.wav");
@@ -305,7 +398,11 @@ public sealed partial class MainPage
             await ConvertNow();
             foreach(string language in new[]{"en","de","ru","ar","tr"})
             {
-                preferences=preferences with { Language=language }; Rebuild(); await Snapshot(Path.Combine(directory,language+".png")); Check(Menu.Children.Count==6 && menuButtons.Count==6,"Navigation in "+language);
+                preferences=preferences with { Language=language }; Rebuild(); await Snapshot(Path.Combine(directory,language+".png"));
+                Check(menuButtons.Count==6 && RadioPages.All(key=>radioChildren!.Children.OfType<Button>().Any(b=>AutomationProperties.GetAutomationId(b)=="Nav-"+key && AutomationProperties.GetName(b)==T(key))),"Translated radio subpages and main navigation in "+language);
+                double firstMenuY=menuButtons[0].TransformToVisual(Root).TransformPoint(new Windows.Foundation.Point(0,0)).Y;
+                double headingY=Breadcrumb.TransformToVisual(Root).TransformPoint(new Windows.Foundation.Point(0,0)).Y;
+                Check(Math.Abs(firstMenuY-headingY)*XamlRoot!.RasterizationScale<=2,"Navigation starts level with the page heading without a reserved sidebar header in "+language);
                 var save=Descendants(Root).OfType<Button>().First(b=>AutomationProperties.GetAutomationId(b)=="save");
                 var host=(FrameworkElement)((FrameworkElement)save.Parent).Parent;
                 var transform=save.TransformToVisual(host);
@@ -318,8 +415,59 @@ public sealed partial class MainPage
                 Check(Math.Abs(brandBounds.X+brandBounds.Width/2-WindowBar.ActualWidth/2)<1 && Math.Abs(brandBounds.Y+brandBounds.Height/2-(WindowBar.ActualHeight-WindowBar.BorderThickness.Bottom)/2)<1,"Logo and name centered in window title bar in "+language);
                 var closePosition=CloseWindowButton.TransformToVisual(WindowBar).TransformPoint(new Windows.Foundation.Point(0,0));
                 Check(closePosition.X>=WindowBar.ActualWidth-CloseWindowButton.ActualWidth-1,"Close button stays on the right in "+language);
+                var minimizePosition=MinimizeWindowButton.TransformToVisual(WindowBar).TransformPoint(new Windows.Foundation.Point(0,0));
+                Check(minimizePosition.X+MinimizeWindowButton.ActualWidth<=closePosition.X+1 && brandBounds.Right<=minimizePosition.X,"Minimize button stays separate from the centered brand and close button in "+language);
             }
             preferences=preferences with { ReduceMotion=true }; SetCollapsed(true,true); Check(Pane.Width==72,"Reduced motion skips menu animation");
+            SetCollapsed(false,false); preferences=preferences with { Theme="light" }; audioWorkspace=0;
+            foreach(string language in new[]{"tr","en","de","ru","ar"})
+            {
+                preferences=preferences with { Language=language };
+                foreach(string feature in new[]{"converter","files","audio","practice","alphabet","keying","glossary","stationProfiles","qsoAssistant","qsoLog","settings"})
+                {
+                    page=feature; Rebuild(); await Task.Delay(60); Root.UpdateLayout();
+                    CheckPageWidth(language+" "+feature);
+                    if(language=="tr") await Snapshot(Path.Combine(directory,"layout-"+feature+".png"));
+                }
+                foreach(int audioSection in new[]{1,2})
+                {
+                    page="audio"; audioWorkspace=audioSection; Rebuild(); await Task.Delay(60); Root.UpdateLayout();
+                    CheckPageWidth(language+" audio "+audioSection);
+                }
+                audioWorkspace=0;
+            }
+            try
+            {
+                Workspace.Width=640;
+                foreach(string language in new[]{"tr","ar"})
+                {
+                    preferences=preferences with { Language=language };
+                    foreach(string feature in new[]{"alphabet","qsoAssistant","settings"})
+                    {
+                        page=feature; Rebuild();
+                        foreach(var section in Descendants(PageContent).OfType<Expander>().ToArray()) section.IsExpanded=true;
+                        await Task.Delay(100); Root.UpdateLayout(); CheckPageWidth(language+" narrow "+feature);
+                        await Snapshot(Path.Combine(directory,"narrow-"+language+"-"+feature+".png"));
+                    }
+                }
+            }
+            finally { Workspace.Width=double.NaN; }
+            preferences=preferences with { Language="tr",ReduceMotion=false }; page="converter"; Rebuild();
+            Backdrop.SetActive(true);
+            Check(Backdrop.IsAnimating==MotionAllowed(),"RAW background motion follows the system animation preference");
+            Backdrop.SetActive(false); Check(!Backdrop.IsAnimating,"RAW background animation stops when the application is inactive");
+            Backdrop.SetActive(true); Check(Backdrop.IsAnimating==MotionAllowed(),"RAW background animation resumes when the application becomes active");
+            Check((contentAnimation!=null)==MotionAllowed(),"Page transition follows the system and application motion preferences");
+            await Task.Delay(350);
+            Check(contentAnimation==null && PageContent.Opacity==1 && ((TranslateTransform)PageContent.RenderTransform).X==0,"Page transition completes without leaving displaced or transparent content");
+            preferences=preferences with { ReduceMotion=true }; AnimateContent();
+            Check(contentAnimation==null && PageContent.Opacity==1,"Reduced motion skips the page transition");
+            page="settings"; Rebuild();
+            var reduceMotion=Descendants(PageContent).OfType<ToggleSwitch>().First(t=>Equals(t.Header,T("reduceMotion")));
+            reduceMotion.IsOn=false;
+            Check(Backdrop.IsAnimating==MotionAllowed(),"Settings can enable RAW background motion immediately");
+            reduceMotion.IsOn=true;
+            Check(!Backdrop.IsAnimating,"Settings reduced motion immediately freezes the RAW background");
             byte[] updateBytes=System.Text.Encoding.UTF8.GetBytes("UI update verification fixture");
             string updateName="MorseCore-2.0.0-Windows-x64-Setup.exe";
             string updateRoot="https://github.com/mustafamertakceylan/MorseCore/releases/";
@@ -339,13 +487,30 @@ public sealed partial class MainPage
                 updateDialog!.Hide(); await operation;
                 Check(!installingUpdate && updateDialog==null,"Dismissing update confirmation leaves the application open");
             }
+            foreach(string language in new[]{"en","tr","de","ru","ar"})
+            {
+                preferences=preferences with { Language=language,Theme="light",ReduceMotion=true,Collapsed=false,Alphabet=language=="ru"?MorseAlphabet.Russian:language=="ar"?MorseAlphabet.Arabic:MorseAlphabet.Latin };
+                page="converter"; decode=false; result=null;
+                source=language switch { "en"=>"Hello world!","tr"=>"Merhaba dünya!","de"=>"Hallo Welt!","ru"=>"Привет мир",_=>"مرحبا بالعالم" };
+                Rebuild(); ContentScroll.ChangeView(null,0,null,true); await ConvertNow();
+                Check(result is { Text.Length:>0 } && Breadcrumb.Text==T("converter"),"README conversion example and navigation match "+language);
+                await Snapshot(Path.Combine(directory,"readme-converter."+language+".png"),contentOnly:true);
+                preferences=preferences with { Theme="dark" }; Rebuild();
+                await Snapshot(Path.Combine(directory,"readme-dark."+language+".png"),contentOnly:true);
+                preferences=preferences with { Theme="light" }; showPracticeLog=true; appliedLogQuery=null; ResetLogPage(); logShowMap=true; page="qsoLog"; Rebuild();
+                await WaitFor(()=>Descendants(PageContent).OfType<Canvas>().Any() && Descendants(PageContent).OfType<Microsoft.UI.Xaml.Shapes.Ellipse>().Any(),"README contact map shows supplied locations in "+language);
+                var map=Descendants(PageContent).OfType<Canvas>().First();
+                double mapTop=map.TransformToVisual(ContentScroll).TransformPoint(new Windows.Foundation.Point(0,0)).Y+ContentScroll.VerticalOffset;
+                ContentScroll.ChangeView(null,Math.Max(0,mapTop-45),null,true);
+                await Snapshot(Path.Combine(directory,"readme-map."+language+".png"),contentOnly:true);
+            }
         }
         catch(Exception e)
         {
-            failure=e.ToString();
+            failure=e.ToString()+(smokeOperationFailure is { } operation ? "\nOperation failure: "+operation : "");
             try { await Snapshot(Path.Combine(directory,"failure.png")); } catch(Exception) { }
         }
-        var report=new { Passed=failure is null,Checks=checks,Failure=failure,SplashVisibleMilliseconds=Math.Round(splashVisibleMilliseconds,1),Status=Status.Text,Page=page,RadioTab=radioTab,LogCall=logCall,AppliedLogCall=appliedLogQuery?.Call,NativeVersion=version,CatalogVoices=voices,SpeechSynthesized=synthesized,MouseDragTested=mouseDragTested,MouseDragEvidence=mouseDragEvidence,WorkingSetMiB=Math.Round(Process.GetCurrentProcess().WorkingSet64/1048576.0,1) };
+        var report=new { Passed=failure is null,Checks=checks,Failure=failure,SplashVisibleMilliseconds=Math.Round(splashVisibleMilliseconds,1),Status=Status.Text,Page=page,LogCall=logCall,AppliedLogCall=appliedLogQuery?.Call,NativeVersion=version,CatalogVoices=voices,SpeechSynthesized=synthesized,MouseDragTested=mouseDragTested,MouseDragEvidence=mouseDragEvidence,WorkingSetMiB=Math.Round(Process.GetCurrentProcess().WorkingSet64/1048576.0,1) };
         await File.WriteAllTextAsync(Path.Combine(directory,"ui-smoke.json"),JsonSerializer.Serialize(report,new JsonSerializerOptions { WriteIndented=true }));
         var closePeer=new ButtonAutomationPeer(CloseWindowButton);
         ((IInvokeProvider)closePeer.GetPattern(PatternInterface.Invoke)).Invoke();

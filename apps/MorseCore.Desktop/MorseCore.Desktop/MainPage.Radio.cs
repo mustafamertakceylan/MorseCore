@@ -1,4 +1,3 @@
-using System.Globalization;
 using Microsoft.UI.Xaml.Media;
 using MorseCore.AppCore.Radio;
 using MorseCore.Interop;
@@ -10,14 +9,13 @@ public sealed partial class MainPage
 {
     private StationDocument? stations;
     private StationProfile stationDraft=new();
-    private int radioTab;
     private string operatingCountry="",operatingClass="",operatingRegion="",manualCall="";
     private StationMode operatingMode;
     private string otherCall="",sentRst="",receivedRst="",qsoMessage="",qsoNote="",qsoGrid="",qsoPreview="",qsoMorse="";
     private double qsoFrequency=14.025;
     private QsoStage qsoStage;
     private bool practiceLog=true,showPracticeLog=true;
-    private bool operatingDetailsExpanded;
+    private bool operatingDetailsExpanded,stationDetailsExpanded,qsoRecordExpanded,countryRulesExpanded;
     private TextBox? qsoTextBox,qsoCodeBox;
     private void InvalidateQso()
     {
@@ -37,10 +35,9 @@ public sealed partial class MainPage
     private void BuildRadio()
     {
         if(stations==null) { stations=radioStore.LoadProfiles(); if(ActiveStation is { } active) LoadStation(active); }
-        Heading(T("radio"),T("radioLocal"));
-        PageContent.Children.Add(Choice("",[T("stationProfiles"),T("qsoAssistant"),T("qsoLog")],radioTab,i=> { if(radioTab==i) return; radioTab=i; BuildPage(); }));
+        Heading(T(page),T(page+"Hint"));
         if(radioStore.Warning!=null) PageContent.Children.Add(Label(T("radioDataError"),14,true));
-        switch(radioTab) { case 0: BuildStationProfiles(); break; case 1: BuildQso(); break; case 2: BuildQsoLog(); break; }
+        switch(page) { case "stationProfiles": BuildStationProfiles(); break; case "qsoAssistant": BuildQso(); break; case "qsoLog": BuildQsoLog(); break; }
     }
     private void LoadStation(StationProfile profile)
     {
@@ -51,9 +48,8 @@ public sealed partial class MainPage
     {
         var stack=new StackPanel { Spacing=12 };
         var profiles=stations!.Profiles.ToArray();
-        stack.Children.Add(Choice(T("stationProfiles"),new[]{T("newStation")}.Concat(profiles.Select(p=>$"{p.Label} · {p.CallSign}")),Array.FindIndex(profiles,p=>p.Id==stationDraft.Id)+1,i=>
+        stack.Children.Add(Choice(T("stationPicker"),new[]{T("newStation")}.Concat(profiles.Select(p=>p.Label==p.CallSign?p.CallSign:$"{p.Label} · {p.CallSign}")),Array.FindIndex(profiles,p=>p.Id==stationDraft.Id)+1,i=>
         { if(i==0) { if(!profiles.Any(p=>p.Id==stationDraft.Id)) return; stationDraft=new(); } else { if(stationDraft.Id==profiles[i-1].Id) return; LoadStation(profiles[i-1]); } BuildPage(); }));
-        stack.Children.Add(RadioInput("profileName",stationDraft.Label,v=>stationDraft=stationDraft with { Label=v }));
         stack.Children.Add(RadioInput("callSign",stationDraft.CallSign,v=>stationDraft=stationDraft with { CallSign=v },true,32));
         var analysis=Label("",14,true); stack.Children.Add(analysis);
         stack.Children.Add(Action("analyzeCall",()=>
@@ -70,12 +66,18 @@ public sealed partial class MainPage
         if(stationDraft.CallSign.Length>0)
         { try { analysis.Text=CallDescription(CallSigns.Parse(stationDraft.CallSign)); } catch(ArgumentException) { analysis.Text=T("invalidCall"); } }
         var countries=RadioCatalog.Data.Countries;
-        stack.Children.Add(Choice(T("homeCountry"),countries.Select(CountryName),Math.Max(0,Array.FindIndex(countries,c=>c.Id==stationDraft.CountryId)),i=>
-        { if(stationDraft.CountryId==countries[i].Id) return; stationDraft=stationDraft with { CountryId=countries[i].Id,ClassId="" }; BuildPage(); }));
+        var homeCountry=Choice(T("homeCountry"),countries.Select(CountryName),Math.Max(0,Array.FindIndex(countries,c=>c.Id==stationDraft.CountryId)),i=>
+        { if(stationDraft.CountryId==countries[i].Id) return; stationDraft=stationDraft with { CountryId=countries[i].Id,ClassId="" }; BuildPage(); });
         var country=RadioCatalog.Country(stationDraft.CountryId)!;
-        stack.Children.Add(Choice(T("licenseClass"),new[]{T("selectClass")}.Concat(country.Classes.Select(ClassName)),Array.IndexOf(country.Classes,stationDraft.ClassId)+1,i=>stationDraft=stationDraft with { ClassId=i==0?"":country.Classes[i-1] }));
-        stack.Children.Add(RadioInput("operatorName",stationDraft.OperatorName,v=>stationDraft=stationDraft with { OperatorName=v }));
-        stack.Children.Add(RadioInput("qth",stationDraft.Qth,v=>stationDraft=stationDraft with { Qth=v }));
+        var licenseClass=Choice(T("licenseClass"),new[]{T("selectClass")}.Concat(country.Classes.Select(ClassName)),Array.IndexOf(country.Classes,stationDraft.ClassId)+1,i=>stationDraft=stationDraft with { ClassId=i==0?"":country.Classes[i-1] });
+        stack.Children.Add(Columns(260,2,homeCountry,licenseClass));
+        var details=new StackPanel { Spacing=12 };
+        details.Children.Add(Columns(260,2,RadioInput("profileName",stationDraft.Label,v=>stationDraft=stationDraft with { Label=v }),RadioInput("operatorName",stationDraft.OperatorName,v=>stationDraft=stationDraft with { OperatorName=v })));
+        details.Children.Add(RadioInput("qth",stationDraft.Qth,v=>stationDraft=stationDraft with { Qth=v }));
+        var optional=new Expander { Header=T("stationOptional"),Content=details,IsExpanded=stationDetailsExpanded,HorizontalAlignment=HorizontalAlignment.Stretch,HorizontalContentAlignment=HorizontalAlignment.Stretch };
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(optional,"StationOptional");
+        optional.Expanding+=(_,_)=>stationDetailsExpanded=true; optional.Collapsed+=(_,_)=>stationDetailsExpanded=false;
+        stack.Children.Add(optional);
         stack.Children.Add(Label(T("callOfflineNote"),12,true));
         var controls=Row();
         controls.Children.Add(Action("saveStation",()=>
@@ -108,25 +110,6 @@ public sealed partial class MainPage
         }
         return value;
     }
-    private void BuildCountryRules(RadioCountry country,string license)
-    {
-        var stack=new StackPanel { Spacing=8 };
-        stack.Children.Add(Label(T("countryRules")+" · "+CountryName(country),18));
-        stack.Children.Add(Label(T(country.NotesKey),13,true));
-        stack.Children.Add(Label(T("rulesCoverage"),12,true));
-        stack.Children.Add(Label(T("rulesReviewed")+" · "+RadioCatalog.Data.ReviewedOn.ToString("yyyy-MM-dd",CultureInfo.InvariantCulture),12,true));
-        foreach(var band in country.Bands)
-        {
-            var power=band.Powers.FirstOrDefault(p=>p.ClassId==license); if(power==null) continue;
-            string basis=power.Basis=="output"?T("powerOutput"):power.Basis;
-            var row=Label($"{band.Band} · {band.StartHz/1_000_000m:0.######}–{band.EndHz/1_000_000m:0.######} MHz · {power.Watts} W {basis}",13);
-            row.FlowDirection=FlowDirection.LeftToRight; stack.Children.Add(row);
-            if(band.ConditionsKey!="bandConditions") stack.Children.Add(Label(T(band.ConditionsKey),12,true));
-        }
-        foreach(var source in RadioCatalog.Data.Sources.Where(s=>country.SourceIds.Contains(s.Id)))
-            stack.Children.Add(new HyperlinkButton { Content=source.Title+" · "+source.Section,NavigateUri=new Uri(source.Url),HorizontalAlignment=HorizontalAlignment.Left,FontSize=12,Padding=new Thickness(0),Foreground=Brush("AccentInkBrush") });
-        PageContent.Children.Add(Card(stack));
-    }
     private OperatingCall CurrentOperatingCall()
     {
         var station=ActiveStation ?? throw new InvalidOperationException("A station profile is required.");
@@ -136,7 +119,7 @@ public sealed partial class MainPage
     private void BuildQso()
     {
         if(ActiveStation is not { } station)
-        { PageContent.Children.Add(Label(T("stationRequired"))); PageContent.Children.Add(Action("stationProfiles",()=> { radioTab=0; BuildPage(); return Task.CompletedTask; })); return; }
+        { PageContent.Children.Add(Label(T("stationRequired"))); PageContent.Children.Add(Action("stationProfiles",()=> { Navigate("stationProfiles"); return Task.CompletedTask; },"\uE77B",true)); return; }
         if(operatingCountry.Length==0) LoadStation(station);
         var stack=new StackPanel { Spacing=12 };
         var profiles=stations!.Profiles.ToArray();
@@ -155,14 +138,15 @@ public sealed partial class MainPage
         try { var call=CurrentOperatingCall(); identity.Text=call.CallSign+" · "+T(call.ExplanationKey); }
         catch(ArgumentException) { identity.Text=T("invalidCall"); }
         stack.Children.Add(identity);
-        stack.Children.Add(details);
+        var operatingFields=details.Children.Cast<FrameworkElement>().ToArray(); details.Children.Clear();
+        stack.Children.Add(Columns(260,2,operatingFields));
         var frequency=new NumberBox { Header=T("qsoFrequency"),Value=qsoFrequency,Minimum=0.000001,Maximum=300_000,SpinButtonPlacementMode=NumberBoxSpinButtonPlacementMode.Compact,FlowDirection=FlowDirection.LeftToRight };
         frequency.ValueChanged+=(_,_)=> { qsoFrequency=frequency.Value; InvalidateQso(); }; stack.Children.Add(frequency);
         var bandInfo=Label("",13,true); bandInfo.Visibility=Visibility.Collapsed; stack.Children.Add(bandInfo);
         stack.Children.Add(Action("checkBand",()=> { var match=RadioCatalog.Assess(operatingCountry,operatingClass,QsoHz()); bandInfo.Text=BandDescription(match); bandInfo.Visibility=Visibility.Visible; return Task.CompletedTask; },"\uE73E"));
         string callSummary;
         try { callSummary=CurrentOperatingCall().CallSign; } catch(ArgumentException) { callSummary=station.CallSign; }
-        var setup=new Expander { Header=$"{callSummary} · {qsoFrequency:0.######} MHz · {CountryName(country)} ({ClassName(operatingClass)})",Content=stack,IsExpanded=operatingDetailsExpanded,HorizontalAlignment=HorizontalAlignment.Stretch };
+        var setup=new Expander { Header=$"{callSummary} · {qsoFrequency:0.######} MHz · {CountryName(country)} ({ClassName(operatingClass)})",Content=stack,IsExpanded=operatingDetailsExpanded,HorizontalAlignment=HorizontalAlignment.Stretch,HorizontalContentAlignment=HorizontalAlignment.Stretch };
         setup.Expanding+=(_,_)=>operatingDetailsExpanded=true;
         setup.Collapsed+=(_,_)=> { operatingDetailsExpanded=false; try { setup.Header=$"{CurrentOperatingCall().CallSign} · {qsoFrequency:0.######} MHz · {CountryName(country)} ({ClassName(operatingClass)})"; } catch(ArgumentException) { } };
         PageContent.Children.Add(setup);
@@ -174,15 +158,13 @@ public sealed partial class MainPage
     {
         var stack=new StackPanel { Spacing=12 };
         string[] stages=["checkFrequency","generalCall","answerCall","signalReport","freeMessage","closeQso"];
-        stack.Children.Add(Choice(T("qsoStep"),stages.Select(T),(int)qsoStage,i=> { if(qsoStage==(QsoStage)i) return; qsoStage=(QsoStage)i; InvalidateQso(); BuildPage(); }));
-        stack.Children.Add(RadioInput("otherCall",otherCall,v=> { otherCall=v; InvalidateQso(); },true,32));
-        var reports=Row();
-        reports.Children.Add(RadioInput("sentRst",sentRst,v=> { sentRst=v; InvalidateQso(); },true,3));
-        reports.Children.Add(RadioInput("receivedRst",receivedRst,v=>receivedRst=v,true,3));
+        stack.Children.Add(Columns(260,2,Choice(T("qsoStep"),stages.Select(T),(int)qsoStage,i=> { if(qsoStage==(QsoStage)i) return; qsoStage=(QsoStage)i; InvalidateQso(); BuildPage(); }),RadioInput("otherCall",otherCall,v=> { otherCall=v; InvalidateQso(); },true,32)));
+        var reports=Columns(220,2,RadioInput("sentRst",sentRst,v=> { sentRst=v; InvalidateQso(); },true,3),RadioInput("receivedRst",receivedRst,v=>receivedRst=v,true,3));
         if(qsoStage==QsoStage.Report) { stack.Children.Add(reports); stack.Children.Add(Label(T("rstHint"),12,true)); }
         if(qsoStage==QsoStage.Message) stack.Children.Add(RadioInput("freeMessage",qsoMessage,v=> { qsoMessage=v; InvalidateQso(); },false,2000));
         var preview=new TextBox { Header=T("qsoPreview"),Text=qsoPreview,IsReadOnly=true,AcceptsReturn=true,TextWrapping=TextWrapping.Wrap,MinHeight=100,FlowDirection=FlowDirection.LeftToRight };
         var morse=new TextBox { Header=T("morseInput"),Text=qsoMorse,IsReadOnly=true,AcceptsReturn=true,TextWrapping=TextWrapping.Wrap,MinHeight=90,FontFamily=new FontFamily("Consolas"),FlowDirection=FlowDirection.LeftToRight };
+        morse.Background=Brush("ResultBrush"); morse.MinHeight=preview.MinHeight=130;
         qsoTextBox=preview; qsoCodeBox=morse;
         stack.Children.Add(Action("prepareMessage",()=>
         {
@@ -192,25 +174,30 @@ public sealed partial class MainPage
             string encoded=CwMessages.Encode(prepared); qsoPreview=preview.Text=prepared; qsoMorse=morse.Text=encoded;
             SetStatus(BandDescription(RadioCatalog.Assess(operatingCountry,operatingClass,QsoHz()))); return Task.CompletedTask;
         },"\uE8A5",true));
-        stack.Children.Add(preview); stack.Children.Add(morse);
+        stack.Children.Add(Columns(300,2,preview,morse));
         var actions=Row();
         actions.Children.Add(Action("play",()=>qsoMorse.Length>0?PlayMorse(qsoMorse,'/'):Task.CompletedTask,"\uE768"));
         actions.Children.Add(Action("stop",()=> { StopPlayback(); return Task.CompletedTask; },"\uE71A"));
         actions.Children.Add(Action("copy",()=> { if(qsoPreview.Length>0) { var data=new DataPackage(); data.SetText(qsoPreview); Clipboard.SetContent(data); SetStatus(T("copied")); } return Task.CompletedTask; },"\uE8C8"));
         actions.Children.Add(Action("exportWav",async()=> { string snapshot=qsoMorse; var settings=preferences; if(snapshot.Length==0) return; string? path=await SavePath("wav","qso"); if(path!=null) await Task.Run(()=>MorseAudio.WriteWav(path,snapshot,new(settings.Wpm,settings.Frequency),'/')); },"\uE74E"));
         stack.Children.Add(actions); WrapActions(actions,stack); stack.Children.Add(Label(T("qsoProcedureNote"),12,true));
+        PageContent.Children.Add(Card(stack));
+        var record=new StackPanel { Spacing=12 };
         var practice=new ToggleSwitch { Header=T("practiceRecord"),IsOn=practiceLog,OnContent=T("practice"),OffContent=T("externalQso") };
-        practice.Toggled+=(_,_)=>practiceLog=practice.IsOn; stack.Children.Add(practice);
-        stack.Children.Add(RadioInput("qsoNote",qsoNote,v=>qsoNote=v,false,4000));
-        stack.Children.Add(RadioInput("logbook.grid",qsoGrid,v=>qsoGrid=v,true,12));
-        stack.Children.Add(Label(T("logbook.locationHint"),12,true));
-        stack.Children.Add(Action("saveQso",()=>
+        practice.Toggled+=(_,_)=>practiceLog=practice.IsOn; record.Children.Add(practice);
+        record.Children.Add(RadioInput("qsoNote",qsoNote,v=>qsoNote=v,false,4000));
+        record.Children.Add(RadioInput("logbook.grid",qsoGrid,v=>qsoGrid=v,true,12));
+        record.Children.Add(Label(T("logbook.locationHint"),12,true));
+        record.Children.Add(Action("saveQso",()=>
         {
             var call=CurrentOperatingCall();
             if(call.NeedsConfirmation && string.IsNullOrWhiteSpace(manualCall)) { SetStatus(T(call.ExplanationKey)); return Task.CompletedTask; }
             var match=RadioCatalog.Assess(operatingCountry,operatingClass,QsoHz());
             radioStore.Append(new() { OwnCall=call.CallSign,OtherCall=CallSigns.Parse(otherCall).Normalized,CountryId=operatingCountry,Band=match.Band?.Band ?? AdifBands.FromFrequency(QsoHz()) ?? "",FrequencyHz=QsoHz(),SentRst=sentRst,ReceivedRst=receivedRst,Practice=practiceLog,Note=qsoNote,GridSquare=qsoGrid.Trim().ToUpperInvariant() }); SetStatus(T("saved")); return Task.CompletedTask;
         },"\uE74E"));
-        PageContent.Children.Add(Card(stack));
+        var recording=new Expander { Header=T("qsoRecordDetails"),Content=record,IsExpanded=qsoRecordExpanded,HorizontalAlignment=HorizontalAlignment.Stretch,HorizontalContentAlignment=HorizontalAlignment.Stretch };
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(recording,"QsoRecord");
+        recording.Expanding+=(_,_)=>qsoRecordExpanded=true; recording.Collapsed+=(_,_)=>qsoRecordExpanded=false;
+        PageContent.Children.Add(recording);
     }
 }

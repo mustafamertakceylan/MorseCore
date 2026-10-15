@@ -21,14 +21,15 @@ public sealed partial class MainPage
         appearance.Children.Add(Choice(T("language"),Localizer.LanguageNames,Array.IndexOf(Localizer.Languages,preferences.Language),i=>
         { StopPlayback(); preferences=preferences with { Language=Localizer.Languages[i] }; SavePreferences(); Rebuild(); AnimateContent(); }));
         var motion=new ToggleSwitch { Header=T("reduceMotion"),IsOn=preferences.ReduceMotion };
-        motion.Toggled+=(_,_)=> { preferences=preferences with { ReduceMotion=motion.IsOn }; SavePreferences(); };
-        appearance.Children.Add(motion); PageContent.Children.Add(Card(appearance));
+        motion.Toggled+=(_,_)=> { preferences=preferences with { ReduceMotion=motion.IsOn }; SavePreferences(); UpdateBackdropMotion(); };
+        appearance.Children.Add(motion);
         var conversions=new StackPanel { Spacing=18 };
         conversions.Children.Add(AlphabetChoice());
         conversions.Children.Add(Choice(T("separator"),["/","|","#","*"],"/|#*".IndexOf(preferences.Separator),i=>
         { preferences=preferences with { Separator="/|#*"[i] }; result=null; revision++; SavePreferences(); }));
         conversions.Children.Add(Label(T("outputFolder"),13,true)); conversions.Children.Add(Label(preferences.OutputDirectory,14));
-        conversions.Children.Add(Action("chooseFolder",ChooseDirectory)); PageContent.Children.Add(Card(conversions));
+        conversions.Children.Add(Action("chooseFolder",ChooseDirectory));
+        PageContent.Children.Add(Columns(340,2,Card(appearance),Card(conversions)));
         var voices=new StackPanel { Spacing=10 };
         voices.Children.Add(Action("workspaceManageVoices",()=>
         {
@@ -47,7 +48,7 @@ public sealed partial class MainPage
                 { SetStatus(T("voicesLocationInvalid")); return; }
                 preferences=preferences with { SpeechHome=folder.Path }; SavePreferences(); BuildPage();
             }
-        },"\uE8B7")); PageContent.Children.Add(Card(voices));
+        },"\uE8B7"));
         var updates=new StackPanel { Spacing=18 };
         updates.Children.Add(Label(T("updates"),23)); updates.Children.Add(Label($"{T("currentVersion")} {version}",14,true));
         var automatic=new ToggleSwitch { Header=T("updateNotice"),IsOn=preferences.CheckUpdates };
@@ -63,7 +64,8 @@ public sealed partial class MainPage
             }
             updates.Children.Add(Action("openRelease",async()=> { await Launcher.LaunchUriAsync(update.Page); }));
         }
-        PageContent.Children.Add(Card(updates)); BuildCredits(); PageContent.Children.Add(Label(T("about"),12,true));
+        PageContent.Children.Add(Columns(340,2,Card(voices),Card(updates)));
+        BuildCredits(); PageContent.Children.Add(Label(T("about"),12,true));
     }
     private async Task InstallUpdate()
     {

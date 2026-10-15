@@ -1,0 +1,16 @@
+{
+  "guide.title": "CW bantları ve güç sınırları",
+  "guide.country": "Ülke",
+  "guide.ranges": "Referans aralık",
+  "guide.intro": "Her kart bir frekans aralığını gösterir. Güç sınırını ve özel koşulları birlikte oku; aynı bant farklı aralıklara ayrılabilir.",
+  "guide.scope": "Bunlar seçili CW referanslarıdır; yayın izni yerine geçmez. Belgeni ve ülke koşullarını ayrıca kontrol et.",
+  "guide.start": "Alt sınır · dahil",
+  "guide.end": "Üst sınır · hariç",
+  "guide.power": "Güç üst sınırı",
+  "guide.condition": "Özel koşul",
+  "guide.details": "Ülke koşulları ve kaynaklar",
+  "guide.empty": "Bu ülke ve sınıf için tabloda aralık gösterilmiyor. Bu, yayın yasağı anlamına gelmez; resmî kaynağı kontrol et.",
+  "guide.scale": "Her çizgi yalnız kendi kartındaki aralığı gösterir; kartlar ortak ölçekte değildir.",
+  "guide.pep": "Tepe zarf gücü (PEP)",
+  "guide.erp": "Etkin yayılan güç (ERP)"
+}

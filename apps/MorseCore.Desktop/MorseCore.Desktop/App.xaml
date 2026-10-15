@@ -9,11 +9,18 @@
    <ResourceDictionary.ThemeDictionaries>
     <ResourceDictionary x:Key="Light">
      <SolidColorBrush x:Key="CanvasBrush" Color="#FAF8F2"/>
-     <SolidColorBrush x:Key="PaneBrush" Color="#FAF9F7"/>
-     <SolidColorBrush x:Key="CardBrush" Color="#FFFFFF"/>
+     <SolidColorBrush x:Key="PaneBrush" Color="#F7F6F0"/>
+     <SolidColorBrush x:Key="PaneSurfaceBrush" Color="#BFF7F6F0"/>
+     <SolidColorBrush x:Key="WorkspaceSurfaceBrush" Color="#B8EEEFE5"/>
+     <SolidColorBrush x:Key="WorkspaceBrush" Color="#EEEFE5"/>
+     <SolidColorBrush x:Key="CardBrush" Color="#FCFBF7"/>
+     <SolidColorBrush x:Key="InputBrush" Color="#FFFFFF"/>
+     <SolidColorBrush x:Key="ResultBrush" Color="#F0F3E8"/>
+     <SolidColorBrush x:Key="ExpanderHeaderBackground" Color="#F6F6EE"/>
+     <SolidColorBrush x:Key="ExpanderContentBackground" Color="#FCFBF7"/>
      <SolidColorBrush x:Key="InkBrush" Color="#2C2A22"/>
      <SolidColorBrush x:Key="MutedBrush" Color="#78716C"/>
-     <SolidColorBrush x:Key="LineBrush" Color="#E7E4DF"/>
+     <SolidColorBrush x:Key="LineBrush" Color="#D5D9C9"/>
      <SolidColorBrush x:Key="AccentBrush" Color="#5E6A42"/>
      <SolidColorBrush x:Key="AccentSoftBrush" Color="#1F5E6A42"/>
      <SolidColorBrush x:Key="AccentInkBrush" Color="#4E5836"/>
@@ -23,10 +30,17 @@
     <ResourceDictionary x:Key="Default">
      <SolidColorBrush x:Key="CanvasBrush" Color="#46513B"/>
      <SolidColorBrush x:Key="PaneBrush" Color="#5E6A42"/>
+     <SolidColorBrush x:Key="PaneSurfaceBrush" Color="#C45E6A42"/>
+     <SolidColorBrush x:Key="WorkspaceSurfaceBrush" Color="#C43D4935"/>
+     <SolidColorBrush x:Key="WorkspaceBrush" Color="#3D4935"/>
      <SolidColorBrush x:Key="CardBrush" Color="#536048"/>
+     <SolidColorBrush x:Key="InputBrush" Color="#46533D"/>
+     <SolidColorBrush x:Key="ResultBrush" Color="#5A684D"/>
+     <SolidColorBrush x:Key="ExpanderHeaderBackground" Color="#4C5A41"/>
+     <SolidColorBrush x:Key="ExpanderContentBackground" Color="#536048"/>
      <SolidColorBrush x:Key="InkBrush" Color="#FAF8F2"/>
      <SolidColorBrush x:Key="MutedBrush" Color="#E1E6D8"/>
-     <SolidColorBrush x:Key="LineBrush" Color="#A7B596"/>
+     <SolidColorBrush x:Key="LineBrush" Color="#889A76"/>
      <SolidColorBrush x:Key="AccentBrush" Color="#5E6A42"/>
      <SolidColorBrush x:Key="AccentSoftBrush" Color="#75845D"/>
      <SolidColorBrush x:Key="AccentInkBrush" Color="#F0F4E7"/>
@@ -62,21 +76,28 @@
     <Setter Property="FontFamily" Value="{StaticResource BodyFont}"/>
     <Setter Property="CornerRadius" Value="12"/>
     <Setter Property="BorderBrush" Value="{ThemeResource LineBrush}"/>
-    <Setter Property="Background" Value="{ThemeResource CardBrush}"/>
+    <Setter Property="Background" Value="{ThemeResource InputBrush}"/>
     <Setter Property="Foreground" Value="{ThemeResource InkBrush}"/>
    </Style>
    <Style TargetType="ComboBox">
     <Setter Property="FontFamily" Value="{StaticResource BodyFont}"/>
     <Setter Property="CornerRadius" Value="8"/>
     <Setter Property="MinWidth" Value="190"/>
-    <Setter Property="Background" Value="{ThemeResource CardBrush}"/>
+    <Setter Property="Background" Value="{ThemeResource InputBrush}"/>
     <Setter Property="Foreground" Value="{ThemeResource InkBrush}"/>
     <Setter Property="BorderBrush" Value="{ThemeResource LineBrush}"/>
    </Style>
    <Style TargetType="NumberBox">
-    <Setter Property="Background" Value="{ThemeResource CardBrush}"/>
+    <Setter Property="Background" Value="{ThemeResource InputBrush}"/>
     <Setter Property="Foreground" Value="{ThemeResource InkBrush}"/>
     <Setter Property="BorderBrush" Value="{ThemeResource LineBrush}"/>
+   </Style>
+   <Style TargetType="Expander">
+    <Setter Property="Background" Value="{ThemeResource CardBrush}"/>
+    <Setter Property="BorderBrush" Value="{ThemeResource LineBrush}"/>
+    <Setter Property="BorderThickness" Value="1"/>
+    <Setter Property="CornerRadius" Value="12"/>
+    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
    </Style>
   </ResourceDictionary>
  </Application.Resources>

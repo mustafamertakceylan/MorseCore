@@ -1,0 +1,16 @@
+{
+  "guide.title": "CW-Bänder und Leistungsgrenzen",
+  "guide.country": "Land",
+  "guide.ranges": "Referenzbereiche",
+  "guide.intro": "Jede Karte zeigt einen Frequenzbereich. Beachte Leistungsgrenze und Sonderbedingungen gemeinsam; ein Band kann mehrere Bereiche haben.",
+  "guide.scope": "Dies sind ausgewählte CW-Referenzen, keine Sendegenehmigung. Prüfe deine Zulassung und die landesspezifischen Bedingungen gesondert.",
+  "guide.start": "Untergrenze · einschließlich",
+  "guide.end": "Obergrenze · ausschließlich",
+  "guide.power": "Leistungsgrenze",
+  "guide.condition": "Sonderbedingung",
+  "guide.details": "Landesbedingungen und Quellen",
+  "guide.empty": "Für dieses Land und diese Klasse sind keine Bereiche aufgeführt. Das bedeutet kein Sendeverbot; prüfe die amtliche Quelle.",
+  "guide.scale": "Jede Linie zeigt nur den Bereich ihrer Karte; die Karten haben keinen gemeinsamen Maßstab.",
+  "guide.pep": "Spitzenhüllkurvenleistung (PEP)",
+  "guide.erp": "Effektive Strahlungsleistung (ERP)"
+}

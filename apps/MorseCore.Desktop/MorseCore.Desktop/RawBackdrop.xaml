@@ -1,0 +1,60 @@
+<UserControl x:Class="MorseCore.Desktop.RawBackdrop"
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ IsHitTestVisible="False" IsTabStop="False" AutomationProperties.AccessibilityView="Raw">
+ <UserControl.Resources>
+  <LinearGradientBrush x:Key="OliveTL" StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#8D9479" Offset="0"/><GradientStop Color="#A9AE96" Offset="1"/></LinearGradientBrush>
+  <LinearGradientBrush x:Key="OliveTR" StartPoint="1,0" EndPoint="0,1"><GradientStop Color="#949A80" Offset="0"/><GradientStop Color="#B2B6A0" Offset="1"/></LinearGradientBrush>
+  <LinearGradientBrush x:Key="OliveBL" StartPoint="0,1" EndPoint="1,0"><GradientStop Color="#7F876C" Offset="0"/><GradientStop Color="#A3A891" Offset="1"/></LinearGradientBrush>
+ </UserControl.Resources>
+ <!-- Geometry and corner proportions adapted from RAW Akademi's SiteBackdrop.tsx.
+      Only the four outer layers move; paths and dash patterns remain static. -->
+ <Grid x:Name="BackdropRoot" SizeChanged="ResizeBackdrop" FlowDirection="LeftToRight">
+  <Viewbox x:Name="TopLeft" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-10,-10,0,0">
+   <Viewbox.RenderTransform><TranslateTransform/></Viewbox.RenderTransform>
+   <Canvas Width="900" Height="780">
+    <Path Data="M0 0 H640 C580 120 470 176 404 250 C332 330 322 424 250 494 C176 566 78 588 0 636 Z" Fill="#EAE3D1" Opacity="0.78"/>
+    <Path Data="M0 0 H470 C420 96 344 150 296 214 C240 288 232 372 176 438 C122 500 56 520 0 566 Z" Fill="#DED6C2" Opacity="0.72"/>
+    <Path Data="M0 0 H210 C176 78 150 150 138 224 C126 300 108 352 60 400 C34 426 14 452 0 486 Z" Fill="{StaticResource OliveTL}" Opacity="0.42"/>
+    <Path Data="M748 0 C702 84 708 154 664 212 C608 286 496 298 440 364 C380 434 404 510 350 568 C298 624 192 620 118 662 C76 686 36 700 0 738" Stroke="#C9A961" StrokeThickness="2.4" Opacity="0.85"/>
+    <Path Data="M566 0 C532 74 540 130 504 178 C460 238 376 252 334 304 C288 360 310 418 268 460 C226 502 152 502 96 532 C60 552 26 568 0 582" Stroke="#C9A961" StrokeThickness="2" StrokeDashArray="3.5,5.5" Opacity="0.55"/>
+   </Canvas>
+  </Viewbox>
+  <Viewbox x:Name="TopRight" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-10,-10,0">
+   <Viewbox.RenderTransform><TranslateTransform/></Viewbox.RenderTransform>
+   <Canvas Width="570" Height="900">
+    <Canvas Width="2000" Height="1125"><Canvas.RenderTransform><TranslateTransform X="-1430"/></Canvas.RenderTransform>
+     <Path Data="M2000 0 H1548 C1596 96 1638 186 1642 272 C1646 368 1596 424 1614 496 C1634 578 1722 620 1790 668 C1866 722 1944 764 2000 812 Z" Fill="#EAE3D1" Opacity="0.76"/>
+     <Path Data="M2000 0 H1712 C1748 88 1774 168 1774 240 C1774 318 1738 362 1752 420 C1768 486 1834 518 1884 556 C1934 594 1974 626 2000 656 Z" Fill="#DDD5C1" Opacity="0.68"/>
+     <Path Data="M2000 0 H1846 C1872 68 1890 140 1890 204 C1890 274 1866 306 1876 350 C1888 400 1934 424 1966 452 C1986 470 1996 486 2000 500 Z" Fill="{StaticResource OliveTR}" Opacity="0.44"/>
+     <Path Data="M1468 0 C1516 92 1554 170 1550 244 C1546 322 1502 370 1514 434 C1528 510 1600 548 1656 596 C1716 650 1762 706 1808 766 C1850 820 1914 850 2000 876" Stroke="#C9A961" StrokeThickness="2.4" Opacity="0.85"/>
+     <Path Data="M1644 0 C1684 80 1712 146 1708 208 C1704 274 1670 314 1680 368 C1692 428 1750 462 1796 502 C1848 548 1888 594 1926 644 C1956 684 1978 708 2000 722" Stroke="#C9A961" StrokeThickness="2" StrokeDashArray="3.5,5.5" Opacity="0.5"/>
+    </Canvas>
+   </Canvas>
+  </Viewbox>
+  <Viewbox x:Name="BottomLeft" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="-10,0,0,-10">
+   <Viewbox.RenderTransform><TranslateTransform/></Viewbox.RenderTransform>
+   <Canvas Width="700" Height="639">
+    <Canvas Width="2000" Height="1125"><Canvas.RenderTransform><TranslateTransform Y="-486"/></Canvas.RenderTransform>
+     <Path Data="M0 1125 V596 C118 648 202 738 244 842 C288 952 366 1030 470 1074 C512 1092 546 1108 568 1125 Z" Fill="#EAE3D1" Opacity="0.8"/>
+     <Path Data="M0 1125 V700 C86 742 148 812 178 892 C210 978 268 1040 348 1078 C382 1094 408 1110 424 1125 Z" Fill="#D9D1BC" Opacity="0.7"/>
+     <Path Data="M0 1125 V806 C56 838 96 890 116 950 C138 1014 180 1062 236 1092 C258 1104 274 1114 284 1125 Z" Fill="{StaticResource OliveBL}" Opacity="0.5"/>
+     <Path Data="M0 492 C88 538 152 610 180 692 C212 784 192 856 236 922 C280 992 372 1022 444 1056 C522 1094 602 1104 692 1125" Stroke="#C9A961" StrokeThickness="2" StrokeDashArray="3.5,5.5" Opacity="0.5"/>
+     <Path Data="M0 712 C66 748 110 802 130 862 C152 930 140 980 170 1028 C204 1082 270 1100 324 1116 C354 1124 378 1124 396 1125" Stroke="#C9A961" StrokeThickness="2.4" Opacity="0.8"/>
+    </Canvas>
+   </Canvas>
+  </Viewbox>
+  <Viewbox x:Name="BottomRight" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,-10,-10">
+   <Viewbox.RenderTransform><TranslateTransform/></Viewbox.RenderTransform>
+   <Canvas Width="700" Height="495">
+    <Canvas Width="2000" Height="1125"><Canvas.RenderTransform><TranslateTransform X="-1300" Y="-630"/></Canvas.RenderTransform>
+     <Path Data="M2000 1125 V702 C1918 722 1848 764 1800 822 C1746 888 1730 950 1662 996 C1590 1046 1490 1064 1400 1125 Z" Fill="#EAE3D1" Opacity="0.76"/>
+     <Path Data="M2000 1125 V830 C1938 846 1888 878 1854 922 C1816 972 1804 1018 1754 1052 C1700 1090 1636 1100 1592 1125 Z" Fill="#DCD4C0" Opacity="0.68"/>
+     <Path Data="M2000 1125 V938 C1958 950 1922 974 1898 1008 C1870 1046 1862 1080 1826 1102 C1798 1118 1776 1122 1758 1125 Z" Fill="#9AA086" Opacity="0.46"/>
+     <Path Data="M2000 638 C1930 668 1872 662 1814 700 C1748 742 1728 808 1676 852 C1620 900 1542 900 1484 942 C1422 986 1380 1054 1346 1125" Stroke="#C9A961" StrokeThickness="2.4" Opacity="0.8"/>
+     <Path Data="M2000 784 C1948 804 1906 800 1864 828 C1816 858 1802 906 1764 940 C1724 974 1666 976 1624 1004 C1578 1036 1548 1084 1524 1125" Stroke="#C9A961" StrokeThickness="2" StrokeDashArray="3.5,5.5" Opacity="0.45"/>
+    </Canvas>
+   </Canvas>
+  </Viewbox>
+ </Grid>
+</UserControl>

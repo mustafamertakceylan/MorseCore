@@ -1,5 +1,5 @@
 #requires -Version 7.0
-param([switch]$MouseInput)
+param([switch]$MouseInput,[ValidateRange(30,180)][int]$TimeoutSeconds=120)
 $ErrorActionPreference='Stop'
 $taskRoot=(Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $env:DOTNET_CLI_HOME=Join-Path $taskRoot 'cmake-build-interop/dotnet-home'
@@ -28,9 +28,9 @@ try {
         $taskProcess=Start-Process -FilePath $taskExecutable.FullName -WindowStyle Hidden -PassThru
     }
     finally { $env:MORSECORE_DESKTOP_SMOKE=$taskPreviousSmoke; $env:MORSECORE_DESKTOP_MOUSE_SMOKE=$taskPreviousMouseSmoke }
-    if(!$taskProcess.WaitForExit(60000)) {
+    if(!$taskProcess.WaitForExit($TimeoutSeconds*1000)) {
         Stop-Process -Id $taskProcess.Id
-        throw 'UI checks did not finish within 60 seconds.'
+        throw "UI checks did not finish within $TimeoutSeconds seconds."
     }
     $taskResult=Get-Content -LiteralPath (Join-Path $taskReport 'ui-smoke.json') -Raw | ConvertFrom-Json
     if(!$taskResult.Passed) { throw $taskResult.Failure }

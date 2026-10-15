@@ -51,7 +51,7 @@ public sealed partial class MainPage
         var autoSpeed = new ToggleSwitch { Header = T("decoderAutoSpeed"), IsOn = decoderAutomaticSpeed };
         autoSpeed.Toggled += (_, _) => { decoderAutomaticSpeed = autoSpeed.IsOn; speed.IsEnabled = !autoSpeed.IsOn; };
         var advanced = new StackPanel { Spacing = 10 };
-        advanced.Children.Add(autoTone); advanced.Children.Add(tone); advanced.Children.Add(autoSpeed); advanced.Children.Add(speed);
+        advanced.Children.Add(Columns(240,2,autoTone,autoSpeed,tone,speed));
         var threshold = new Slider { Header = T("decoderThreshold"), Minimum = 10, Maximum = 70, Value = decoderThreshold, StepFrequency = 5 };
         threshold.ValueChanged += (_, _) => decoderThreshold = threshold.Value;
         advanced.Children.Add(threshold);
@@ -75,10 +75,10 @@ public sealed partial class MainPage
         var output = new TextBox { Header = T("decodedText"), Text = decoderResult?.Text ?? "", IsReadOnly = true, AcceptsReturn = true, TextWrapping = TextWrapping.Wrap, MinHeight = 100, FlowDirection = PlainDirection, FontSize = 18 };
         Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(output, "DecoderText");
         decoderText = output;
-        stack.Children.Add(output);
         var code = new TextBox { Header = T("morseInput"), Text = decoderResult?.Morse ?? "", IsReadOnly = true, AcceptsReturn = true, TextWrapping = TextWrapping.Wrap, MinHeight = 72, FlowDirection = FlowDirection.LeftToRight, FontFamily = new FontFamily("Consolas") };
         decoderMorseText = code;
-        stack.Children.Add(code);
+        code.Background=Brush("ResultBrush"); code.MinHeight=output.MinHeight=120;
+        stack.Children.Add(Columns(300,2,output,code));
         decoderDetails = new StackPanel { Spacing = 8 };
         if (decoderResult is { } result)
         {

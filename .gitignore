@@ -17,6 +17,7 @@ build/
 
 # Local progress log
 /MORSECORE_PROGRESS.md
+/design-qa.md
 
 # Managed build output
 **/bin/

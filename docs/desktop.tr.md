@@ -6,12 +6,12 @@ Windows arayüzü; metin ve dosya dönüşümünü, Morse sesini, seslendirmeyi,
 
 ## Görünüm ve kullanım
 
-- RAW Akademi açık renkleri birebir: zeytin `#5E6A42`, krem `#FAF8F2`, beyaz yüzey `#FFFFFF`, metin `#2C2A22`, kenarlık `#E7E4DF`. Koyu temada aynı zeytin rengi menü/üst çubukta kullanılır; yüzeyler daha açık yeşil, ana düğmeler kremdir.
-- Uygulamaya ait üst çubuk ve kapatma düğmesi; Windows'a tanımlanan başlık alanı, fare basılıyken taşınır ve bırakılınca durur. Logo ve uygulama adı pencerenin ortasındadır. Pencere boyutu kilitlidir; yeniden boyutlandırma, büyütme ve küçültme engellenir. Açılış boyutu ekranın çalışma alanına sığdırılır.
-- MorseCore logosu üst çubukta, menüde, açılış ekranında ve uygulama simgesinde kullanılır. **Sistem / Açık / Koyu** tema seçimi Ayarlar bölümündedir.
+- RAW kaynaklı zeytin `#5E6A42` ve krem `#FAF8F2`; sıcak kartlar, beyaz girişler ve hafif renkli sonuç alanları. Koyu temada yeşil yüzeyler ve krem düğmeler kullanılır. RAW'ın dalgalı şekilleri ve altın çizgileri dört köşede yavaş hareket eder; okunurluk için kartlar opaktır.
+- Uygulamaya ait üst çubuk; ortalanmış marka, alta alma ve kapatma düğmeleri. Pencere 1440×900 piksel açılır, ekranın çalışma alanına sığdırılır. Yeniden boyutlandırma ve büyütme kapalıdır. Taşıma, yerel Windows başlık alanlarıyla yapılır.
+- MorseCore logosu üst çubukta, açılışta ve uygulama simgesindedir. **Sistem / Açık / Koyu** tema seçimi Ayarlar bölümündedir. Gezinme, karşılama ekranı bitince görünür.
 - Atkinson Hyperlegible metin yazı tipi, Crimson Pro başlıklar; Morse alanlarında eş aralıklı yazı.
-- Daraltılabilen menü; dönüştürücü, dosyalar, ses, eğitim ve amatör telsiz. Alfabe, alıştırmalar ve telsiz sözlüğü Eğitim altında toplanır. Ayarlar altta. Dar menüde açma düğmesi ve tüm simgeler aynı eksende ortalanır; Arapça yerleşim de buna dahildir.
-- Kısa sayfa geçişleri ve menü animasyonu. Windows'un hareket tercihi ve uygulamadaki **Hareketi azalt** seçeneği dikkate alınır. Boşta sürekli çalışan animasyon yoktur.
+- Menüyü açma düğmesi pencerenin sol üstündedir. Eğitim ve Amatör telsiz alt sayfalara ayrılır; Ayarlar alttadır. Form sütunları kullanılabilir genişliğe uyarlanır.
+- Kısa sayfa/menü geçişleri ve hafif arka plan hareketi. Windows'un hareket tercihi ve **Hareketi azalt** seçeneği izlenir. Arka plan, pencere etkin değilken durur.
 - Türkçe, İngilizce, Almanca, Rusça ve Arapça arayüz. Arapçada menü sağa geçer; Morse alanları soldan sağa kalır.
 - Kompakt dönüştürücüde kopyalama/kayıt bulunur; `Ctrl+Enter` dönüştürür. Morse dinleme ve çevrimdışı seslendirme Ses bölümündedir.
 
@@ -19,7 +19,13 @@ Ayarlardaki **Açık kaynağa teşekkürler** bölümünde EMA Lightning, Antali
 
 Arayüz dili, dönüşüm alfabesi ve konuşma dili ayrı seçimlerdir. Örneğin Türkçe arayüzde Rusça bir mesaj dönüştürülebilir. Morse'dan metne dönerken alfabe seçilmelidir; nokta ve çizgiler alfabe bilgisi taşımaz.
 
-## 0.6.0 ile gelenler
+## 0.7.0 ile gelenler
+
+Amatör telsizde **İstasyonlarım**, **Görüşme hazırla** ve **Görüşme günlüğü** yan menüden açılır. Günlükte doğrudan harita düğmesi bulunur. Ülke rehberi; kesin frekans sınırlarını, güç birimlerini, lisans sınıfını ve özel koşulları koruyan infografikle gösterilir. Kaynak kapsamı ve inceleme tarihleri değişmedi; rehber yayın izni vermez.
+
+[İngilizce](../README.md), [Türkçe](../README.tr.md), [Almanca](../README.de.md), [Rusça](../README.ru.md) ve [Arapça](../README.ar.md) README'lerde kendi dillerindeki ekran görüntüleri bulunur.
+
+## 0.6.0 ile eklenenler
 
 Bu özellikler v0.6.0 Windows kurucusunda ve taşınabilir ZIP'te bulunur.
 

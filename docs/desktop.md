@@ -6,12 +6,12 @@ The Windows interface brings text and file conversion, Morse audio, speech, lear
 
 ## Interface
 
-- RAW Akademi's exact light palette: olive `#5E6A42`, cream `#FAF8F2`, white surfaces `#FFFFFF`, ink `#2C2A22` and borders `#E7E4DF`. Dark mode uses the same olive for the sidebar/title bar, lighter green surfaces and cream action buttons.
-- An application-drawn title bar and close button; a native Windows caption region moves while the mouse button is held and stops on release. The logo and app name are centered in the window. Window dimensions are locked; resize, maximize and minimize are blocked. Startup size is clamped to the display work area.
-- The MorseCore logo appears in the title bar, sidebar, loading screen and application icon. **System / Light / Dark** theme selection lives in Settings.
+- RAW-inspired olive `#5E6A42` and cream `#FAF8F2`, warm cards, white inputs and lightly tinted results. Dark mode uses green surfaces and cream action buttons. Four slow-moving corners reuse RAW's wave shapes and gold lines; cards keep their solid background for readability.
+- An application-drawn title bar with centered branding, minimize and close controls. The window opens at 1440×900 pixels, clamped to the display work area; resizing and maximizing remain disabled. Native Windows caption regions provide dragging.
+- The MorseCore logo appears in the title bar, loading screen and application icon. **System / Light / Dark** theme selection lives in Settings. Navigation stays hidden until the welcome screen finishes.
 - Atkinson Hyperlegible body text, Crimson Pro headings and monospace Morse editors.
-- A collapsible sidebar for conversion, files, audio, learning and amateur radio. Alphabet, exercises and the radio glossary are grouped under Learning. Settings stay at the bottom. Collapsed icons and the menu toggle share one center line, including the Arabic layout.
-- Short page and menu transitions. Windows animation preferences and **Reduce motion** are respected; no continuously running idle effects.
+- A collapsible sidebar with its menu button at the top left of the window. Learning and Amateur radio have subpages; Settings stays at the bottom. Form columns adapt to the available width.
+- Short page/menu transitions and subtle background motion. Windows animation preferences and **Reduce motion** are respected. Background animation stops while the window is inactive.
 - Turkish, English, German, Russian and Arabic. Arabic mirrors the sidebar to the right while Morse fields remain left to right.
 - A compact converter with clipboard/export actions; `Ctrl+Enter` converts. Morse playback and offline speech live on Audio.
 
@@ -19,7 +19,13 @@ Settings include an expandable **Thanks to open source** section with authors, l
 
 Interface language, conversion alphabet and speech language are independent. Choose an alphabet when decoding: dots and dashes do not carry an alphabet identifier.
 
-## New in 0.6.0
+## New in 0.7.0
+
+Amateur radio now opens **My stations**, **Prepare a contact** and **Contact log** from the sidebar. The map has a direct button in the log. Country guides use an infographic that preserves exact frequency limits, power units, licence-class requirements and special conditions. Source coverage and review dates are unchanged; the guide does not grant operating permission.
+
+The [English](../README.md), [Turkish](../README.tr.md), [German](../README.de.md), [Russian](../README.ru.md) and [Arabic](../README.ar.md) READMEs include screenshots in their own language.
+
+## Added in 0.6.0
 
 These features are included in the v0.6.0 Windows installer and portable ZIP.
 

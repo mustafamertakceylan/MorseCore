@@ -14,8 +14,7 @@ public sealed partial class MainPage
     {
         Heading(T("files"),T("fileLimit"));
         var stack=new StackPanel { Spacing=18 };
-        stack.Children.Add(AlphabetChoice());
-        stack.Children.Add(Choice("",[T("textToMorse"),T("morseToText")],decode?1:0,i=> { decode=i==1; result=null; revision++; }));
+        PageContent.Children.Add(Card(Columns(280,2,AlphabetChoice(),Choice(T("conversionDirection"),[T("textToMorse"),T("morseToText")],decode?1:0,i=> { decode=i==1; result=null; revision++; }))));
         stack.Children.Add(Action("chooseFiles",async()=>
         {
             if(batchWorking) return;
@@ -24,8 +23,10 @@ public sealed partial class MainPage
             if(selected.Count>0) { files.Clear(); files.AddRange(selected.Select(f=>f.Path)); BuildPage(); }
         },"\uE8B7"));
         var list=new ListView { ItemsSource=files.Select(Path.GetFileName).ToArray(),MaxHeight=240,SelectionMode=ListViewSelectionMode.None };
-        stack.Children.Add(list); stack.Children.Add(Label(T("outputFolder"),13,true));
-        stack.Children.Add(Label(preferences.OutputDirectory,14)); stack.Children.Add(Action("chooseFolder",ChooseDirectory));
+        stack.Children.Add(list);
+        var destination=new StackPanel { Spacing=14 };
+        destination.Children.Add(Label(T("outputFolder"),18));
+        destination.Children.Add(Label(preferences.OutputDirectory,14,true)); destination.Children.Add(Action("chooseFolder",ChooseDirectory));
         stack.Children.Add(Action("convert",async()=>
         {
             if(batchWorking || files.Count==0) return;
@@ -44,7 +45,7 @@ public sealed partial class MainPage
             catch(IOException) { SetStatus($"{done}/{selected.Length} · {T("fileError")}"); }
             finally { batchWorking=false; }
         },"\uE8D4",true));
-        PageContent.Children.Add(Card(stack));
+        PageContent.Children.Add(Columns(320,2,Card(stack),Card(destination)));
     }
     private string audioSource="";
     private bool audioIsMorse;
@@ -62,8 +63,8 @@ public sealed partial class MainPage
         PageContent.Children.Add(workspace);
         if(audioWorkspace==1) { BuildAudioDecoderSection(); return; }
         if(audioWorkspace==2) { BuildVoicePacksPage(); return; }
-        var stack=new StackPanel { Spacing=18 }; stack.Children.Add(AlphabetChoice());
-        stack.Children.Add(Choice(T("audioInputType"),[T("plainText"),T("morseInput")],audioIsMorse?1:0,i=> { if(audioIsMorse==(i==1)) return; audioIsMorse=i==1; BuildPage(); }));
+        var stack=new StackPanel { Spacing=18 };
+        stack.Children.Add(Columns(260,2,AlphabetChoice(),Choice(T("audioInputType"),[T("plainText"),T("morseInput")],audioIsMorse?1:0,i=> { if(audioIsMorse==(i==1)) return; audioIsMorse=i==1; BuildPage(); })));
         stack.Children.Add(Action("useConversion",()=> { audioSource=result?.Text ?? source; audioIsMorse=result!=null ? !decode : decode; BuildPage(); return Task.CompletedTask; }));
         var morse=new TextBox { Header=T(audioIsMorse?"morseInput":"plainText"),Text=audioSource,PlaceholderText=audioIsMorse?"... --- ...":T("inputPlaceholder"),AcceptsReturn=true,TextWrapping=TextWrapping.Wrap,Height=160,MaxLength=200_000,FlowDirection=audioIsMorse?FlowDirection.LeftToRight:PlainDirection,FontFamily=new FontFamily(audioIsMorse?"Consolas":"Segoe UI"),FontSize=18 };
         morse.TextChanged+=(_,_)=>audioSource=morse.Text; stack.Children.Add(morse);
@@ -77,12 +78,11 @@ public sealed partial class MainPage
             if(path!=null) { await Task.Run(()=>MorseAudio.WriteWav(path,snapshot,new(options.Wpm,options.Frequency),options.Separator)); SetStatus(T("saved")); }
         },"\uE74E")); stack.Children.Add(controls);
         WrapActions(controls,stack);
-        var optionsRow=Row();
         var speed=new NumberBox { Header=T("speed"),Minimum=5,Maximum=60,Value=preferences.Wpm,SpinButtonPlacementMode=NumberBoxSpinButtonPlacementMode.Compact };
         speed.ValueChanged+=(_,_)=> { if(!double.IsNaN(speed.Value)) { preferences=preferences with { Wpm=(uint)Math.Clamp(speed.Value,5,60) }; SavePreferences(); } };
         var frequency=new NumberBox { Header=T("frequency"),Minimum=200,Maximum=2000,Value=preferences.Frequency,SpinButtonPlacementMode=NumberBoxSpinButtonPlacementMode.Compact };
         frequency.ValueChanged+=(_,_)=> { if(!double.IsNaN(frequency.Value)) { preferences=preferences with { Frequency=(uint)Math.Clamp(frequency.Value,200,2000) }; SavePreferences(); } };
-        optionsRow.Children.Add(speed); optionsRow.Children.Add(frequency); stack.Children.Add(optionsRow);
+        stack.Children.Add(Columns(220,2,speed,frequency));
         PageContent.Children.Add(Card(stack));
         BuildSpeech(async()=>
         {
@@ -95,19 +95,17 @@ public sealed partial class MainPage
         Heading(T("alphabet"),T("normalizationNote"));
         if(!nativeReady) { PageContent.Children.Add(Label(T("nativeUnavailable"))); return; }
         PageContent.Children.Add(AlphabetChoice());
-        var grid=new Grid { RowSpacing=9,ColumnSpacing=12 };
-        for(int i=0;i<3;i++) grid.ColumnDefinitions.Add(new ColumnDefinition { Width=new GridLength(1,GridUnitType.Star) });
+        var cells=new List<FrameworkElement>();
         var entries=MorseEngine.Alphabet(preferences.Alphabet);
-        for(int i=0;i<(entries.Count+2)/3;i++) grid.RowDefinitions.Add(new RowDefinition { Height=GridLength.Auto });
         for(int i=0;i<entries.Count;i++)
         {
             var entry=entries[i]; var line=Row();
             var character=Label(entry.Character.ToString(),22); character.Width=34;
             line.Children.Add(character);
             line.Children.Add(new TextBlock { Text=entry.Code,FontFamily=new FontFamily("Consolas"),FontSize=17,VerticalAlignment=VerticalAlignment.Center,FlowDirection=FlowDirection.LeftToRight });
-            var cell=Card(line); cell.Padding=new Thickness(12); Grid.SetRow(cell,i/3); Grid.SetColumn(cell,i%3); grid.Children.Add(cell);
+            var cell=Card(line); cell.Padding=new Thickness(12); cells.Add(cell);
         }
-        PageContent.Children.Add(grid);
+        PageContent.Children.Add(Columns(180,4,cells.ToArray()));
     }
     private CwLesson? lesson;
     private string practiceAnswer="",practiceFeedback="";
@@ -119,7 +117,8 @@ public sealed partial class MainPage
         stack.Children.Add(Choice(T("mode"),[T("letters"),T("digits"),T("wordPractice"),T("qcodes"),T("callSigns"),T("prosigns")],practiceMode,i=>practiceMode=i));
         var signal=Label(lesson?.Current?.Morse ?? (lesson!=null ? T("practiceEnded") : "· — · ·"),28);
         signal.FontFamily=new FontFamily("Consolas"); signal.FlowDirection=FlowDirection.LeftToRight;
-        stack.Children.Add(signal);
+        var signalCard=Card(signal); signalCard.Background=Brush("ResultBrush"); signal.HorizontalAlignment=HorizontalAlignment.Center;
+        stack.Children.Add(signalCard);
         var answer=new TextBox { Header=T("answer"),Text=practiceAnswer,MaxLength=64,FlowDirection=FlowDirection.LeftToRight };
         Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(answer,"PracticeAnswer");
         answer.TextChanged+=(_,_)=>practiceAnswer=answer.Text; stack.Children.Add(answer);

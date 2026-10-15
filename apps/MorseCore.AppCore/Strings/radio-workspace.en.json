@@ -1,0 +1,9 @@
+{
+  "stationProfilesHint": "Save your call sign and licence details. This station will be used when preparing contacts.",
+  "qsoAssistantHint": "Choose a contact step, prepare the message and listen in Morse. QSO means a radio contact; the app does not transmit over radio.",
+  "qsoLogHint": "Find, edit or map your saved contacts. Practice and actual contacts are kept separate.",
+  "stationPicker": "Saved station",
+  "stationOptional": "Optional details",
+  "qsoRecordDetails": "Add this contact to the log",
+  "radioFiles": "Import / export files"
+}
