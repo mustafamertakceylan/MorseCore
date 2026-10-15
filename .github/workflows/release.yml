@@ -31,7 +31,7 @@ jobs:
           name: MorseCore-Windows-x64
           path: dist
 
-      - name: Verify ZIP checksums
+      - name: Verify package checksums
         working-directory: dist
         run: sha256sum --check --strict SHA256SUMS
 
@@ -41,5 +41,5 @@ jobs:
           GH_REPO: ${{ github.repository }}
           RELEASE_TAG: ${{ github.ref_name }}
         run: >-
-          gh release create "$RELEASE_TAG" dist/*.zip dist/SHA256SUMS
+          gh release create "$RELEASE_TAG" dist/*.zip dist/*-Setup.exe dist/SHA256SUMS
           --verify-tag --title "MorseCore $RELEASE_TAG" --notes-file dist/RELEASE-NOTES.md

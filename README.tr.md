@@ -51,6 +51,7 @@ Komut satırında `.\run.cmd --encode "HELLO WORLD"` ile başlayın; tüm seçen
 ## Rehberler
 
 - [Masaüstü kullanımı ve arayüzü derleme](docs/desktop.tr.md)
+- [Windows Setup: kurulum ve derleme](docs/windows-setup.md#türkçe)
 - [Çevrimdışı seslendirme ve ses modelleri](docs/offline-speech.tr.md)
 - [C API ve .NET bağlantısı](docs/native-api.tr.md)
 - [Değişiklik günlüğü](CHANGELOG.md)

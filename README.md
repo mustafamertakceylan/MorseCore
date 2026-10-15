@@ -51,6 +51,7 @@ For command-line use, try `.\run.cmd --encode "HELLO WORLD"`; see `.\run.cmd --h
 ## Guides
 
 - [Desktop app and building the GUI](docs/desktop.md)
+- [Windows Setup: installation and building](docs/windows-setup.md)
 - [Offline speech and voice models](docs/offline-speech.md)
 - [C API and .NET integration](docs/native-api.md)
 - [Changelog](CHANGELOG.md)

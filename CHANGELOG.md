@@ -1,5 +1,10 @@
 # Changelog / Değişiklik günlüğü
 
+## Unreleased / Yayımlanmamış
+
+- Added a Windows x64 Setup.exe build with five wizard languages, per-user shortcuts/uninstall, persistent optional speech storage and install/reinstall/removal checks. The release workflow includes Setup alongside the portable ZIPs.
+- Beş dilli kurulum sihirbazı, kullanıcıya özel kısayol/kaldırma, kalıcı isteğe bağlı ses paketi ve kurma/yeniden kurma/kaldırma kontrolleriyle Windows x64 Setup.exe derlemesi eklendi. Yayın akışı Setup'ı taşınabilir ZIP'lerle birlikte paketler.
+
 ## 0.3.0 — 2026-10-15
 
 ### English

@@ -1,3 +1,4 @@
 # Preserve original third-party license and notice bytes.
 third_party/speech/** -text
 third_party/runtime/** -text
+third_party/installer/** -text whitespace=cr-at-eol

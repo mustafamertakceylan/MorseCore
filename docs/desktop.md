@@ -53,6 +53,10 @@ Morse audio supports Windows playback and WAV export, 5–60 WPM and 200–2000 
 
 Speech uses [offline neural models](offline-speech.md): EMA Lightning and Antalia Mini for Turkish, Piper for Arabic, German, Russian and English. Install the optional pack once with `setup-speech.cmd`; choose voices directly in the converter. Windows speech packs are no longer used. Synthesis starts on demand in a separate process that exits when finished. Speech is limited to 4000 characters. Small weights do not imply small active runtime memory; measured figures and separate model licenses are documented in the speech guide.
 
+## Windows Setup
+
+An unsigned per-user **Setup.exe** can be built with `pwsh -File scripts/package-desktop-installer.ps1`. It includes Start menu shortcuts and Windows uninstall registration. Optional speech models remain outside the application folder. See the [installation, build and verification guide](windows-setup.md).
+
 ## Updates and MSIX
 
 The loading screen prepares preferences and the native engine. Network checks do not hold the main interface open. Automatic checks query the latest stable GitHub Release at most once every six hours, excluding drafts, prereleases and older versions. Settings provide manual checks and an opt-out. The application check does not download or execute binaries.

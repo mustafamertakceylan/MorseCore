@@ -57,6 +57,10 @@ Morse sesi Windows'ta çalınabilir ve WAV olarak kaydedilebilir. Hız 5–60 WP
 
 Seslendirme [çevrimdışı sinir ağı modellerini](offline-speech.tr.md) kullanır: Türkçede EMA Lightning ve Antalia Mini; Arapça, Almanca, Rusça ve İngilizcede Piper. İsteğe bağlı paket `setup-speech.cmd` ile bir kez kurulur, ses dönüştürücüden seçilir. Windows ses paketleri kullanılmaz. Model ayrı bir işlemde yalnızca gerektiğinde açılır; iş bitince işlem kapanır. Sınır 4000 karakterdir. Küçük ağırlık dosyası düşük aktif RAM anlamına gelmez; ölçümler ve modellerin ayrı lisansları ses kılavuzundadır.
 
+## Windows Setup
+
+`pwsh -File scripts/package-desktop-installer.ps1` komutu, mevcut kullanıcı için imzasız **Setup.exe** oluşturur. Başlat menüsü kısayolları ve Windows kaldırma kaydı dahildir. İsteğe bağlı ses modelleri uygulama klasörünün dışında tutulur. Ayrıntılar [kurulum, derleme ve doğrulama rehberindedir](windows-setup.md#türkçe).
+
 ## Güncelleme ve MSIX
 
 Açılış ekranı tercihleri ve dönüşüm motorunu hazırlar. Ağ kontrolü ana ekranı engellemez. Uygulama en fazla altı saatte bir GitHub'ın son kararlı Release sürümünü kontrol eder; taslak, ön sürüm ve eski sürümler önerilmez. Ayarlardan elle kontrol edilebilir veya açılış kontrolü kapatılabilir. Sürüm kontrolü dosya indirip çalıştırmaz.
