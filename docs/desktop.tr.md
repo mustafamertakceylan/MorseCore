@@ -2,7 +2,7 @@
 
 [English](desktop.md) · [Ana sayfa](../README.tr.md)
 
-Windows arayüzü; metin ve dosya dönüşümünü, Morse sesini, seslendirmeyi ve alıştırmayı aynı yerde toplar. Bu, 0.4.1 için geliştirilen bir önizlemedir. İmzalı bir kurulum sürümü henüz yayımlanmadı.
+Windows arayüzü; metin ve dosya dönüşümünü, Morse sesini, seslendirmeyi, eğitimi ve telsiz görüşmesi hazırlığını aynı yerde toplar. [Windows önizlemesini indir](https://github.com/mustafamertakceylan/MorseCore/releases/latest); Setup şu anda imzasızdır.
 
 ## Görünüm ve kullanım
 
@@ -10,18 +10,29 @@ Windows arayüzü; metin ve dosya dönüşümünü, Morse sesini, seslendirmeyi 
 - Uygulamaya ait üst çubuk ve kapatma düğmesi; Windows'a tanımlanan başlık alanı, fare basılıyken taşınır ve bırakılınca durur. Logo ve uygulama adı pencerenin ortasındadır. Pencere boyutu kilitlidir; yeniden boyutlandırma, büyütme ve küçültme engellenir. Açılış boyutu ekranın çalışma alanına sığdırılır.
 - MorseCore logosu üst çubukta, menüde, açılış ekranında ve uygulama simgesinde kullanılır. **Sistem / Açık / Koyu** tema seçimi Ayarlar bölümündedir.
 - Atkinson Hyperlegible metin yazı tipi, Crimson Pro başlıklar; Morse alanlarında eş aralıklı yazı.
-- Daraltılabilen menü; dönüştürücü, dosyalar, ses stüdyosu, alıştırma ve alfabe. Ayarlar altta. Dar menüde açma düğmesi ve tüm simgeler aynı eksende ortalanır; Arapça yerleşim de buna dahildir.
+- Daraltılabilen menü; dönüştürücü, dosyalar, ses, eğitim ve amatör telsiz. Alfabe, alıştırmalar ve telsiz sözlüğü Eğitim altında toplanır. Ayarlar altta. Dar menüde açma düğmesi ve tüm simgeler aynı eksende ortalanır; Arapça yerleşim de buna dahildir.
 - Kısa sayfa geçişleri ve menü animasyonu. Windows'un hareket tercihi ve uygulamadaki **Hareketi azalt** seçeneği dikkate alınır. Boşta sürekli çalışan animasyon yoktur.
 - Türkçe, İngilizce, Almanca, Rusça ve Arapça arayüz. Arapçada menü sağa geçer; Morse alanları soldan sağa kalır.
-- Kompakt dönüştürücüde kopyalama/kayıt, Morse dinleme ve çevrimdışı seslendirme aynı ekrandadır. `Ctrl+Enter` dönüştürür.
+- Kompakt dönüştürücüde kopyalama/kayıt bulunur; `Ctrl+Enter` dönüştürür. Morse dinleme ve çevrimdışı seslendirme Ses bölümündedir.
 
 Ayarlardaki **Açık kaynağa teşekkürler** bölümünde EMA Lightning, Antalia Mini, Piper, normalizer-tr, PyTorch, ONNX Runtime ve ses modellerinin geliştiricileri, lisans adları ve kaynak bağlantıları yer alır. Motor ve model lisansları ayrıdır.
 
 Arayüz dili, dönüşüm alfabesi ve konuşma dili ayrı seçimlerdir. Örneğin Türkçe arayüzde Rusça bir mesaj dönüştürülebilir. Morse'dan metne dönerken alfabe seçilmelidir; nokta ve çizgiler alfabe bilgisi taşımaz.
 
+## 0.6.0 ile gelenler
+
+Bu özellikler v0.6.0 Windows kurucusunda ve taşınabilir ZIP'te bulunur.
+
+- **Eğitim → Gönderme eğitimi:** Büyük anahtara odaklan; boşluk tuşunu, fareyi veya dokunmayı basılı tutarak gönder. Bitirdiğinde süre, ritim, hız ve isteğe bağlı referans metnine göre doğruluk gösterilir. Seçilen alfabe kullanılır; hedef hız nokta/çizgi eşiklerini belirler. Sayfadan çıkınca anahtar ve sesi bırakılır.
+- **Ses → Sesi çöz:** WAV seçip cihazında çözümle. Gelişmiş bölümünde otomatik ton/hız yerine elle değer verilebilir. Windows'ta seçilen ses girişinden en çok 30 saniye kayıt alınır ve durdurunca çözülür. Dosya sınırı 64 MiB/iki dakikadır; PCM ve IEEE float, mono/stereo desteklenir. Hedef temiz, tek CW tonudur; konuşma veya birden fazla istasyonun karışımı değildir. Belirsiz karakter `□` ile gösterilir. Gerçek mikrofon ve gürültülü telsiz başarımı henüz doğrulanmadı.
+- **Amatör telsiz → Günlük:** Tüm kayıtlarda çağrı, UTC tarih veya bant ara; kayıt düzenle; CW ADIF dosyasını önizleyip onaylayarak içe aktar. Yalnız kesin yinelenenler elenir; farklı saniye/frekans korunur. İçe alınan zamanın hassasiyeti saklanır. Çevrimdışı harita yalnız girilmiş koordinatları veya Maidenhead hücrelerini gösterir; çağrı öneki operatörün kesin konumunu vermez.
+- **Ses → Ses paketleri**, ayrıca Ayarlar'dan: Dil seç, model boyutunu gör; sesleri tek tek kur, seç, örnek dinle veya kaldır. İndirme onay ister; ses üretimi çevrimdışıdır. Ortak Python bağımlılıkları ayrıca yer kaplar. Eksik Python, onayından sonra doğrulanmış resmî Windows kurucusuyla yüklenebilir.
+
+ADIF içe aktarma ASCII `.adi`/`.adif`, en çok 8 MiB ve 10.000 kaydı destekler. Desteklenmeyen alanlar ve reddedilen kayıtlar onaydan önce özetlenir; günlük bütün ADIF alanlarının kayıpsız arşivi değildir. Kaynak dosyanı sakla. Alıştırmalar ve gerçek görüşmeler ayrı kalır.
+
 ## Çalıştırma
 
-Windows x64, .NET 10 SDK, Windows SDK 10.0.26100, WinUI derleme araçları, PowerShell 7 ve [C23 araçları](../README.tr.md#derleme-ve-çalıştırma) gerekir. NuGet bağımlılıkları ilk derlemede indirilir. Uno SDK sürümü `global.json` içinde sabittir.
+Windows x64, .NET 10 SDK, Windows SDK 10.0.26100, WinUI derleme araçları, PowerShell 7, CMake 3.28+, GCC 15+ ve Ninja gerekir. NuGet bağımlılıkları ilk derlemede indirilir. Uno SDK sürümü `global.json` içinde sabittir.
 
 ```powershell
 pwsh -File scripts/run-desktop.ps1

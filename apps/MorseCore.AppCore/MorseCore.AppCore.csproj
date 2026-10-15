@@ -7,7 +7,11 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../../bindings/dotnet/MorseCore.Interop/MorseCore.Interop.csproj" />
-    <EmbeddedResource Include="Strings/*.json" />
+    <EmbeddedResource Include="Strings/*.json" WithCulture="false" />
     <EmbeddedResource Include="Radio/*.json" />
+    <EmbeddedResource Include="../../scripts/setup-speech.py" LogicalName="MorseCore.SpeechAssets.setup-speech.py" />
+    <EmbeddedResource Include="../../scripts/speech_worker.py" LogicalName="MorseCore.SpeechAssets.speech_worker.py" />
+    <EmbeddedResource Include="../../scripts/speech-models.json" LogicalName="MorseCore.SpeechAssets.speech-models.json" />
+    <EmbeddedResource Include="../../third_party/speech/**/*" LogicalName="MorseCore.SpeechLicenses.%(RecursiveDir)%(Filename)%(Extension)" />
   </ItemGroup>
 </Project>

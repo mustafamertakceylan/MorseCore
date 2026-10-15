@@ -52,6 +52,7 @@ public sealed partial class MainPage
             Grid.SetRow(actions,narrow?1:0);
         };
         stack.Children.Add(choices); stack.Children.Add(info);
+        stack.Children.Add(Action("voicesManage",()=> { audioWorkspace=2; BuildPage(); return Task.CompletedTask; },"\uE713"));
         PageContent.Children.Add(Card(stack));
     }
     private async Task SpeakText(Func<Task<string>> getText)

@@ -17,7 +17,7 @@ try {
     if($LASTEXITCODE -ne 0) { throw 'Native library build failed.' }
     Set-Location (Join-Path $taskRoot 'apps/MorseCore.Desktop')
     $taskBuildOutput=Join-Path $taskReport 'build/'
-    & dotnet build MorseCore.Desktop/MorseCore.Desktop.csproj -c Debug -f net10.0-windows10.0.26100 -p:Platform=x64 "-p:BaseOutputPath=$taskBuildOutput"
+    & dotnet build MorseCore.Desktop/MorseCore.Desktop.csproj -c Debug -f net10.0-windows10.0.26100 -p:Platform=x64 --disable-build-servers -m:1 "-p:BaseOutputPath=$taskBuildOutput"
     if($LASTEXITCODE -ne 0) { throw 'WinUI build failed.' }
     $taskPreviousSmoke=$env:MORSECORE_DESKTOP_SMOKE
     $taskPreviousMouseSmoke=$env:MORSECORE_DESKTOP_MOUSE_SMOKE

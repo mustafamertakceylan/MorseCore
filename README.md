@@ -1,61 +1,60 @@
 <div align="center">
 
-# MorseCore
+![MorseCore — animated Morse signal](docs/media/morsecore.gif)
 
-<img src="apps/MorseCore.Desktop/MorseCore.Desktop/Assets/Brand/morsecore.png" width="92" alt="MorseCore logo">
+**Write a message. Hear Morse. Learn by practicing.**
 
-**Convert, listen, and practice Morse code.**
-
-![C23](https://img.shields.io/badge/C-23-225E85?style=flat-square&logo=c&logoColor=white)
-[![Version](https://img.shields.io/badge/Version-0.5.0-5e6a42?style=flat-square)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v0.5.0)
-[![License](https://img.shields.io/badge/License-Apache%202.0-2A9D8F?style=flat-square)](LICENSE)
+[![Download for Windows](https://img.shields.io/badge/Download-Windows-5e6a42?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.6.0/MorseCore-0.6.0-Windows-x64-Setup.exe)
+[![Version 0.6.0](https://img.shields.io/badge/v0.6.0-Preview-c58c59?style=for-the-badge)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v0.6.0)
 
 **English** · [Türkçe](README.tr.md)
 
 </div>
 
-MorseCore converts text and files to Morse code and back. A Windows desktop app powered by a C23 engine.
+MorseCore is a free Windows app for converting text to Morse code, listening and practicing. Your messages stay on your computer.
 
-## Download
+![MorseCore's light theme: text on the left, Morse code on the right](docs/media/converter.png)
 
-**[Download Windows Setup — v0.5.0](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.5.0/MorseCore-0.5.0-Windows-x64-Setup.exe)** · [Portable ZIP](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.5.0/MorseCore-0.5.0-Windows-x64-Desktop.zip)
+### Get started
 
-Run Setup and open MorseCore from the Start menu. For the portable ZIP, extract all files and open **MorseCore.Desktop.exe**. This is an unsigned preview; macOS and Linux desktop editions are planned.
+1. **Download and run Setup**, then open MorseCore from the Start menu.
+2. Type your message in **Converter** and choose **Convert**. Use **Audio** to listen.
+3. Explore **Learning** for the alphabet, exercises and radio abbreviations.
 
-For optional speech, use **Set up offline voices** in the Start menu or **setup-speech.cmd** in the ZIP. Python 3.11–3.13 and internet are needed once; speech then works offline. Models download separately. [Speech setup →](docs/offline-speech.md)
+Prefer no installation? Get the [portable ZIP](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.6.0/MorseCore-0.6.0-Windows-x64-Desktop.zip), extract it and open **MorseCore.Desktop.exe**. The current preview is unsigned; Windows may show a publisher warning.
 
-Checksums and release notes are on the [release page](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v0.5.0).
+### What can you do?
 
-## Features
+- **Convert** text and text files in both directions, including batches of files.
+- **Listen** to Morse and save it as a WAV audio file.
+- **Practice** letters, words and radio abbreviations, or send Morse yourself and measure your rhythm.
+- **Decode recordings** from WAV files or a Windows audio input. Clean, single-tone Morse is supported.
+- **Keep a radio log:** station profiles, Morse messages, search, editing, ADIF imports and an offline map. Hardware connection is planned; the app does not transmit RF.
+- **Read text aloud offline:** install voices, hear samples and manage packs inside the app. [Voice setup →](docs/offline-speech.md)
 
-- Convert messages and `.txt` files, individually or in batches.
-- Listen to Morse, export WAV audio, and practice reading or listening.
-- Convert Latin/Turkish, Russian, and Arabic text in the desktop app.
-- Choose light/dark themes and Turkish, English, German, Russian, or Arabic menus.
-- Read text aloud offline: EMA Lightning and Antalia-2 Mini for Turkish; Piper for the other four languages.
+### Your language, your theme
 
-Version **0.5.0** adds station profiles, CW preparation, separate practice/QSO logs and a radio glossary. Country guides use dated sources; Russian power matching is unavailable. [Radio guide →](docs/amateur-radio.md)
+**Türkçe · English · Deutsch · Русский · العربية**
 
-## Build and run
+All five languages have menus and optional speech voices. Text conversion supports Latin/Turkish, Russian and Arabic. Arabic menus run right to left; Morse stays left to right.
 
-Use **PowerShell 7**, **.NET 10**, Windows SDK/WinUI tools, **CMake 3.28+**, **GCC 15+** and **Ninja**. See the [desktop guide](docs/desktop.md#run-from-source) for details.
+Choose a cream light theme or a green dark theme in Settings.
 
-```powershell
-git clone https://github.com/mustafamertakceylan/MorseCore.git
-cd MorseCore
-pwsh -File scripts/run-desktop.ps1
-```
+<details>
+<summary><b>See more screens</b></summary>
 
-## Guides
+![MorseCore's green dark theme](docs/media/dark.png)
 
-- [Desktop app and building the GUI](docs/desktop.md)
-- [Windows Setup: installation and building](docs/windows-setup.md)
-- [Offline speech and voice models](docs/offline-speech.md)
-- [C API and .NET integration](docs/native-api.md)
-- [Changelog](CHANGELOG.md)
+![Arabic interface with mirrored navigation and left-to-right Morse](docs/media/arabic.png)
 
-## Thanks and license
+![Radio contacts on the offline map](docs/media/log-map.png)
 
-Thank you to **Canberk Aslan** for [EMA Lightning](https://github.com/canberk7/ema-lightning) and **PatientDesk AI** for [Antalia-2 Mini](https://huggingface.co/cloud0day3/antalia-mini), which provide MorseCore's Turkish speech voices. More credits are available in **Settings → Thanks to open source**.
+</details>
 
-MorseCore is licensed under [Apache 2.0](LICENSE). See [NOTICE](NOTICE) for attribution. Third-party components and models retain their own licenses; original speech-engine licenses and Antalia's notice are preserved in [third_party/speech](third_party/speech/README.md).
+**Available now: Windows x64. Coming later: Linux and macOS.** Release dates are not set.
+
+### Thanks & license
+
+Thanks to **Canberk Aslan** for [EMA Lightning](https://github.com/canberk7/ema-lightning), **PatientDesk AI** for [Antalia-2 Mini](https://huggingface.co/cloud0day3/antalia-mini), and the **Piper** contributors for offline speech.
+
+[Apache 2.0](LICENSE) · [Credits & third-party licenses](NOTICE) · [Release notes](CHANGELOG.md) · [Build from source](docs/desktop.md)

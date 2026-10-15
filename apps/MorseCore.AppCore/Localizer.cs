@@ -14,8 +14,18 @@ public sealed class Localizer
         if(!Languages.Contains(language)) language="en";
         Language=language;
         IsRtl=language=="ar";
-        using var stream=typeof(Localizer).Assembly.GetManifestResourceStream($"MorseCore.AppCore.Strings.{language}.json")!;
-        strings=JsonSerializer.Deserialize(stream,AppJsonContext.Default.DictionaryStringString)!;
+        var assembly=typeof(Localizer).Assembly;
+        strings=new(StringComparer.Ordinal);
+        foreach(string resource in assembly.GetManifestResourceNames()
+            .Where(name=>name.StartsWith("MorseCore.AppCore.Strings.",StringComparison.Ordinal) && name.EndsWith($".{language}.json",StringComparison.Ordinal))
+            .Order(StringComparer.Ordinal))
+        {
+            using var stream=assembly.GetManifestResourceStream(resource)!;
+            var section=JsonSerializer.Deserialize(stream,AppJsonContext.Default.DictionaryStringString)
+                ?? throw new InvalidDataException("Invalid language resource: "+resource);
+            foreach(var entry in section)
+                if(!strings.TryAdd(entry.Key,entry.Value)) throw new InvalidDataException("Duplicate translation key: "+entry.Key);
+        }
     }
     public string this[string key] => strings.TryGetValue(key,out string? value) ? value : throw new KeyNotFoundException(key);
     public IReadOnlyCollection<string> Keys => strings.Keys;

@@ -1,5 +1,18 @@
 # Changelog / Değişiklik günlüğü
 
+## 0.6.0 — 2026-10-15
+
+- Added a keyboard/touch Morse key with measured timing, speed, rhythm feedback and five-language sending practice.
+- Klavye/dokunma mors anahtarı, süre ve hız ölçümü, ritim geri bildirimi ve beş dilde gönderme eğitimi eklendi.
+- Added offline single-tone WAV decoding and Windows audio-input recording, with uncertain-character markers and cancellation.
+- Belirsiz karakter işaretleri ve iptal desteğiyle çevrimdışı tek tonlu WAV çözme ve Windows ses girişinden kayıt eklendi.
+- Added searchable, editable QSO logs, reviewed ADIF imports, exact duplicate checks and a small offline contact map. Existing records remain compatible.
+- QSO günlüğüne arama, düzenleme, önizlemeli ADIF içe aktarma, kesin yinelenen kontrolü ve küçük çevrimdışı harita eklendi; eski kayıt uyumluluğu korundu.
+- Added in-app voice-pack installation, selection, samples and removal. Reworked both READMEs with actual screenshots, an animated banner and clearer platform/language information.
+- Uygulama içinden ses paketi kurma, seçme, örnek dinleme ve kaldırma eklendi. İki README gerçek görüntüler, hareketli başlık ve açık platform/dil bilgisiyle sadeleştirildi.
+- The welcome screen now stays visible for at least two seconds, including with reduced motion.
+- Karşılama ekranı, hareket azaltılmışken de en az iki saniye görünür kalır.
+
 ## 0.5.0 — 2026-10-15
 
 - Added station profiles, call recognition, sourced country guides, CW message preparation and separate UTC practice/contact logs with CSV/ADIF export. No RF or hardware control. Russian power matching remains disabled because the current primary annex could not be accessed.

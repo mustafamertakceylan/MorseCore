@@ -39,7 +39,7 @@ public static class OfflineSpeech
         string model=Path.Combine(home,"models",voice.Model);
         return voice.Engine switch
         {
-            "ema"=>File.Exists(Path.Combine(home,"speech_worker.py")) && File.Exists(Path.Combine(model,"ema.pt")) && File.Exists(Path.Combine(model,"decoder.pt")),
+            "ema"=>File.Exists(Path.Combine(home,"speech_worker.py")) && File.Exists(Path.Combine(model,"ema.pt")) && File.Exists(Path.Combine(model,"decoder.pt")) && File.Exists(Path.Combine(model,"config.json")),
             "antalia"=>File.Exists(Path.Combine(home,"speech_worker.py")) && File.Exists(Path.Combine(model,"acoustic.safetensors")) && File.Exists(Path.Combine(model,"vocoder.safetensors")) && File.Exists(Path.Combine(model,"config.json")),
             "piper"=>File.Exists(model+".onnx") && File.Exists(model+".onnx.json"),
             _=>false

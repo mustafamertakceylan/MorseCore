@@ -30,13 +30,23 @@ public sealed partial class MainPage
         conversions.Children.Add(Label(T("outputFolder"),13,true)); conversions.Children.Add(Label(preferences.OutputDirectory,14));
         conversions.Children.Add(Action("chooseFolder",ChooseDirectory)); PageContent.Children.Add(Card(conversions));
         var voices=new StackPanel { Spacing=10 };
+        voices.Children.Add(Action("workspaceManageVoices",()=>
+        {
+            audioWorkspace=2; Navigate("audio"); return Task.CompletedTask;
+        },"\uE896",true));
         voices.Children.Add(Label(T("speechPack"),22)); voices.Children.Add(Label(T("speechPackHelp"),13,true));
         voices.Children.Add(Label(OfflineSpeech.ResolveHome(preferences.SpeechHome),12,true));
         voices.Children.Add(Action("chooseSpeechPack",async()=>
         {
             var picker=new Windows.Storage.Pickers.FolderPicker(); picker.FileTypeFilter.Add("*"); InitializePicker(picker);
             var folder=await picker.PickSingleFolderAsync();
-            if(folder!=null) { preferences=preferences with { SpeechHome=folder.Path }; SavePreferences(); BuildPage(); }
+            if(folder!=null)
+            {
+                try { _=new MorseCore.AppCore.SpeechPackages.VoicePackageManager(folder.Path,http); }
+                catch(Exception error) when(error is ArgumentException or IOException or UnauthorizedAccessException)
+                { SetStatus(T("voicesLocationInvalid")); return; }
+                preferences=preferences with { SpeechHome=folder.Path }; SavePreferences(); BuildPage();
+            }
         },"\uE8B7")); PageContent.Children.Add(Card(voices));
         var updates=new StackPanel { Spacing=18 };
         updates.Children.Add(Label(T("updates"),23)); updates.Children.Add(Label($"{T("currentVersion")} {version}",14,true));

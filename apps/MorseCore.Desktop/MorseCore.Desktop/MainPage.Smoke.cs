@@ -27,7 +27,7 @@ public sealed partial class MainPage
         encoder.SetPixelData(BitmapPixelFormat.Bgra8,BitmapAlphaMode.Premultiplied,(uint)bitmap.PixelWidth,(uint)bitmap.PixelHeight,96,96,pixels.ToArray());
         await encoder.FlushAsync();
     }
-    private async Task RunUiSmoke(string directory)
+    private async Task RunUiSmoke(string directory,double splashVisibleMilliseconds)
     {
         Directory.CreateDirectory(directory); var checks=new List<string>(); string? failure=null;
         var voices=new Dictionary<string,int>(); bool synthesized=false;
@@ -49,6 +49,12 @@ public sealed partial class MainPage
             Root.UpdateLayout();
             await Invoke(Descendants(Root).OfType<Button>().First(b=>AutomationProperties.GetAutomationId(b)==id));
         }
+        async Task WaitFor(Func<bool> condition,string description)
+        {
+            var deadline=DateTimeOffset.UtcNow.AddSeconds(5);
+            while(!condition() && DateTimeOffset.UtcNow<deadline) await Task.Delay(50);
+            Check(condition(),description);
+        }
         void CheckCollapsedAlignment(string language)
         {
             Root.UpdateLayout();
@@ -64,6 +70,7 @@ public sealed partial class MainPage
         try
         {
             Check(Splash.Visibility==Visibility.Collapsed && LoadingProgress.Value==100,"Loading screen completes before main interaction");
+            Check(splashVisibleMilliseconds>=1950,"Welcome screen remains visible for at least two seconds before dismissal");
 #if MORSE_WINUI
             var presenter=(Microsoft.UI.Windowing.OverlappedPresenter)App.MainWindow.AppWindow.Presenter;
             Check(App.MainWindow.ExtendsContentIntoTitleBar && App.MainWindow.AppWindow.TitleBar.PreferredHeightOption==Microsoft.UI.Windowing.TitleBarHeightOption.Collapsed && App.MainWindow.AppWindow.TitleBar.Height==0,"System caption controls hidden");
@@ -129,6 +136,18 @@ public sealed partial class MainPage
             Check(lesson.Correct==1 && lesson.Incorrect==0,"Practice submit button and score");
             answer.Text="WRONG"; await ActionButton("submit"); await ActionButton("retryMissed");
             Check(lesson.Current!=null && lesson.Correct==0,"Mistakes can be reviewed separately");
+            keyingSound=false; keyingWpm=5; Navigate("keying"); await ActionButton("keyingStart");
+            Check(keyingSession is { IsFinished:false } && keyingSmokePress!=null,"Keying start opens a measured input session");
+            keyingSmokePress!(true); await Task.Delay(260); keyingSmokePress!(false); await Task.Delay(600);
+            await ActionButton("keyingFinish");
+            Check(keyingSession!.Snapshot().Text=="E" && keyingSession.Snapshot().Marks==1,"Keying paddle handlers decode a measured dot and finalize its letter");
+            Check(keyingSession.IsFinished && keyingTimer?.IsEnabled==false,"Finishing keying stops the display timer");
+            await Snapshot(Path.Combine(directory,"keying.png"));
+            keyingExpected="🙂"; BuildPage(); keyingSmokePress!(true);
+            Check(keyingSession?.IsPressed!=true && keyingTone==null && Status.Text==T("unsupported"),"Unsupported keying reference is rejected safely from the direct input handler");
+            keyingExpected="SOS"; keyingWpm=20;
+            Navigate("practice");
+            Check(keyingSmokePress==null && keyingTimer==null && keyingTone==null,"Leaving keying releases its input hook, timer and tone");
             await ActionButton("Nav-education");
             Check(educationChildren?.Visibility==Visibility.Collapsed,"Education group collapses");
             await ActionButton("Nav-education"); await ActionButton("Nav-glossary");
@@ -169,9 +188,93 @@ public sealed partial class MainPage
                 while(new FileInfo(path).Length==0 && DateTimeOffset.UtcNow<deadline) await Task.Delay(50);
                 Check((await File.ReadAllTextAsync(path)).Contains(adif?"<EOR>":"DL1ABC",StringComparison.Ordinal),"QSO "+(adif?"ADIF":"CSV")+" button handles a picker-reserved target");
             }
+            await WaitFor(()=>Descendants(PageContent).OfType<Button>().Any(b=>AutomationProperties.GetAutomationId(b)=="logbook.edit"),"Saved QSO rows finish loading");
+            var logFilters=Descendants(PageContent).OfType<Expander>().First(e=>Equals(e.Header,T("logbook.filters"))); logFilters.IsExpanded=true; Root.UpdateLayout();
+            Descendants(PageContent).OfType<TextBox>().First(b=>AutomationProperties.GetAutomationId(b)=="logbook.searchCall").Text="ZZ9ZZZ";
+            await ActionButton("logbook.search");
+            await WaitFor(()=>Descendants(PageContent).OfType<TextBlock>().Any(b=>b.Text==T("noRecords")),"Call filter shows an empty result for a missing station");
+            await ActionButton("logbook.reset");
+            await WaitFor(()=>Descendants(PageContent).OfType<Button>().Any(b=>AutomationProperties.GetAutomationId(b)=="logbook.edit"),"Resetting log filters restores saved rows");
+            string editedId=radioStore.Recent(showPracticeLog).Single().Id;
+            await ActionButton("logbook.edit");
+            Descendants(PageContent).OfType<TextBox>().First(b=>AutomationProperties.GetAutomationId(b)=="logbook.grid").Text="KN40";
+            Descendants(PageContent).OfType<TextBox>().First(b=>AutomationProperties.GetAutomationId(b)=="qsoNote").Text="UI edit test";
+            await ActionButton("logbook.save");
+            await WaitFor(()=>logDraft==null,"Saving an edited QSO closes its editor");
+            Check(radioStore.Recent(showPracticeLog).Single() is { GridSquare:"KN40",Note:"UI edit test" } updated && updated.Id==editedId,"QSO editing preserves identity and saves location and notes");
+            Descendants(PageContent).OfType<Expander>().First(e=>Equals(e.Header,T("logbook.filters"))).IsExpanded=true; Root.UpdateLayout();
+            await ActionButton("logbook.map");
+            await WaitFor(()=>Descendants(PageContent).OfType<Microsoft.UI.Xaml.Shapes.Ellipse>().Any(),"Offline contact map plots a recorded locator");
+            Check(Descendants(PageContent).OfType<Canvas>().All(c=>c.FlowDirection==FlowDirection.LeftToRight),"Contact map uses geographic LTR coordinates");
+            ContentScroll.ChangeView(null,200,null,true); await Snapshot(Path.Combine(directory,"log-map.png"));
+            importDocument=AdifImport.Parse("<QSO_DATE:8>20261016<TIME_ON:6>120000<CALL:6>G4ABCD<STATION_CALLSIGN:6>TA1PDM<FREQ:6>14.025<MODE:2>CW<GRIDSQUARE:4>IO91<EOR>",new("TA1PDM","TR",showPracticeLog));
+            importPreview=radioStore.PreviewImport(importDocument.Records); importFileName="ui-import.adi"; BuildPage();
+            Check(importPreview.Candidates.Count==1,"ADIF import preview separates new contacts before confirmation");
+            await Snapshot(Path.Combine(directory,"adif-preview.png"));
+            await ActionButton("logbook.confirm");
+            await WaitFor(()=>importDocument==null,"Confirming ADIF import publishes the reviewed contacts");
+            Check(radioStore.Query(new(Practice:showPracticeLog,Call:"G4ABCD")).Total==1,"Imported ADIF contact can be found in the log");
+            Check(radioStore.PreviewImport(AdifImport.Parse("<QSO_DATE:8>20261016<TIME_ON:6>120000<CALL:6>G4ABCD<STATION_CALLSIGN:6>TA1PDM<FREQ:6>14.025<MODE:2>CW<EOR>",new("TA1PDM","TR",showPracticeLog)).Records).Duplicates==1,"Importing the same exact contact is recognized as a duplicate");
+            logShowMap=false; appliedLogQuery=null; ResetLogPage();
             preferences=preferences with { Language="ar" }; Rebuild(); radioTab=1; BuildPage(); await Snapshot(Path.Combine(directory,"qso-arabic.png"));
             Check(qsoTextBox!.FlowDirection==FlowDirection.LeftToRight && qsoCodeBox!.FlowDirection==FlowDirection.LeftToRight,"Arabic QSO calls and Morse stay LTR");
             preferences=preferences with { Language="tr" }; Rebuild();
+            audioWorkspace=1; Navigate("audio"); BuildPage();
+            string decoderWave=Path.Combine(directory,"decoder-sos.wav");
+            MorseAudio.WriteWav(decoderWave,"... --- ...",new(20,700));
+            decoderPath=decoderWave; decoderResult=null; BuildPage();
+            await DecodeAudioPath(decoderWave);
+            Check(decoderResult?.Text=="SOS" && decoderResult.UncertainCharacters==0,"Audio decoder solves a native-engine WAV through the desktop workflow");
+            var decoderText=Descendants(Root).OfType<TextBox>().First(b=>AutomationProperties.GetAutomationId(b)=="DecoderText");
+            Check(decoderText.Text=="SOS" && decoderText.IsReadOnly,"Decoded audio appears in the readable results field");
+            await Snapshot(Path.Combine(directory,"decoder.png"));
+            await ActionButton("DecoderCancel");
+            var refreshedInputs=Descendants(PageContent).OfType<ComboBox>().First(b=>AutomationProperties.GetAutomationId(b)=="DecoderInputs");
+            await ActionButton("DecoderRefreshInputs");
+            await WaitFor(()=>refreshedInputs.ItemsSource!=null,"Audio inputs can be refreshed after cancellation");
+            string brokenWave=Path.Combine(directory,"decoder-broken.wav"); File.WriteAllText(brokenWave,"broken");
+            await DecodeAudioPath(brokenWave);
+            Check(Status.Text==T("decoderFileSize") && decoderOperation==null,"Malformed audio reports its error and releases the operation");
+            decoderResult=null;
+            var cancelledDecode=DecodeAudioPath(decoderWave); Navigate("converter"); await cancelledDecode;
+            Check(decoderResult==null && decoderOperation==null,"Navigating away cancels audio decoding without writing stale results");
+            Navigate("settings"); await ActionButton("workspaceManageVoices");
+            Check(page=="audio" && audioWorkspace==2,"Settings opens the voice manager inside Audio");
+            var voiceDeadline=DateTimeOffset.UtcNow.AddSeconds(10);
+            while(voicePackProbe!=null && DateTimeOffset.UtcNow<voiceDeadline) await Task.Delay(50);
+            Check(voicePackProbe==null,"Voice manager finishes its local runtime detection");
+            Check(Descendants(Root).OfType<StackPanel>().Count(p=>AutomationProperties.GetAutomationId(p).StartsWith("VoicePack-",StringComparison.Ordinal))==2,"Turkish voice manager renders both local neural engines");
+            Check(Descendants(Root).OfType<Button>().Any(b=>AutomationProperties.GetAutomationId(b)=="voicesInstall"),"Voice cards offer installation inside the application");
+            await Snapshot(Path.Combine(directory,"voice-packs.png"));
+            var sampleVoice=OfflineSpeech.Voices.First(v=>v.Engine=="antalia");
+            if(OfflineSpeech.IsInstalled(OfflineSpeech.ResolveHome(preferences.SpeechHome),sampleVoice))
+            {
+                var voiceCard=Descendants(Root).OfType<StackPanel>().First(p=>AutomationProperties.GetAutomationId(p)=="VoicePack-"+sampleVoice.Id);
+                var selectVoice=Descendants(voiceCard).OfType<Button>().First(b=>AutomationProperties.GetAutomationId(b)=="voicesChoose");
+                if(selectVoice.IsEnabled) await Invoke(selectVoice);
+                Check(preferences.VoiceId==sampleVoice.Id,"An installed voice can be selected from its package card");
+                await Invoke(Descendants(voiceCard).OfType<Button>().First(b=>AutomationProperties.GetAutomationId(b)=="voicesPreview"));
+                var sampleDeadline=DateTimeOffset.UtcNow.AddSeconds(20);
+                while(voicePackRequest!=null && DateTimeOffset.UtcNow<sampleDeadline) await Task.Delay(50);
+                Check(voicePackRequest==null && voicePackageFeedback==T("voicesPreviewDone"),"Voice package preview synthesizes locally and releases the worker");
+            }
+            string originalSpeechHome=preferences.SpeechHome;
+            preferences=preferences with { SpeechHome=Path.GetPathRoot(directory)! }; BuildPage();
+            Check(Descendants(PageContent).OfType<TextBlock>().Any(b=>b.Text==T("voicesLocationInvalid")),"Invalid voice home renders a recoverable page instead of throwing");
+            preferences=preferences with { SpeechHome=originalSpeechHome };
+            foreach(string language in Localizer.Languages)
+            {
+                preferences=preferences with { Language=language }; page="keying"; Rebuild();
+                Check(PageContent.Children.Count>0 && Breadcrumb.Text==T("keyingTitle"),"Keying page translates in "+language);
+                page="audio"; audioWorkspace=1; Rebuild();
+                Check(Descendants(Root).OfType<TextBox>().Any(b=>AutomationProperties.GetAutomationId(b)=="DecoderText"),"Decoder page translates in "+language);
+                if(language=="ar")
+                {
+                    Check(Descendants(PageContent).OfType<TextBox>().First(b=>Equals(b.Header,T("morseInput"))).FlowDirection==FlowDirection.LeftToRight,"Arabic audio decoder keeps Morse LTR");
+                    await Snapshot(Path.Combine(directory,"decoder-arabic.png"));
+                }
+            }
+            preferences=preferences with { Language="tr" }; audioWorkspace=0; Rebuild();
 #if MORSE_WINUI
             foreach(string culture in new[]{"tr-TR","en-US","de-DE","ru-RU","ar-SA"}) voices[culture]=MorseCore.AppCore.OfflineSpeech.ForLanguage(culture).Count;
             Check(voices.Count==5 && voices.All(v=>v.Value>0),"Offline neural voice catalog covers five languages");
@@ -237,8 +340,12 @@ public sealed partial class MainPage
                 Check(!installingUpdate && updateDialog==null,"Dismissing update confirmation leaves the application open");
             }
         }
-        catch(Exception e) { failure=e.ToString(); }
-        var report=new { Passed=failure is null,Checks=checks,Failure=failure,NativeVersion=version,CatalogVoices=voices,SpeechSynthesized=synthesized,MouseDragTested=mouseDragTested,MouseDragEvidence=mouseDragEvidence,WorkingSetMiB=Math.Round(Process.GetCurrentProcess().WorkingSet64/1048576.0,1) };
+        catch(Exception e)
+        {
+            failure=e.ToString();
+            try { await Snapshot(Path.Combine(directory,"failure.png")); } catch(Exception) { }
+        }
+        var report=new { Passed=failure is null,Checks=checks,Failure=failure,SplashVisibleMilliseconds=Math.Round(splashVisibleMilliseconds,1),Status=Status.Text,Page=page,RadioTab=radioTab,LogCall=logCall,AppliedLogCall=appliedLogQuery?.Call,NativeVersion=version,CatalogVoices=voices,SpeechSynthesized=synthesized,MouseDragTested=mouseDragTested,MouseDragEvidence=mouseDragEvidence,WorkingSetMiB=Math.Round(Process.GetCurrentProcess().WorkingSet64/1048576.0,1) };
         await File.WriteAllTextAsync(Path.Combine(directory,"ui-smoke.json"),JsonSerializer.Serialize(report,new JsonSerializerOptions { WriteIndented=true }));
         var closePeer=new ButtonAutomationPeer(CloseWindowButton);
         ((IInvokeProvider)closePeer.GetPattern(PatternInterface.Invoke)).Invoke();

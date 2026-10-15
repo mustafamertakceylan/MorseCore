@@ -1,50 +1,44 @@
 # Çevrimdışı seslendirme
 
+Uygulama içi ses yöneticisi **v0.6.0** ile gelir. **v0.5.0** kullanıcıları güncelleyebilir veya Başlat menüsündeki **Çevrimdışı sesleri kur** / taşınabilir ZIP'teki **setup-speech.cmd** kısayolunu kullanmayı sürdürebilir.
+
 [English](offline-speech.md) · [Masaüstü](desktop.tr.md)
 
-Seslendirme, Windows ses paketleri yerine cihazdaki sinir ağı modellerini kullanır. Metinden Morse'a dönüşümde özgün metin okunur; Morse'dan metne dönüşümde önce seçilen alfabe ile çözümleme yapılır. Dil ve ses, dönüştürücünün hemen altından seçilir. Sesleri elle taramak veya metni başka ekrana kopyalamak gerekmez. **Durdur**, hem ses üretimini hem oynatmayı keser.
+**Ses → Ses paketleri** bölümünde dili seç, istediğin sesin yanındaki **İndir ve kur** düğmesine bas. Örneğini dinleyip **Bu sesi kullan** seçeneğine tıkla. **Ses → Ses oluştur** bölümünde metin girerek veya son dönüşümü aktararak **Seslendir** düğmesini kullanabilirsin. Dönüştürücü yalnızca dönüştürür.
 
-| Dil | Sesler | Çalıştırıcı |
-|---|---|---|
-| Türkçe | EMA Lightning; Antalia-2 Mini | CPU PyTorch |
-| Arapça | Kareem; Ürdün Arapçası, tek konuşmacı | Piper / ONNX Runtime CPU |
-| Almanca | Thorsten, yüksek kalite; Kerstin, düşük kalite | Piper / ONNX Runtime CPU |
-| Rusça | Dmitri; Denis | Piper / ONNX Runtime CPU |
-| İngilizce | Joe | Piper / ONNX Runtime CPU |
+Terminal komutu gerekmez. Ses çalıştırıcısı eksikse uygulama, onayınla resmî Python çalıştırıcısını Windows kullanıcın için kurabilir. Uyumlu Python 3.11–3.13 x64 varsa yeniden kullanır; PATH değiştirmez, yönetici yetkisi istemez. Setup da bu isteğe bağlı bileşeni sunar. Resmî Python kurucusu başladıktan sonra bitmesini bekle; uygulama kurucuyu yarıda kesmez.
 
-[EMA Lightning](https://huggingface.co/canberkkkkkk/ema-lightning), geliştiricisinin verilerine göre 8,6 milyon parametre ve yaklaşık 34 MB ağırlık içerir. [Antalia-2 Mini](https://huggingface.co/cloud0day3/antalia-mini) 7,62 milyon parametreli, fp32 ağırlıkları yaklaşık 30,5 MB olan ayrı bir modeldir. Bunlar RAM ölçümü veya ses kalitesi garantisi değildir. Alania'nın çevrimiçi API'si ile yerel Antalia Mini aynı ürün değildir.
+| Dil | Kullanılabilen sesler |
+|---|---|
+| Türkçe | EMA Lightning · Antalia-2 Mini |
+| İngilizce | Joe · Piper |
+| Almanca | Thorsten · Piper; Kerstin · Piper |
+| Rusça | Dmitri · Piper; Denis · Piper |
+| Arapça | Kareem · Piper, Ürdün Arapçası |
 
-## Bir kez kurulum
+## Bir kez indir, internetsiz kullan
 
-Geliştirme paketi Python 3.11–3.13 x64, `curl` ve kurulum sırasında internet gerektirir. Windows Setup 0.4.1, Python'ı kontrol eder ve eksikse paketindeki değiştirilmemiş [resmî Python 3.13.16 kurucusunu](https://www.python.org/downloads/release/python-31316/) isteğe bağlı sunar. Uyumlu kurulum varsa onu kullanır; PATH değiştirilmez. Ses modelleri ayrıca kullanıcı seçimiyle indirilir. Windows'ta kökteki `setup-speech.cmd` dosyasını çift tıklayabilir veya şu komutu çalıştırabilirsin:
+İndirmeler yalnızca onayından sonra başlar. Her modelin kesin indirme boyutu, ilerleme, iptal ve hata durumu uygulamada gösterilir. Ortak çalıştırıcı ve bağımlılıklar ayrıca yer kaplar; boyutları modele dahil değildir. Yalnızca Piper sesi kurduğunda PyTorch veya Türkçe motorları kurulmaz. Paket sayfasından ayrılmak model/bağımlılık kurulumunu iptal eder; yeniden denemede doğrulanmış dosyalar kullanılır.
 
-```powershell
-python -X utf8 scripts/setup-speech.py
-```
+Seslendirme bundan sonra API anahtarı veya sürekli çalışan sunucu olmadan yerel dosyaları kullanır. Eksik ses için mesaj gösterilir; kendiliğinden indirme başlamaz. **Durdur**, ses üretimini ve oynatımını iptal eder. Uygulama güncelleme kontrolü Ayarlar'dan ayrıca yönetilir.
 
-Gitignore içindeki `speech-runtime/` klasörüne ayrı bir CPU ortamı ve sekiz ses kurulur. Modeller yaklaşık 472 MiB tutar; Python bağımlılıkları ayrıca yer kaplar. Kurulum tekrarlandığında doğrulanmış dosyalar yeniden indirilmez. Model sürümleri, boyutları ve SHA-256/LFS veya Git blob özetleri `scripts/speech-models.json` içinde sabittir. Model kartları ve bağımlılık lisansları pakette kalır. Ağırlıklar Git'e eklenmez.
+**Sesi kaldır**, yalnızca o sese ait değiştirilmemiş ve doğrulanmış model dosyalarıyla model kartını kaldırır. Diğer sesler, Python, ortak bağımlılıklar, ayarlar, görüşmeler ve kayıtların korunur. Yönetici dışında değiştirilmiş dosyalar silinmez. Seçili ses klasörü sayfada gösterilir; gerekirse **Ayarlar → Ses paketi** bölümünden değiştirilebilir.
 
-Uygulama, kendi klasöründe veya üst klasörlerinde `speech-runtime` arar. Başka konum **Ayarlar → Ses paketi** bölümünden veya mutlak `MORSECORE_SPEECH_HOME` değişkeniyle seçilebilir. Önizlemedeki sanal ortam, kurulduğu makinenin Python kurulumuna bağlıdır; başka bilgisayara taşınan bir kurulum paketi değildir. MSIX isteğe bağlı ses paketini içermez.
+## Sınırlar ve teşekkür
 
-## İnternetsiz çalışma ve bellek
+Ses oynatımı şu anda Windows hedefinde kullanılabilir. macOS ve Linux planlanıyor. Modeller gerektiğinde ayrı çalıştırıcıda yüklenir; üretim bitince işlem kapanır. Sınır 4000 karakter ve iki dakikalık ses üretimidir. Küçük model dosyası düşük tepe RAM tüketimi anlamına gelmez; Türkçe sesler CPU PyTorch kullanır ve üretim sırasında birkaç yüz MiB bellek tüketebilir.
 
-Ses üretimi ayrı bir işlemde, yerel model yollarıyla yapılır. Türkçe adaptörü Hub erişimini kapatır ve ağ bağlantılarını reddeder. Piper kendi komut satırı aracıyla, mevcut yerel model üzerinden çağrılır. API anahtarı veya sürekli çalışan sunucu gerekmez. Eksik model için mesaj gösterilir; seslendirme kendiliğinden indirme başlatmaz. Uygulamanın GitHub sürüm kontrolü ayrı ayarına bağlıdır.
+[EMA Lightning](https://huggingface.co/canberkkkkkk/ema-lightning), [Antalia-2 Mini](https://huggingface.co/cloud0day3/antalia-mini) ve [Piper](https://github.com/OHF-Voice/piper1-gpl/tree/v1.3.0) geliştiricilerine teşekkürler. EMA ve Antalia'nın kod ve ağırlıkları Apache-2.0'dır. Piper GPL-3.0 lisansıyla ayrı işlem olarak çalışır. Modellerin ve bağımlılıkların kendi koşulları geçerlidir. Lisans ve NOTICE dosyaları kurulan pakette korunur.
 
-Modeller yalnızca ses üretirken açılır; işlem bitince çalıştırıcı kapanır. Geçici WAV dosyaları oynatım veya iptal sonrasında silinir. Sınır 4000 karakter ve iki dakikalık üretim süresidir. CUDA paketi kurulmaz; Türkçe adaptörü iki CPU iş parçacığı kullanır ve toplu iş boyutu araması yapmaz.
+Kareem'in kaynak model kartında veri kümesinin lisansı açıkça belirtilmez. Yeniden dağıtımdan önce [kaynak kartını](https://huggingface.co/rhasspy/piper-voices/blob/c10ece1aade47bb51c153c893d14e5bf8e5b7117/ar/ar_JO/kareem/medium/MODEL_CARD) incele; kurulum onayında da bu durum belirtilir. Diğer katalog kartları veri kümelerini CC0 olarak tanımlar. Kurulum, üçüncü taraf bileşenleri Apache-2.0 yapmaz.
 
-Küçük ağırlık dosyası küçük RAM tüketimi anlamına gelmez. Bu Windows makinesindeki tek soğuk CPU örneğinde EMA, Python/model açılışı dahil 2,92 saniyede 4,68 saniyelik ses; Antalia 3,02 saniyede 5,40 saniyelik ses üretti. Çalıştırıcı işlem ağacının çalışma kümesi sırasıyla 335,3/349,5 MiB; özel ayrılmış belleği 1185,7/1139,1 MiB zirvesine çıktı. Ardından işlem kapandı. Arayüzün belleği bu sayılara dahil değildir; performans garantisi değildir. Geliştiricilerin GPU hızları CPU sonucu olarak sunulmaz.
+<details>
+<summary>Geliştirici kullanımı ve kontroller</summary>
 
-Antalia'nın yayımladığı tarayıcı ONNX örneği 1.0.0, burada kullanılan Python sürümü 1.0.1'dir. Daha az bellek kullanan ONNX adaptörü, çıktı ve metin normalizasyonu eşdeğerliği doğrulanmadan bu yolun yerine konmadı. Önizlemede etkin değildir.
+İsteğe bağlı komut satırı kurulumu korunur: `python -X utf8 scripts/setup-speech.py --voice ema-tr`. `--voice` olmadan tüm katalog kurulur. Arayüz aynı sürümü sabitlenmiş motor paketlerini kullanır; `scripts/speech-models.json` içindeki dosyaları geçici dosya, kesin boyut ve SHA-256 veya Git blob özetiyle doğruladıktan sonra taşır.
 
-## Lisanslar ve test
+Uygulama gitignore içindeki `speech-runtime/` geliştirme klasörünü, seçilmiş mutlak klasörü veya `%LOCALAPPDATA%/MorseCore/Speech` konumunu kullanır. Klasör seçilmemişse `MORSECORE_SPEECH_HOME` keşfi değiştirebilir. Kurulum ayrıntıları seçili klasörde `.voice-tools/setup.stdout.log` ve `setup.stderr.log` dosyalarındadır. Sanal ortam aynı bilgisayardaki Python'a bağlıdır; başka bilgisayara kopyalanması desteklenmez.
 
-MorseCore ve Türkçe adaptörü Apache-2.0 olarak kalır. EMA ve Antalia'nın kod/ağırlıkları da Apache-2.0'dır. Ayrı kurulan [Piper motoru](https://github.com/OHF-Voice/piper1-gpl/tree/v1.3.0) GPL-3.0 lisanslıdır; MorseCore kütüphanesine bağlanmaz, ayrı komut satırı işlemi olarak çağrılır. Bağımlılıkların kendi lisansları geçerlidir.
+`python -m unittest discover -s tests -p test_speech_setup.py`, AppCore kontrolleri ve kurulu sesler için `pwsh -File scripts/test-speech.ps1` kullanılabilir. Ses doğallığı ve fiziksel hoparlör çıkışı ayrıca dinlenmelidir; otomatik testler bunları kanıtlamaz.
 
-Piper model kartları Thorsten, Kerstin, Dmitri, Denis ve Joe verilerini CC0 olarak belirtir. Kareem kartı, lisansı açıkça yazmadan bir veri deposuna yönlendirir. Genel dağıtıma dahil edilmeden önce yeniden dağıtım izni netleştirilmelidir. Geliştirme paketinin kurulması, üçüncü taraf motor/model/verilerini Apache-2.0 yapmaz. Sabitlenmiş kartlar `speech-runtime/licenses/` altında; kaynak [Piper ses deposunda](https://huggingface.co/rhasspy/piper-voices).
-
-```powershell
-pwsh -File scripts/test-speech.ps1
-pwsh -File scripts/test-desktop.ps1
-```
-
-Ses testi katalogdaki her sesle gerçek üretim yapar; çıktı, giriş sınırı, eksik paket ve iptali denetler. GUI testi beş dilde yerleşimi ve EMA kuruluysa gerçek ses üretimi ile sessize alınmış MediaPlayer oynatımını sınar. Sesin doğallığı ve fiziksel hoparlör çıkışı ayrıca dinlenerek değerlendirilmelidir.
+</details>

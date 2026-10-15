@@ -1,61 +1,60 @@
 <div align="center">
 
-# MorseCore
+![MorseCore — hareketli Morse sinyali](docs/media/morsecore.gif)
 
-<img src="apps/MorseCore.Desktop/MorseCore.Desktop/Assets/Brand/morsecore.png" width="92" alt="MorseCore logosu">
+**Mesajını yaz. Morse'u dinle. Alıştırma yaparak öğren.**
 
-**Morse kodunu dönüştürün, dinleyin ve alıştırma yapın.**
-
-![C23](https://img.shields.io/badge/C-23-225E85?style=flat-square&logo=c&logoColor=white)
-[![Sürüm](https://img.shields.io/badge/Version-0.5.0-5e6a42?style=flat-square)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v0.5.0)
-[![Lisans](https://img.shields.io/badge/License-Apache%202.0-2A9D8F?style=flat-square)](LICENSE)
+[![Windows için indir](https://img.shields.io/badge/%C4%B0ndir-Windows-5e6a42?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.6.0/MorseCore-0.6.0-Windows-x64-Setup.exe)
+[![Sürüm 0.6.0](https://img.shields.io/badge/v0.6.0-%C3%96nizleme-c58c59?style=for-the-badge)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v0.6.0)
 
 [English](README.md) · **Türkçe**
 
 </div>
 
-MorseCore, metin ve dosyaları Morse koduna çevirir; Morse kodunu yeniden metne dönüştürür. C23 motoruyla çalışan bir Windows masaüstü uygulamasıdır.
+MorseCore; metni Morse koduna çevirmek, dinlemek ve alıştırma yapmak için ücretsiz bir Windows uygulamasıdır. Mesajların bilgisayarında kalır.
 
-## İndir
+![Açık temada MorseCore: solda metin, sağda Morse kodu](docs/media/converter.png)
 
-**[Windows Setup indir — v0.5.0](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.5.0/MorseCore-0.5.0-Windows-x64-Setup.exe)** · [Taşınabilir ZIP](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.5.0/MorseCore-0.5.0-Windows-x64-Desktop.zip)
+### Hemen başla
 
-Setup'ı çalıştırıp uygulamayı Başlat menüsünden açın. Taşınabilir ZIP'i kullanıyorsanız tüm dosyaları açıp **MorseCore.Desktop.exe** dosyasını çalıştırın. Bu, imzasız bir önizlemedir; macOS ve Linux arayüzleri planlanmaktadır.
+1. **Setup'ı indirip çalıştır**, ardından Başlat menüsünden MorseCore'u aç.
+2. **Dönüştürücü** bölümüne mesajını yaz ve **Dönüştür** düğmesine bas. Dinlemek için **Ses** bölümünü kullan.
+3. Alfabe, alıştırmalar ve telsiz kısaltmaları için **Eğitim** bölümünü keşfet.
 
-İsteğe bağlı seslendirme için Başlat menüsündeki **Çevrimdışı sesleri kur** kısayolunu veya ZIP'teki **setup-speech.cmd** dosyasını kullanın. Python 3.11–3.13 ve internet bir kez gerekir; sonra seslendirme çevrimdışı çalışır. Modeller ayrıca indirilir. [Ses kurulumu →](docs/offline-speech.tr.md)
+Kurmak istemiyorsan [taşınabilir ZIP'i](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.6.0/MorseCore-0.6.0-Windows-x64-Desktop.zip) indir, dosyaları çıkar ve **MorseCore.Desktop.exe** dosyasını aç. Güncel önizleme imzasızdır; Windows yayıncı uyarısı gösterebilir.
 
-Dosya özetleri ve sürüm notları [sürüm sayfasındadır](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v0.5.0).
+### Neler yapabilirsin?
 
-## Özellikler
+- **Dönüştür:** Metinleri ve metin dosyalarını iki yönde, tek tek veya topluca çevir.
+- **Dinle:** Morse kodunu dinle, WAV ses dosyası olarak kaydet.
+- **Çalış:** Harf, kelime ve telsiz kısaltmalarıyla alıştırma yap; kendin Morse gönderip ritmini ölç.
+- **Kaydı çöz:** WAV dosyasından veya Windows ses girişinden temiz, tek tonlu Morse kaydını metne çevir.
+- **Telsiz günlüğünü tut:** İstasyonlar, hazır Morse mesajları, arama, düzenleme, ADIF içe aktarma ve çevrimdışı harita. Telsiz bağlantısı ilerisi için planlanıyor; uygulama RF yayını yapmaz.
+- **Seslendir:** Sesleri uygulama içinden kur, örneklerini dinle ve paketlerini yönet. Metnin çevrimdışı okunur. [Ses kurulumu →](docs/offline-speech.tr.md)
 
-- Metinleri ve `.txt` dosyalarını tek tek veya topluca dönüştürün.
-- Morse dinleyin, WAV kaydedin; okuyarak veya dinleyerek alıştırma yapın.
-- Masaüstünde Latin/Türkçe, Rusça ve Arapça metinleri dönüştürün.
-- Açık/koyu tema; Türkçe, İngilizce, Almanca, Rusça ve Arapça menüler kullanın.
-- Metni çevrimdışı seslendirin: Türkçede EMA Lightning ve Antalia-2 Mini, diğer dört dilde Piper.
+### Kendi dilinde, kendi temanda
 
-**0.5.0 sürümüne** istasyon profilleri, CW hazırlığı, ayrı eğitim/QSO günlükleri ve telsiz sözlüğü eklendi. Ülke rehberleri tarihli kaynaklara dayanır; Rusya güç eşleştirmesi kapalıdır. [Telsiz rehberi →](docs/amateur-radio.md)
+**Türkçe · English · Deutsch · Русский · العربية**
 
-## Derleme ve çalıştırma
+Beş dilde menü ve isteğe bağlı seslendirme desteği bulunur. Metin dönüşümü Latin/Türkçe, Rusça ve Arapça alfabelerini destekler. Arapçada menü sağa geçer; Morse soldan sağa kalır.
 
-**PowerShell 7**, **.NET 10**, Windows SDK/WinUI araçları, **CMake 3.28+**, **GCC 15+** ve **Ninja** gerekir. Ayrıntılar [masaüstü rehberindedir](docs/desktop.tr.md#çalıştırma).
+Ayarlar'dan krem renkli açık temayı veya yeşil koyu temayı seç.
 
-```powershell
-git clone https://github.com/mustafamertakceylan/MorseCore.git
-cd MorseCore
-pwsh -File scripts/run-desktop.ps1
-```
+<details>
+<summary><b>Diğer ekranları gör</b></summary>
 
-## Rehberler
+![MorseCore'un yeşil koyu teması](docs/media/dark.png)
 
-- [Masaüstü kullanımı ve arayüzü derleme](docs/desktop.tr.md)
-- [Windows Setup: kurulum ve derleme](docs/windows-setup.md#türkçe)
-- [Çevrimdışı seslendirme ve ses modelleri](docs/offline-speech.tr.md)
-- [C API ve .NET bağlantısı](docs/native-api.tr.md)
-- [Değişiklik günlüğü](CHANGELOG.md)
+![Sağdaki menüsü ve soldan sağa Morse alanıyla Arapça arayüz](docs/media/arabic.png)
 
-## Teşekkürler ve lisans
+![Çevrimdışı haritada telsiz görüşmelerinin konumları](docs/media/log-map.png)
 
-MorseCore'un Türkçe seslendirmesinde kullanılan [EMA Lightning](https://github.com/canberk7/ema-lightning) için **Canberk Aslan'a**, [Antalia-2 Mini](https://huggingface.co/cloud0day3/antalia-mini) için **PatientDesk AI ekibine** teşekkür ederiz. Diğer katkılar **Ayarlar → Açık kaynağa teşekkürler** bölümündedir.
+</details>
 
-MorseCore, [Apache 2.0](LICENSE) lisanslıdır. Atıflar [NOTICE](NOTICE) dosyasındadır. Üçüncü taraf bileşenler ve modeller kendi lisanslarını korur; ses motorlarının özgün lisansları ve Antalia'nın bildirimi [third_party/speech](third_party/speech/README.md) altında bulunur.
+**Şimdi Windows x64'te. İleride Linux ve macOS'ta.** Yayın tarihleri henüz belirlenmedi.
+
+### Teşekkürler ve lisans
+
+[EMA Lightning](https://github.com/canberk7/ema-lightning) için **Canberk Aslan'a**, [Antalia-2 Mini](https://huggingface.co/cloud0day3/antalia-mini) için **PatientDesk AI ekibine** ve çevrimdışı seslendirmeyi sağlayan **Piper** katkıcılarına teşekkür ederiz.
+
+[Apache 2.0](LICENSE) · [Katkılar ve bileşen lisansları](NOTICE) · [Sürüm notları](CHANGELOG.md) · [Kaynak koddan çalıştırma](docs/desktop.tr.md)

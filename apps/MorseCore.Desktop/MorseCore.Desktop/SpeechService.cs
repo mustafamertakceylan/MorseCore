@@ -7,6 +7,7 @@ internal sealed class SpeechService
 #if MORSE_WINUI
     public static bool IsSupported=>true;
     private CancellationTokenSource? current;
+    private readonly SemaphoreSlim gate=new(1,1);
     public void Stop()=>current?.Cancel();
 #else
     public static bool IsSupported=>false;
@@ -15,13 +16,14 @@ internal sealed class SpeechService
     public async Task SpeakAsync(string text,string id,string home,CancellationToken token,bool muted=false)
     {
 #if MORSE_WINUI
-        if(current!=null) return;
-        using var cancellation=CancellationTokenSource.CreateLinkedTokenSource(token); current=cancellation;
-        string directory=Path.Combine(Path.GetTempPath(),"MorseCore-Speech");
-        Directory.CreateDirectory(directory);
-        string path=Path.Combine(directory,Guid.NewGuid().ToString("N")+".wav");
+        await gate.WaitAsync(token);
+        string? path=null;
         try
         {
+            using var cancellation=CancellationTokenSource.CreateLinkedTokenSource(token); current=cancellation;
+            string directory=Path.Combine(Path.GetTempPath(),"MorseCore-Speech");
+            Directory.CreateDirectory(directory);
+            path=Path.Combine(directory,Guid.NewGuid().ToString("N")+".wav");
             await OfflineSpeech.SynthesizeAsync(text,id,home,path,cancellation.Token);
             cancellation.Token.ThrowIfCancellationRequested();
             using var stream=File.OpenRead(path);
@@ -33,7 +35,7 @@ internal sealed class SpeechService
             using var registration=cancellation.Token.Register(()=>complete.TrySetCanceled(cancellation.Token));
             cancellation.Token.ThrowIfCancellationRequested(); player.Play(); await complete.Task;
         }
-        finally { if(File.Exists(path)) File.Delete(path); current=null; }
+        finally { try { if(path!=null && File.Exists(path)) File.Delete(path); } finally { current=null; gate.Release(); } }
 #else
         await Task.CompletedTask;
         throw new PlatformNotSupportedException("Speech playback is currently available in the Windows target.");

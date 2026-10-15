@@ -21,7 +21,7 @@ public sealed partial class MainPage : Page
     private readonly Dictionary<Button,Border> navigationIndicators=[];
     private bool educationExpanded;
     private StackPanel? educationChildren;
-    private string page="converter", source="", version="0.5.0";
+    private string page="converter", source="", version="0.6.0";
     private ConversionResult? result;
     private bool decode, working, initialized, disposed, nativeReady;
     private int revision;
@@ -63,7 +63,9 @@ public sealed partial class MainPage : Page
         LoadingProgress.Value=35; LoadingDetail.Text=T("loadingEngine");
         await FirstSplashFrame();
         if(disposed) return;
+        var minimumSplash=Task.Delay(TimeSpan.FromSeconds(2),lifetime.Token);
 #if DEBUG
+        var splashTimer=System.Diagnostics.Stopwatch.StartNew();
         if(SmokeDirectory is { } captureDirectory) await Snapshot(Path.Combine(captureDirectory,"loading.png"));
 #endif
         if(preferences.CheckUpdates && SmokeDirectory is null)
@@ -81,11 +83,17 @@ public sealed partial class MainPage : Page
         Shell.Visibility=Visibility.Visible;
         SetStatus(ready ? store.LoadWarning is null ? T("ready") : T("settingsRecovered") : T("nativeUnavailable"));
         if(update!=null && ready) SetStatus($"{T("updateAvailable")} · {update.Version}");
+        try { await minimumSplash; }
+        catch(OperationCanceledException) { return; }
+        if(disposed) return;
+#if DEBUG
+        double splashVisibleMilliseconds=splashTimer.Elapsed.TotalMilliseconds;
+#endif
         await DismissSplash();
         if(disposed) return;
         AnimateContent();
 #if DEBUG
-        if(SmokeDirectory is { } directory) { await RunUiSmoke(directory); return; }
+        if(SmokeDirectory is { } directory) { await RunUiSmoke(directory,splashVisibleMilliseconds); return; }
 #endif
     }
     private async Task FirstSplashFrame()
@@ -132,7 +140,7 @@ public sealed partial class MainPage : Page
         AddMenu("converter","\uE8D4"); AddMenu("files","\uE8B7"); AddMenu("audio","\uE8D6");
         AddMenu("education","\uE7BE");
         educationChildren=new StackPanel { Spacing=2,Visibility=educationExpanded && !preferences.Collapsed ? Visibility.Visible : Visibility.Collapsed };
-        foreach(string key in new[]{"alphabet","practice","glossary"})
+        foreach(string key in new[]{"alphabet","practice","keying","glossary"})
         {
             var title=Label(T(key),13); title.Margin=new Thickness(4,0,4,0);
             var child=new Button { Content=title,HorizontalAlignment=HorizontalAlignment.Stretch,HorizontalContentAlignment=HorizontalAlignment.Left,Padding=new Thickness(8,9,8,9),Margin=new Thickness(24,0,0,0),
@@ -151,7 +159,7 @@ public sealed partial class MainPage : Page
         var panel=new StackPanel { Orientation=Orientation.Horizontal,Spacing=11 };
         panel.Children.Add(new FontIcon { Glyph=glyph,FontSize=18,Width=20 });
         var title=Label(T(key),14); title.FontWeight=Microsoft.UI.Text.FontWeights.SemiBold; panel.Children.Add(title);
-        bool selected=key==page || key=="education" && (page is "practice" or "alphabet" or "glossary");
+        bool selected=key==page || key=="education" && (page is "practice" or "keying" or "alphabet" or "glossary");
         if(key=="education") panel.Children.Add(new FontIcon { Glyph=educationExpanded?"\uE70E":"\uE70D",FontSize=10,Margin=new Thickness(4,0,0,0) });
         var ink=Brush(selected ? "AccentInkBrush" : "MutedBrush");
         ((FontIcon)panel.Children[0]).Foreground=ink; ((TextBlock)panel.Children[1]).Foreground=ink;
@@ -169,7 +177,7 @@ public sealed partial class MainPage : Page
             if(preferences.Collapsed)
             {
                 var flyout=new MenuFlyout();
-                foreach(string child in new[]{"alphabet","practice","glossary"})
+                foreach(string child in new[]{"alphabet","practice","keying","glossary"})
                 {
                     var entry=new MenuFlyoutItem { Text=T(child) }; entry.Click+=(_,_)=>Navigate(child); flyout.Items.Add(entry);
                 }
@@ -188,11 +196,12 @@ public sealed partial class MainPage : Page
     {
         if(page==key) return;
         StopPlayback(); revision++;
-        if(key is "practice" or "alphabet" or "glossary") educationExpanded=true;
+        if(key is "practice" or "keying" or "alphabet" or "glossary") educationExpanded=true;
         page=key; Rebuild(); ContentScroll.ChangeView(null,0,null,true); AnimateContent();
     }
     private void BuildPage()
     {
+        CleanupKeying(); CleanupAudioDecoder(); CleanupVoicePacks();
         inputBox=null; outputBox=null; statistics=null;
         PageContent.Children.Clear(); Breadcrumb.Text=T(page);
         switch(page)
@@ -201,6 +210,7 @@ public sealed partial class MainPage : Page
             case "files": BuildFiles(); break;
             case "audio": BuildAudio(); break;
             case "practice": BuildPractice(); break;
+            case "keying": BuildKeying(); break;
             case "alphabet": BuildAlphabet(); break;
             case "glossary": BuildGlossary(); break;
             case "radio": BuildRadio(); break;
@@ -332,7 +342,7 @@ public sealed partial class MainPage : Page
         choice.SelectionChanged+=(_,_)=> { if(choice.SelectedIndex>=0) changed(choice.SelectedIndex); }; return choice;
     }
     private ComboBox AlphabetChoice()=>Choice(T("conversionAlphabet"),[T("latin"),T("russian"),T("arabic")],(int)preferences.Alphabet,index=>
-    { preferences=preferences with { Alphabet=(MorseAlphabet)index }; result=null; revision++; SavePreferences(); BuildPage(); });
+    { preferences=preferences with { Alphabet=(MorseAlphabet)index }; result=null; decoderResult=null; revision++; SavePreferences(); BuildPage(); });
     private void InitializePicker(object picker)
     {
 #if MORSE_WINUI
@@ -358,6 +368,6 @@ public sealed partial class MainPage : Page
     public void Shutdown()
     {
         if(disposed) return;
-        disposed=true; lifetime.Cancel(); StopPlayback(); http.Dispose(); lifetime.Dispose();
+        disposed=true; lifetime.Cancel(); CleanupKeying(); CleanupAudioDecoder(); CleanupVoicePacks(); StopPlayback(); http.Dispose(); lifetime.Dispose();
     }
 }

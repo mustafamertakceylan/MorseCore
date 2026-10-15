@@ -48,10 +48,20 @@ public sealed partial class MainPage
     }
     private string audioSource="";
     private bool audioIsMorse;
+    private int audioWorkspace;
     private string AudioMorse()=>audioIsMorse ? audioSource : MorseEngine.Encode(audioSource,preferences.Alphabet,preferences.Separator).Text;
     private void BuildAudio()
     {
         Heading(T("audio"));
+        var workspace=Choice("",[T("workspaceCompose"),T("workspaceDecode"),T("workspaceVoices")],audioWorkspace,index=>
+        {
+            if(audioWorkspace==index) return;
+            StopPlayback(); audioWorkspace=index; BuildPage();
+        });
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(workspace,"AudioWorkspace");
+        PageContent.Children.Add(workspace);
+        if(audioWorkspace==1) { BuildAudioDecoderSection(); return; }
+        if(audioWorkspace==2) { BuildVoicePacksPage(); return; }
         var stack=new StackPanel { Spacing=18 }; stack.Children.Add(AlphabetChoice());
         stack.Children.Add(Choice(T("audioInputType"),[T("plainText"),T("morseInput")],audioIsMorse?1:0,i=> { if(audioIsMorse==(i==1)) return; audioIsMorse=i==1; BuildPage(); }));
         stack.Children.Add(Action("useConversion",()=> { audioSource=result?.Text ?? source; audioIsMorse=result!=null ? !decode : decode; BuildPage(); return Task.CompletedTask; }));

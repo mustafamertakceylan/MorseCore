@@ -45,12 +45,19 @@ public sealed record QsoRecord
     public string ReceivedRst { get; init; }="";
     public bool Practice { get; init; }=true;
     public string Note { get; init; }="";
+    private readonly string? gridSquare;
+    public string GridSquare { get=>gridSquare??""; init=>gridSquare=value; }
+    // Null is the legacy schema-1 default (seconds were always recorded). False preserves an imported HHMM time.
+    public bool? TimeHasSeconds { get; init; }
+    public double? Latitude { get; init; }
+    public double? Longitude { get; init; }
 }
 
 [JsonSourceGenerationOptions(WriteIndented=true,PropertyNamingPolicy=JsonKnownNamingPolicy.CamelCase)]
 [JsonSerializable(typeof(RadioData))]
 [JsonSerializable(typeof(StationDocument))]
 [JsonSerializable(typeof(QsoRecord))]
+[JsonSerializable(typeof(WorldOutlineData))]
 internal partial class RadioJsonContext : JsonSerializerContext;
 
 public static class RadioCatalog

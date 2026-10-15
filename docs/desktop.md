@@ -2,7 +2,7 @@
 
 [Türkçe](desktop.tr.md) · [Home](../README.md)
 
-The Windows interface brings text and file conversion, Morse audio, speech and practice together. This is a development preview for 0.4.1. No signed installer has been released.
+The Windows interface brings text and file conversion, Morse audio, speech, learning and radio contact preparation together. [Download the Windows preview](https://github.com/mustafamertakceylan/MorseCore/releases/latest); Setup is currently unsigned.
 
 ## Interface
 
@@ -10,18 +10,29 @@ The Windows interface brings text and file conversion, Morse audio, speech and p
 - An application-drawn title bar and close button; a native Windows caption region moves while the mouse button is held and stops on release. The logo and app name are centered in the window. Window dimensions are locked; resize, maximize and minimize are blocked. Startup size is clamped to the display work area.
 - The MorseCore logo appears in the title bar, sidebar, loading screen and application icon. **System / Light / Dark** theme selection lives in Settings.
 - Atkinson Hyperlegible body text, Crimson Pro headings and monospace Morse editors.
-- A collapsible sidebar for conversion, files, audio, practice and the alphabet. Settings stay at the bottom. Collapsed icons and the menu toggle share one center line, including the Arabic layout.
+- A collapsible sidebar for conversion, files, audio, learning and amateur radio. Alphabet, exercises and the radio glossary are grouped under Learning. Settings stay at the bottom. Collapsed icons and the menu toggle share one center line, including the Arabic layout.
 - Short page and menu transitions. Windows animation preferences and **Reduce motion** are respected; no continuously running idle effects.
 - Turkish, English, German, Russian and Arabic. Arabic mirrors the sidebar to the right while Morse fields remain left to right.
-- A compact converter with clipboard/export actions, Morse playback and offline speech on the same screen; `Ctrl+Enter` converts.
+- A compact converter with clipboard/export actions; `Ctrl+Enter` converts. Morse playback and offline speech live on Audio.
 
 Settings include an expandable **Thanks to open source** section with authors, license labels and source links for EMA Lightning, Antalia Mini, Piper, normalizer-tr, PyTorch, ONNX Runtime and the voice models. Engine and model licenses remain separate.
 
 Interface language, conversion alphabet and speech language are independent. Choose an alphabet when decoding: dots and dashes do not carry an alphabet identifier.
 
+## New in 0.6.0
+
+These features are included in the v0.6.0 Windows installer and portable ZIP.
+
+- **Learning → Sending practice:** focus the large key, then hold Space, click or touch to send. Finish to see timing, rhythm, speed and optional reference-text accuracy. Letters use the selected alphabet; the speed target sets the dot/dash thresholds. Leaving the page releases the key and sound.
+- **Audio → Decode audio:** select a WAV and decode it locally. Automatic tone/speed detection can be overridden under Advanced. Windows can record up to 30 seconds from a selected audio input and decode when stopped. Files are limited to 64 MiB and two minutes; PCM and IEEE float mono/stereo are supported. This targets a single clean CW tone, not speech or a mixture of stations. `□` marks uncertain characters; real microphone and noisy-radio performance remain unverified.
+- **Amateur radio → Log:** search all contacts by call, UTC date or band, edit existing records, or preview a CW ADIF import before confirming it. Exact duplicates are excluded; differing seconds/frequencies remain separate. Imported time precision is preserved. The offline map shows only manually supplied coordinates or recorded Maidenhead cells; a call prefix does not locate an operator.
+- **Audio → Voice packs**, also reachable from Settings: choose a language, review model size and install, select, sample or remove individual voices. Downloads require confirmation; playback stays offline. Shared Python dependencies take extra space. Missing Python can be installed with the official verified Windows installer after confirmation.
+
+ADIF imports support ASCII `.adi`/`.adif`, up to 8 MiB and 10,000 records. Unsupported fields and rejected records are summarized before importing; the log is not a lossless archive of every ADIF field. Keep the original file. Practice and real contacts remain separate.
+
 ## Run from source
 
-Development requires Windows x64, .NET 10 SDK, Windows SDK 10.0.26100, WinUI build tools, PowerShell 7 and the [C23 toolchain](../README.md#build-and-run). NuGet dependencies download on the first build. `global.json` pins the Uno SDK.
+Development requires Windows x64, .NET 10 SDK, Windows SDK 10.0.26100, WinUI build tools, PowerShell 7, CMake 3.28+, GCC 15+ and Ninja. NuGet dependencies download on the first build. `global.json` pins the Uno SDK.
 
 ```powershell
 pwsh -File scripts/run-desktop.ps1

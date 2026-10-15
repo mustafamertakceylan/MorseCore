@@ -1,6 +1,10 @@
 MorseCore
 Copyright 2026 Mustafa Mert Akceylan
 
+The offline contact map uses simplified Natural Earth coastline data.
+Natural Earth data is in the public domain. Source and terms:
+https://www.naturalearthdata.com/about/terms-of-use/
+
 Desktop builds include these fonts under the SIL Open Font License 1.1:
 Atkinson Hyperlegible: Copyright 2020 Braille Institute of America, Inc.
 Crimson Pro: Copyright 2018 The Crimson Pro Project Authors.

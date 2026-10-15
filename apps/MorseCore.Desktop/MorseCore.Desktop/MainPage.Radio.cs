@@ -13,7 +13,7 @@ public sealed partial class MainPage
     private int radioTab;
     private string operatingCountry="",operatingClass="",operatingRegion="",manualCall="";
     private StationMode operatingMode;
-    private string otherCall="",sentRst="",receivedRst="",qsoMessage="",qsoNote="",qsoPreview="",qsoMorse="";
+    private string otherCall="",sentRst="",receivedRst="",qsoMessage="",qsoNote="",qsoGrid="",qsoPreview="",qsoMorse="";
     private double qsoFrequency=14.025;
     private QsoStage qsoStage;
     private bool practiceLog=true,showPracticeLog=true;
@@ -202,34 +202,15 @@ public sealed partial class MainPage
         var practice=new ToggleSwitch { Header=T("practiceRecord"),IsOn=practiceLog,OnContent=T("practice"),OffContent=T("externalQso") };
         practice.Toggled+=(_,_)=>practiceLog=practice.IsOn; stack.Children.Add(practice);
         stack.Children.Add(RadioInput("qsoNote",qsoNote,v=>qsoNote=v,false,4000));
+        stack.Children.Add(RadioInput("logbook.grid",qsoGrid,v=>qsoGrid=v,true,12));
+        stack.Children.Add(Label(T("logbook.locationHint"),12,true));
         stack.Children.Add(Action("saveQso",()=>
         {
             var call=CurrentOperatingCall();
             if(call.NeedsConfirmation && string.IsNullOrWhiteSpace(manualCall)) { SetStatus(T(call.ExplanationKey)); return Task.CompletedTask; }
             var match=RadioCatalog.Assess(operatingCountry,operatingClass,QsoHz());
-            radioStore.Append(new() { OwnCall=call.CallSign,OtherCall=CallSigns.Parse(otherCall).Normalized,CountryId=operatingCountry,Band=match.Band?.Band ?? "",FrequencyHz=QsoHz(),SentRst=sentRst,ReceivedRst=receivedRst,Practice=practiceLog,Note=qsoNote }); SetStatus(T("saved")); return Task.CompletedTask;
+            radioStore.Append(new() { OwnCall=call.CallSign,OtherCall=CallSigns.Parse(otherCall).Normalized,CountryId=operatingCountry,Band=match.Band?.Band ?? AdifBands.FromFrequency(QsoHz()) ?? "",FrequencyHz=QsoHz(),SentRst=sentRst,ReceivedRst=receivedRst,Practice=practiceLog,Note=qsoNote,GridSquare=qsoGrid.Trim().ToUpperInvariant() }); SetStatus(T("saved")); return Task.CompletedTask;
         },"\uE74E"));
         PageContent.Children.Add(Card(stack));
-    }
-    private void BuildQsoLog()
-    {
-        var filter=Choice(T("recordType"),[T("practice"),T("externalQso")],showPracticeLog?0:1,i=> { if(showPracticeLog==(i==0)) return; showPracticeLog=i==0; BuildPage(); }); PageContent.Children.Add(filter);
-        var actions=Row();
-        foreach(bool adif in new[]{false,true})
-            actions.Children.Add(Action(adif?"exportAdif":"exportCsv",async()=> { bool practice=showPracticeLog; string? path=await SavePath(adif?"adi":"csv",practice?"morsecore-practice":"morsecore-qso"); if(path!=null) { await Task.Run(()=>radioStore.ExportAsync(path,practice,adif,lifetime.Token,replaceExisting:true)); SetStatus(T("saved")); } },"\uE74E"));
-        PageContent.Children.Add(actions); WrapActions(actions,PageContent); PageContent.Children.Add(Label(T("logHint"),12,true));
-        try
-        {
-            var entries=radioStore.Recent(showPracticeLog);
-            if(entries.Count==0) PageContent.Children.Add(Label(T("noRecords"),14,true));
-            foreach(var entry in entries)
-            {
-                var stack=new StackPanel { Spacing=6 };
-                var title=Label($"{entry.Utc.UtcDateTime:yyyy-MM-dd HH:mm:ss} UTC · {entry.OwnCall} → {entry.OtherCall}",15); title.FlowDirection=FlowDirection.LeftToRight; stack.Children.Add(title);
-                var details=Label($"{entry.FrequencyHz/1_000_000m:0.######} MHz · CW · {entry.SentRst} / {entry.ReceivedRst}",13,true); details.FlowDirection=FlowDirection.LeftToRight; stack.Children.Add(details);
-                if(entry.Note.Length>0) stack.Children.Add(Label(entry.Note,13)); PageContent.Children.Add(Card(stack));
-            }
-        }
-        catch(Exception e) when(e is IOException or InvalidDataException or UnauthorizedAccessException or System.Text.Json.JsonException or ArgumentException) { PageContent.Children.Add(Label(T("radioDataError"),14,true)); }
     }
 }

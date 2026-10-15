@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.28)
-project(MorseCore VERSION 0.5.0 LANGUAGES C)
+project(MorseCore VERSION 0.6.0 LANGUAGES C)
 
 set(CMAKE_C_STANDARD 23)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -66,11 +66,11 @@ if(MORSECORE_BUILD_DOTNET_BINDINGS)
         COMMAND "${CMAKE_COMMAND}" -E env ${MORSECORE_DOTNET_ENV}
             "${DOTNET_EXECUTABLE}" build "${CMAKE_CURRENT_SOURCE_DIR}/tests/dotnet/MorseCore.Interop.Smoke/MorseCore.Interop.Smoke.csproj"
             --configuration "$<IF:$<CONFIG:Debug>,Debug,Release>" --artifacts-path "${CMAKE_CURRENT_BINARY_DIR}/dotnet"
-            -p:ArtifactsPivots=native --nologo --ignore-failed-sources
+            -p:ArtifactsPivots=native --nologo --ignore-failed-sources --disable-build-servers -m:1
         COMMAND "${CMAKE_COMMAND}" -E env ${MORSECORE_DOTNET_ENV}
             "${DOTNET_EXECUTABLE}" build "${CMAKE_CURRENT_SOURCE_DIR}/tests/dotnet/MorseCore.AppCore.Smoke/MorseCore.AppCore.Smoke.csproj"
             --configuration "$<IF:$<CONFIG:Debug>,Debug,Release>" --artifacts-path "${CMAKE_CURRENT_BINARY_DIR}/dotnet"
-            -p:ArtifactsPivots=native --nologo --ignore-failed-sources
+            -p:ArtifactsPivots=native --nologo --ignore-failed-sources --disable-build-servers -m:1
         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bindings/dotnet"
         DEPENDS MorseCoreNative VERBATIM)
     if(BUILD_TESTING)

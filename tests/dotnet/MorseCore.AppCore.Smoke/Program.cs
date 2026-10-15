@@ -38,6 +38,7 @@ try
         Check(localizer.Keys.Order().SequenceEqual(keys),"Complete translation keys: "+language);
         Check(localizer.Keys.All(key=>!string.IsNullOrWhiteSpace(localizer[key])),"Nonempty translations: "+language);
         Check(localizer.IsRtl==(language=="ar"),"RTL locale: "+language);
+        Check(new[]{"keyingTitle","decoderHint","voicesTitle","workspaceCompose"}.All(key=>localizer.Keys.Contains(key)),"Feature language resources load: "+language);
     }
     var store=new PreferencesStore(Path.Combine(directory,"settings.json"));
     var settings=new Preferences { Language="ar",Theme="dark",Alphabet=MorseAlphabet.Arabic,ReduceMotion=true,Separator='#' };
@@ -94,6 +95,10 @@ try
     }
     checks+=await UpdateChecks.Run(directory);
     checks+=await RadioChecks.Run(directory);
+    KeyingChecks.Run(Check);
+    DecoderChecks.Run(Check);
+    VoicePackageChecks.Run(Check);
+    LogbookChecks.Run(Check);
     foreach(string language in new[]{"tr-TR","ar-SA","de-DE","ru-RU","en-US"})
         Check(OfflineSpeech.ForLanguage(language).Count>0,"Offline voice coverage: "+language);
     Check(OfflineSpeech.ForLanguage("tr-TR").Select(v=>v.Engine).ToHashSet().SetEquals(["ema","antalia"]),"Two Turkish neural engines");
