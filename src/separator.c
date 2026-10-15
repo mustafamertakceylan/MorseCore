@@ -1,3 +1,4 @@
+#include <stddef.h>
 #include "separator.h"
 #include "app_config.h"
 
@@ -11,7 +12,7 @@ int isValidSeparator(char separator)
 
 char detectSeparatorFromMorse(const char morseInput[])
 {
-    for (int i = 0; morseInput[i] != '\0'; i++) {
+    for (size_t i = 0; morseInput[i] != '\0'; i++) {
         if (isValidSeparator(morseInput[i])) {
             return morseInput[i];
         }

@@ -48,6 +48,12 @@ const char* getText(const char language[], LanguageTextKey key)
         case TXT_MENU_SETTINGS:
             return isTurkish ? "Ayarlar" : "Settings";
 
+        case TXT_MENU_AUDIO:
+            return isTurkish ? "Sesli Morse / WAV" : "Morse Audio / WAV";
+
+        case TXT_MENU_PRACTICE:
+            return isTurkish ? "Alistirma" : "Practice";
+
         case TXT_MENU_EXIT:
             return isTurkish ? "Cikis" : "Exit";
 
@@ -207,8 +213,8 @@ const char* getText(const char language[], LanguageTextKey key)
                 : "Convert text and text files to Morse code and back.";
 
         case TXT_ABOUT_CONVERSION:
-            return isTurkish ? "Harfleri ve rakamlari iki yonde donusturun."
-                             : "Convert letters and numbers in either direction.";
+            return isTurkish ? "Harfleri, rakamlari ve noktalama isaretlerini iki yonde donusturun."
+                             : "Convert letters, digits and punctuation in either direction.";
 
         case TXT_ABOUT_TURKISH:
             return isTurkish ? "Turkce harfleri donusturun; kelime ayiracini otomatik algilayin."
@@ -222,14 +228,32 @@ const char* getText(const char language[], LanguageTextKey key)
             return isTurkish ? "Dil ve ayirac tercihlerinizi sonraki oturumlarda da kullanin."
                              : "Keep your language and separator preferences between sessions.";
 
+        case TXT_ABOUT_AUDIO:
+            return isTurkish ? "Morse'u dinleyin veya hiz ve ton secerek WAV kaydedin."
+                             : "Play Morse or save WAV audio with adjustable speed and tone.";
+
+        case TXT_ABOUT_PRACTICE:
+            return isTurkish ? "Harf, rakam ve kelimeleri okuyarak veya dinleyerek calisin."
+                             : "Practice letters, digits and words by reading or listening.";
+
+        case TXT_ABOUT_PUNCTUATION:
+            return isTurkish ? "Standart noktalama" : "Standard punctuation";
+
+        case TXT_ABOUT_EXTENSIONS:
+            return isTurkish ? "Yaygin uzantilar" : "Common extensions";
+
         case TXT_ABOUT_SUPPORTED:
             return isTurkish ? "Desteklenen karakterler" : "Supported characters";
 
         case TXT_ABOUT_INPUT_LIMIT:
-            return isTurkish ? "En fazla girdi" : "Maximum input size";
+            return isTurkish ? "Metin ve dosyalar bellege sigdigi surece sabit uzunluk siniri yoktur."
+                             : "Text and files have no fixed length limit beyond available memory.";
 
         case TXT_BYTES:
             return isTurkish ? "bayt" : "bytes";
+
+        case TXT_PREVIEW_TRUNCATED:
+            return isTurkish ? "Onizleme kisaltildi; toplam" : "Preview truncated; total";
 
         case TXT_ABOUT_AUTHOR:
             return isTurkish ? "Gelistirici" : "Author";

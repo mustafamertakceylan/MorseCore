@@ -2,9 +2,9 @@
 
 # MorseCore
 
-**Metinden Morse koduna, Morse kodundan metne.**
+**Morse kodunu dönüştürün, dinleyin ve alıştırma yapın.**
 
-Terminale yazdığınız veya bir metin dosyasından okuduğunuz mesajı dönüştürün. Morse alfabesine bakın, sonuçları kaydedin; dil ve kelime ayracı tercihlerinizi sonraki açılışta kullanın.
+Metin ve dosyaları Morse koduna çevirin, mesajları çözün, ses dosyası oluşturun; okuyarak veya dinleyerek alıştırma yapın. Konsol menüsünü kullanın ya da dönüşümleri betiklerden çalıştırın.
 
 ![C17](https://img.shields.io/badge/C-17-225E85?style=flat-square&logo=c&logoColor=white)
 ![CMake](https://img.shields.io/badge/CMake-3.28%2B-064F8C?style=flat-square&logo=cmake&logoColor=white)
@@ -20,19 +20,22 @@ Terminale yazdığınız veya bir metin dosyasından okuduğunuz mesajı dönü�
 
 - [Ne yapar](#ne-yapar)
 - [Özellikler](#özellikler)
-- [Kurulum](#kurulum)
-- [Kullanım](#kullanım)
-- [Dosyalar](#dosyalar)
-- [Ayarlar](#ayarlar)
+- [Derleme ve çalıştırma](#derleme-ve-çalıştırma)
+- [Konsol menüsü](#konsol-menüsü)
+- [Komut satırı](#komut-satırı)
+- [Ses ve WAV](#ses-ve-wav)
+- [Alıştırma](#alıştırma)
+- [Dosyalar ve ayarlar](#dosyalar-ve-ayarlar)
 - [Desteklenen girdiler](#desteklenen-girdiler)
 - [İstatistikler](#istatistikler)
+- [Taşınabilir paket](#taşınabilir-paket)
+- [Testler ve otomasyon](#testler-ve-otomasyon)
 - [Klasör yapısı](#klasör-yapısı)
-- [Testler](#testler)
 - [Lisans](#lisans)
 
 ## Ne yapar
 
-MorseCore harf ve rakamları nokta ve çizgilerden oluşan Morse koduna, Morse kodunu da okunabilir büyük harfli metne dönüştürür. Bilgisayarınızda, numaralı bir konsol menüsüyle çalışır.
+MorseCore harfleri, rakamları ve desteklenen noktalama işaretlerini nokta ve çizgilere dönüştürür; Morse kodunu yeniden okunabilir metne çevirir. Bilgisayarınızda çalışır, arayüz dili ve kelime ayracı tercihlerinizi sonraki açılışa taşır.
 
 Örneğin `HELLO WORLD` metni şu koda dönüşür:
 
@@ -40,34 +43,22 @@ MorseCore harf ve rakamları nokta ve çizgilerden oluşan Morse koduna, Morse k
 .... . .-.. .-.. --- / .-- --- .-. .-.. -..
 ```
 
-Ters yönde dönüştürdüğünüzde yeniden `HELLO WORLD` metnini elde edersiniz.
+Çözümleme `HELLO WORLD` sonucunu verir. Türkçe harfler Latin karşılıklarına dönüştürülür; özgün yazımları Morse kodundan geri getirilemez.
 
 ## Özellikler
 
-- Yazılan metni veya `.txt` dosyalarını iki yönde dönüştürme.
-- Türkçe harfleri Latin karşılıklarına çevirerek işleme.
-- Morse kelimeleri arasında `/`, `|`, `#` veya `*` kullanma; çözerken ayracı algılama.
-- İngilizce ve Türkçe menüler; kalıcı dil ve ayraç tercihleri.
-- Her dönüşümün istatistikleri ve geçerli oturumun özeti.
-- Harf ve rakamlar için 36 öğeli Morse tablosu.
-- ASCII `MORSE CORE` başlığıyla renkli konsol arayüzü.
-
-## Kurulum
-
-### Gereksinimler
-
-| Araç | Kullanım amacı |
+| Özellik | Yapabilecekleriniz |
 |---|---|
-| CMake 3.28 veya üzeri | Projeyi yapılandırma ve derleme |
-| C17 destekleyen GCC | Hazır `debug` yapılandırması |
-| Ninja | Hazır `debug` yapılandırması |
-| Python 3 | CLI bütünleşme testleri; uygulamayı çalıştırmak için gerekmez |
+| Metin ve dosyalar | Yazılan mesajları, standart girdiyi veya `.txt` dosyalarını iki yönde dönüştürme |
+| Komut satırı | Tek bir dönüşümü otomatikleştirme veya klasördeki metin dosyalarını topluca işleme |
+| Ses | Windows'ta Morse dinleme veya PCM WAV dosyası oluşturma |
+| Alıştırma | Rastgele harf, rakam veya kısa kelimeleri okuyarak ya da dinleyerek cevaplama |
+| Arayüz | İngilizce/Türkçe menüler, Morse tablosu ve dönüşüm istatistikleri |
+| Taşınabilir Windows paketi | Kurulu klasörü yeniden derlemeden taşıma |
 
-Derleme ve testler Windows üzerinde MSYS2 UCRT64 GCC ile kontrol edilmiştir. Diğer platformlar doğrulanmamıştır.
+## Derleme ve çalıştırma
 
-### Derleme ve çalıştırma
-
-Depoyu klonlayın ve aşağıdaki komutları proje kökünde çalıştırın. `cmake`, `gcc` ve `ninja` komutlarının terminalden erişilebilir olması gerekir.
+Gereksinimler: **CMake 3.28+**, **C17 destekleyen GCC** ve hazır yapılandırmalar için **Ninja**. Python 3 bütünleşme testlerinde gereklidir; uygulamayı çalıştırmak için gerekmez. Derleme araçlarının terminalden erişilebilir olması gerekir.
 
 ```powershell
 git clone https://github.com/mustafamertakceylan/MorseCore.git
@@ -77,17 +68,13 @@ cmake --build --preset debug
 .\run.cmd
 ```
 
-Derledikten sonra Windows'ta `run.cmd` dosyasına çift tıklayabilir veya uygulamayı doğrudan açabilirsiniz:
+Windows'ta derlemeden sonra `run.cmd` dosyasına çift tıklayabilirsiniz. Kaynak klasöründeki başlatıcı, `data/` ve `config/` için proje kökünü kullanır. Önce yanındaki paketlenmiş uygulamayı, sonra debug, ardından release derlemesini arar.
 
-```powershell
-.\cmake-build-debug\MorseCore.exe
-```
+Yerel Windows taşınabilirlik kontrolleri taşınmış kurulumları, boşluklu yolları, Unicode adları ve uzun yolları kapsar. Linux derleme ve test otomasyonu yapılandırılmıştır; uzaktaki çalışma durumu [Testler ve otomasyon](#testler-ve-otomasyon) bölümündedir.
 
-Derleme, `data/` ve `config/` için proje klasörünün mutlak yolunu kaydeder. Böylece uygulama başka bir çalışma dizininden başlatıldığında da aynı dosyaları kullanır. Proje klasörünü taşırsanız yeniden yapılandırıp derleyin. Çalıştırılabilir dosya tek başına dağıtılabilir bir paket değildir.
+## Konsol menüsü
 
-## Kullanım
-
-Menü numarasını yazıp Enter'a basın:
+Argümansız çalıştırınca menü açılır. Numarayı yazıp Enter'a basın:
 
 ```text
 1  Metinden Morse koduna
@@ -97,62 +84,103 @@ Menü numarasını yazıp Enter'a basın:
 5  Morse tablosu
 6  MorseCore hakkında
 7  Ayarlar
+8  Sesli Morse / WAV
+9  Morse alıştırması
 0  Çıkış
 ```
 
-### Bir mesajı dönüştürme
+**1** seçeneğinde `HELLO WORLD` yazıp sonucu ve istatistikleri görün. Morse çıktısını kaydetmek için `y`, devam etmek için `n` yazın. Morse kodunu çözmek için **2** seçeneğini kullanın; bu seçenek metni gösterir, kaydetme sorusu sormaz.
 
-**1** seçeneğini açın, `HELLO WORLD` yazıp Enter'a basın. Uygulama sonucu ve istatistikleri gösterir, ardından Morse çıktısını kaydetmek isteyip istemediğinizi sorar. Kaydetmek için `y`, kaydetmeden devam etmek için `n` yazın.
+Her Morse harfi ayrı bir gruptur ve gruplar boşluk karakterleriyle ayrılır. Kelime ayracı, `... --- ... / .-` örneğindeki gibi tek başına durmalıdır. Çözümleme, kayıtlı tercihiniz farklı olsa da girdideki `/`, `|`, `#` veya `*` ayracını algılar.
 
-Aşağıdaki mesajı çözmek için **2** seçeneğini kullanın:
+## Komut satırı
 
-```text
-.... . .-.. .-.. --- / .-- --- .-. .-.. -..
+Aşağıdaki PowerShell örnekleri proje kökünden çalıştırılır:
+
+```powershell
+.\run.cmd --help
+.\run.cmd --version
+.\run.cmd --encode "HELLO WORLD"
+.\run.cmd --decode ".... . .-.. .-.. --- / .-- --- .-. .-.. -.."
+.\run.cmd --encode "Merhaba Dünya" --separator "|"
+.\run.cmd --encode --input "message.txt" --output "message.morse.txt"
+.\run.cmd --decode --input "message.morse.txt" --output "decoded.txt"
+"SOS" | .\run.cmd --encode --input -
 ```
 
-Her harfin Morse kodu ayrı bir gruptur; gruplar boşluk karakterleriyle ayrılır. Kelime ayracı da `... --- ... / .-` örneğindeki gibi tek başına bir grup olmalıdır. Çözümleme sırasında mesajdaki desteklenen ayraç algılanır; kayıtlı tercihiniz farklı olabilir. Doğrudan girilen Morse kodu çözülürken kaydetme sorulmaz. Dosyadan çözülen çıktıyı kaydetmek için **4** seçeneğini kullanın.
+Dönüşüm girdisi tek bir tırnaklı metin argümanı, `--input DOSYA` veya girdi sonuna kadar okunan standart girdi olabilir. `--input -`, standart girdiyi açıkça seçer. `--output` verilmezse standart çıktıya yalnızca sonuç yazılır; hata ve durum mesajları standart hata kanalına gider. CLI yolları çalışma dizinine göre veya mutlak olarak verilir; `data/` içindeki dosya adlarıyla sınırlı değildir.
 
-## Dosyalar
+CLI ayracı varsayılan olarak `/` olur; menüde kaydedilmiş tercih okunmaz. Kodlamada başka ayraç seçmek için `--separator` kullanın. Çözümleme desteklenen ayracı otomatik algılar.
 
-Girdi dosyalarını `data/` klasörüne koyun. `message.txt` dosyası için **3** veya **4** seçeneğini açıp `message` ya da `message.txt` yazın. Gerektiğinde `.txt` uzantısı otomatik eklenir; tam yol yerine dosya adını girin.
+### Bir klasörü topluca dönüştürme
 
-Dosya dönüşümleri girdiyi ve çıktıyı gösterir, ardından sonucu aynı klasöre numaralı bir dosya olarak otomatik kaydeder:
-
-```text
-data/
-  message.txt
-  morse_output_1.txt
-  morse_output_2.txt
-  decoded_output_1.txt
+```powershell
+.\run.cmd --batch "input" --encode --output-dir "encoded"
+.\run.cmd --batch "encoded" --decode --output-dir "decoded"
 ```
 
-Numaralandırma, mevcut dosya adlarını atlayarak dosyaların üzerine yazılmasını önler. Doğrudan yazılan metnin Morse çıktısını kaydettiğinizde de `morse_output_*.txt` adında numaralı bir dosya oluşturulur.
+Toplu işlem, normal `.txt` dosyalarını dosya adı sırasıyla okur; alt klasörlere girmez. `message.txt` dosyası kodlanınca `message.morse.txt`, çözülünce `message.text.txt` oluşur. Girdi ve çıktı klasörleri farklı olmalıdır. Üst klasörü mevcutsa çıktı klasörü oluşturulabilir; kaynak klasör önceden var olmalıdır.
 
-`data/` altında sonradan oluşan `.txt` çalışma dosyaları Git tarafından yok sayılır. Depoda zaten takip edilen örnek `.txt` dosyaları takip edilmeye devam eder.
+Toplu işlem dahil mevcut metin ve WAV çıktıları varsayılan olarak korunur. Üzerlerine yazmak istediğinizde **`--overwrite`** ekleyin. Girdi dosyası kendi çıktısı olarak kullanılamaz. Toplu işlem bildirimleri ve başarı/hata sayıları standart hata kanalına yazılır; tek bir dosyanın başarısız olması bile komutun hata koduyla bitmesine yol açar.
 
-## Ayarlar
+Çıkış kodları: `0` başarı, `1` dönüşüm/dosya/ses hatası, `2` geçersiz argümanlar.
 
-Kelime ayracını veya arayüz dilini değiştirmek için **7 → Ayarlar** menüsünü açın. Tercihler `config/settings.txt` dosyasına kaydedilir ve sonraki açılışta yeniden kullanılır.
+## Ses ve WAV
 
-Varsayılan değerler:
+**8** menüsünü açın, düz metni girin, hız ve tonu seçin. Varsayılanı korumak için Enter'a basın. Dinletmek için **1**, WAV kaydetmek için **2**, kaydedip dinletmek için **3** seçin. Menüden oluşturulan sesler `data/` altında numaralı `morse_audio_*.wav` dosyalarına kaydedilir.
+
+```powershell
+.\run.cmd --encode "SOS" --wav "sos.wav"
+.\run.cmd --encode "SOS" --play --wpm 15 --frequency 700
+```
+
+| Ses ayarı | Varsayılan | Desteklenen aralık |
+|---|---|---|
+| Hız | 20 WPM | 5–60 WPM |
+| Ton | 600 Hz | 200–2000 Hz |
+| Örnekleme hızı | 22050 Hz | Ses çekirdeğinde 8000–48000 Hz; menü ve CLI varsayılanı kullanır |
+
+WAV çıktısı **16 bit tek kanallı PCM** biçimindedir. Zamanlama nokta için 1, çizgi için 3; harf içi, harfler arası ve kelimeler arası boşluklar için 1/3/7 birim kullanır. Ses, akış tamponlarıyla üretilir. Ses işlemleri en fazla **10 dakika** ve **1 MiB Morse girdisi** ile sınırlıdır.
+
+Canlı oynatma Windows'ta kullanılabilir; ses cihazı açılamazsa hata bildirilir. WAV üretimi ses cihazı gerektirmez. `--wav` ve `--play`, tek bir `--encode` işlemiyle kullanılır; toplu işlemde kullanılamaz.
+
+## Alıştırma
+
+**9** menüsünde Morse okuyarak veya dinleyerek cevaplamayı, ardından harfleri, rakamları ya da kısa İngilizce kelimeleri seçin. Kelime kümesinde 32 ASCII kelime bulunur. Soru sayısı 1–100 arasındadır, varsayılan 10'dur. Dinleme yöntemi ayrıca hız ve tonu sorar; Windows ses oynatması gerektirir.
+
+Cevabı düz metin olarak yazın. ASCII büyük/küçük harf farkı ve çevredeki boşluklar dikkate alınmaz. Her cevap o soruyu bitirir ve beklenen cevabı gösterir.
+
+- Atlamak için Enter'a basın veya `:skip` yazın.
+- Geçerli soruyu tekrar görmek ya da dinlemek için `:replay` yazın.
+- Erken bitirmek için `:quit` yazın.
+
+Özet; doğru, yanlış, atlanan ve tamamlanan soru sayılarını gösterir. Doğruluk `doğru / tamamlanan × 100` olarak hesaplanır; atlanan sorular da tamamlananlara dahildir. Sonuçlar yalnızca oturum boyunca tutulur.
+
+## Dosyalar ve ayarlar
+
+Konsoldaki **3** ve **4** seçenekleri için dosyaları etkin `data/` klasörüne koyup `message` veya `message.txt` gibi bir ad girin. Gerektiğinde `.txt` eklenir. Dönüşümler numaralı `morse_output_*.txt` veya `decoded_output_*.txt` dosyalarına otomatik kaydedilir. Mevcut adlar atlanır.
+
+Varsayılan olarak `data/` ve `config/`, uygulamanın yanında oluşturulur. Paketteki `run.cmd` kendi klasörünü, kaynak klasöründeki `run.cmd` proje kökünü kullanır. Ayrı ve önceden var olan yazılabilir bir kök seçmek için **`MORSECORE_HOME`** değişkenini ayarlayıp uygulamayı doğrudan açın; `run.cmd` bu değişkeni kendisi ayarlar:
+
+```powershell
+$env:MORSECORE_HOME = "C:\MorseCore Data"
+.\cmake-build-release\MorseCore.exe
+```
+
+**7** menüsü kelime ayracını ve arayüz dilini `config/settings.txt` dosyasına kaydeder. Varsayılanlar:
 
 ```ini
 word_separator=/
 language=EN
 ```
 
-Desteklenen diller `EN` ve `TR` seçenekleridir. Türkçe menü metinleri terminal uyumluluğu için ASCII harflerle yazılmıştır; dönüşüm girdisinde Türkçe harfler yine kabul edilir.
+Diller `EN` ve `TR` seçenekleridir. Türkçe menü metinleri terminal uyumluluğu için ASCII yazımlıdır; Türkçe girdi ve Unicode dosya yolları desteklenir. Terminal destekliyorsa renkler açılır. Yönlendirilen çıktı ANSI kaçış dizileri içermez; `NO_COLOR` değişkenini ayarlamak renkleri kapatır.
 
-Renkler, terminal destekliyorsa açılır. Dosyaya veya başka bir programa yönlendirilen çıktı ANSI kaçış dizileri içermez. PowerShell'de renkleri kapatmak için:
-
-```powershell
-$env:NO_COLOR = "1"
-.\run.cmd
-```
+Projenin `data/` klasöründe sonradan oluşan `.txt` dosyaları Git tarafından yok sayılır; önceden takip edilen örnekler takip edilmeye devam eder.
 
 ## Desteklenen girdiler
 
-Düz metinde `A–Z`, `a–z`, `0–9`, boşluk, sekme ve satır sonu karakterleri desteklenir. Türkçe harfler UTF-8 veya Windows-1254 kodlamasıyla kabul edilir:
+`A–Z`, `a–z`, `0–9` ve ASCII boşluk karakterleri kabul edilir. UTF-8 veya desteklenen Windows-1254 alt kümesindeki Türkçe harfler dönüştürülür:
 
 ```text
 Ç/ç → C    Ğ/ğ → G    İ/ı → I
@@ -161,48 +189,66 @@ Düz metinde `A–Z`, `a–z`, `0–9`, boşluk, sekme ve satır sonu karakterle
 Merhaba Dünya → MERHABA DUNYA
 ```
 
-Çözümleme, büyük Latin harfleri üretir; metnin özgün Türkçe yazımı geri getirilemez. Kodlama sırasında kelimeler arasındaki boşluk karakterleri tek ayraca dönüşür, baştaki ve sondaki boşluklar atılır.
+Başlangıçtaki UTF-8 BOM kabul edilir; dönüşüme ve karakter sayılarına eklenmez. Diğer alfabeler, emoji, desteklenen eski kodlama alt kümesi dışındaki bozuk girdiler ve bilinmeyen Morse grupları reddedilir.
 
-Dosya içeriği dahil girdi sınırı **999 bayttır**; UTF-8 kodlamasında bir Türkçe harf iki bayt tutar. Sınırı aşan girdi kısmen dönüştürülmez, reddedilir. Noktalama işaretleri ve diğer desteklenmeyen karakterler de reddedilir. Morse girdisinde harfler için `.` ve `-`, kelimeler arasında `/`, `|`, `#` veya `*` kullanılır.
+Desteklenen ITU noktalama işaretleri:
 
-Uygulama şu anda metin dönüşümü sunar. Sesli oynatma, mikrofonla çözümleme, grafik arayüz ve komut satırı dönüşüm argümanları henüz uygulanmamıştır.
+```text
+. , ? ' / ( ) : = + - " @
+```
 
-<a id="istatistikler"></a>
+Uygulama ayrıca yaygın uzantılar olan **`! & ; _ $`** işaretlerini destekler; bu beş işaret ITU standardı olarak sunulmaz. Düz metindeki gerçek `/` işareti `-..-.` olarak kodlanır; Morse girdisinde tek başına duran ayraç kelime sınırını belirtir.
+
+Kodlama, kelimeler arasındaki boşluk karakterlerini tek ayraca dönüştürür; baştaki ve sondaki boşlukları kaldırır. Çözümleme büyük harf üretir. Metin girdisi ve çıktısı, kullanılabilir bellek ve temsil edilebilir boyutlarla sınırlı olarak dinamik büyür. Bellek ayırma ve boyut taşması sorunları hata döndürür; sesin ayrı sınırları yukarıda belirtilmiştir.
 
 <a id="istatistikler"></a>
 
 ## İstatistikler
 
-Başarılı dönüşümden sonra girdi ve çıktı karakter sayıları, kelime sayısı, dönüştürülen harf ve rakam sayısı ile gerçek boşluk sayısı gösterilir. Desteklenen bir Türkçe harf, UTF-8'de iki bayt tutsa da tek karakter sayılır.
+Konsol dönüşümleri girdi/çıktı karakter sayılarını, kelime sayısını, dönüştürülen karakterleri ve gerçek boşlukları gösterir. Desteklenen Türkçe harfler bir kez sayılır. Dönüştürülen karakterlere desteklenen noktalama işaretleri dahildir. Kelime, dönüştürülen karakter ve boşluk sayıları düz metin tarafında hesaplanır: kodlamada girdi, çözümlemede çıktı kullanılır.
 
-Kelime, dönüştürülen karakter ve boşluk sayıları işlemin düz metin tarafında hesaplanır: kodlamada girdi, çözümlemede çıktı kullanılır. Sekme ve satır sonları kelimeleri ayırır ancak gerçek boşluk sayısına eklenmez. Örneğin `Merhaba Dünya` 13 karakter, 12 harf, 2 kelime ve 1 boşluk içerir.
+ASCII boşluk karakterleri kelimeleri ayırır; boşluk sayısına yalnız gerçek boşluk karakteri eklenir. Örneğin `Merhaba Dünya` 13 karakter, dönüştürülen 12 harf, 2 kelime ve 1 boşluk içerir. Çıkış özeti geçerli oturumdaki dönüşümleri, dosya işlemlerini, geçersiz girdileri ve kaydedilen çıktıları sayar.
 
-Çıkış özeti, geçerli oturumdaki dönüşümleri, dosya işlemlerini, geçersiz girdileri ve kaydedilen çıktıları gösterir. Oturum istatistikleri sonraki açılışa taşınmaz.
+## Taşınabilir paket
+
+Yerel release derlemesini oluşturun, test edin ve paketleyin:
+
+```powershell
+cmake --preset release
+cmake --build --preset release
+ctest --preset release
+cpack --preset release
+cmake --install cmake-build-release --prefix "C:\Apps\MorseCore"
+```
+
+CPack, ZIP dosyasını `cmake-build-release/` içine yazar. Windows AMD64 üzerinde 0.1.0 sürümünün dosya adı `MorseCore-0.1.0-Windows-AMD64.zip` olur. Yazılabilir bir klasöre açıp `MorseCore.exe` veya `run.cmd` çalıştırın. Kurulum komutu, ZIP'i açmaya alternatiftir. Kurulu klasörü bir arada tutun; uygulama, başlatıcı, belgeler, lisans ve varsayılan yapılandırmayı içerir.
+
+## Testler ve otomasyon
+
+```powershell
+ctest --preset debug
+ctest --preset release
+```
+
+C testleri dönüşümleri, noktalama işaretlerini, dinamik tamponları, ses zamanlamasını/WAV yapısını ve alıştırma puanlamasını kapsar. Python bütünleşme testleri konsol/CLI akışlarını, toplu işlemde çıktı korumasını, ayarları ve taşınmış kurulumları kapsar. Python olmadan bütünleşme testleri eklenmez. Testler sırasında uygulamayı kapatın; testler ayarları geçici olarak değiştirip geri yükleyebilir.
+
+[CI](.github/workflows/ci.yml), push, pull request ve elle çalıştırma için yapılandırılmıştır. Ortak [derleme akışı](.github/workflows/build.yml), Windows'ta GCC UCRT64 ve Ubuntu 24.04'te GCC ile derleme ve test yapacak şekilde ayarlanmıştır. Başarılı Windows işleri ZIP ve `SHA256SUMS` dosyalarını `MorseCore-Windows-x64` adıyla yükleyecek ve 14 gün saklayacak şekilde yapılandırılmıştır.
+
+[Release akışı](.github/workflows/release.yml), CMake proje sürümüyle eşleşen bir `v<sürüm>` etiketi, şu anda `v0.1.0`, ve GitHub Release yayımlamadan önce başarılı Windows/Linux kontrolleri gerektirir. Bu akışlar henüz uzakta çalıştırılmamıştır; yayımlanmış bir sürüm olduğu iddia edilmemektedir. Otomatik ses testleri fiziksel donanımda duyulabilir oynatmayı kanıtlamaz.
 
 ## Klasör yapısı
 
 ```text
-src/                 Uygulama akışı, dönüşüm, konsol arayüzü, dosyalar ve ayarlar
-include/             Başlık dosyaları ve ortak yapılandırma
-tests/               Çekirdek testleri ve CLI bütünleşme senaryoları
-config/settings.txt  Kayıtlı dil ve kelime ayracı
-data/                Girdi dosyaları, örnekler ve üretilen çıktılar
-CMakeLists.txt       Derleme ve test hedefleri
-CMakePresets.json    GCC / Ninja debug yapılandırması
-run.cmd              Derlenmiş uygulama için Windows başlatıcısı
+src/                  Dönüşüm, konsol, CLI, ses, alıştırma, dosyalar ve ayarlar
+include/              Başlık dosyaları ve ortak yapılandırma
+tests/                C testleri ve Python bütünleşme testleri
+config/settings.txt   Kayıtlı dil ve kelime ayracı
+data/                 Konsol girdileri, örnekler ve üretilen çıktılar
+.github/workflows/    CI, ortak derleme kontrolleri ve release otomasyonu
+CMakeLists.txt        C17 derleme, test, kurulum ve ZIP paketleme hedefleri
+CMakePresets.json     GCC / Ninja debug ve release yapılandırmaları
+run.cmd               Windows başlatıcısı
 ```
-
-## Testler
-
-Yapılandırma ve derleme sonrasında çalıştırın:
-
-```powershell
-ctest --preset debug
-```
-
-CTest, C çekirdek testlerini çalıştırır. Yapılandırma sırasında Python 3 bulunmuşsa gerçek uygulama üzerinde **12 senaryolu** CLI test paketi de çalışır. Python yoksa CLI paketi eklenmez; çekirdek testleri çalışmaya devam eder.
-
-Testler dönüşümleri, Türkçe kodlamaları, dört ayracı, istatistikleri, girdi ve çıktı sınırlarını, dosya işlemlerini, kalıcı ayarları, geçersiz girdileri ve girdi sonunu kapsar. CLI paketi ayarları geri yükler, kendi oluşturduğu dosyaları siler ve mevcut örnek dosyaların değişmediğini kontrol eder. Test sırasında ayarlar geçici olarak değiştirildiği için uygulamayı kapalı tutun.
 
 ## Lisans
 

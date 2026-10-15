@@ -67,9 +67,9 @@ void printResult(const char title[], const char content[])
     printf("\n%s%s%s\n%s%s%s\n", COLOR_GREEN, title, COLOR_RESET, COLOR_TEXT, content, COLOR_RESET);
 }
 
-void printStatLine(const char label[], int value)
+void printStatLine(const char label[], size_t value)
 {
-    printf("%s%s:%s %s%d%s\n", COLOR_MUTED, label, COLOR_RESET, COLOR_TEXT, value, COLOR_RESET);
+    printf("%s%s:%s %s%zu%s\n", COLOR_MUTED, label, COLOR_RESET, COLOR_TEXT, value, COLOR_RESET);
 }
 
 void clearConsole(void)
@@ -163,6 +163,14 @@ static void printMenuItem(char key, const char label[])
            keyColor, key, COLOR_TEXT, label, COLOR_MUTED, COLOR_RESET);
 }
 
+static void printMenuPair(char leftKey, const char left[], char rightKey, const char right[])
+{
+    printf("%s  |%s  %s[%c]%s %-24s %s[%c]%s %-24s %s|%s\n",
+           COLOR_MUTED, COLOR_RESET, COLOR_YELLOW, leftKey, COLOR_TEXT, left,
+           rightKey == '0' ? COLOR_MUTED : COLOR_YELLOW, rightKey, COLOR_TEXT, right,
+           COLOR_MUTED, COLOR_RESET);
+}
+
 static void printBanner(void)
 {
     static const char *morse[] = {
@@ -196,11 +204,9 @@ void printMainMenu(char wordSeparator, const char language[])
     printMenuItem('3', getText(language, TXT_MENU_FILE_TEXT_TO_MORSE));
     printMenuItem('4', getText(language, TXT_MENU_FILE_MORSE_TO_TEXT));
     printPanelRule(getText(language, TXT_SECTION_TOOLS));
-    printMenuItem('5', getText(language, TXT_MENU_SHOW_TABLE));
-    printMenuItem('6', getText(language, TXT_MENU_ABOUT));
-    printMenuItem('7', getText(language, TXT_MENU_SETTINGS));
-    printPanelRule("");
-    printMenuItem('0', getText(language, TXT_MENU_EXIT));
+    printMenuPair('8', getText(language, TXT_MENU_AUDIO), '9', getText(language, TXT_MENU_PRACTICE));
+    printMenuPair('5', getText(language, TXT_MENU_SHOW_TABLE), '6', getText(language, TXT_MENU_ABOUT));
+    printMenuPair('7', getText(language, TXT_MENU_SETTINGS), '0', getText(language, TXT_MENU_EXIT));
     printPanelRule("");
     printf("%s  %s: %s%c%s    |    %s: %s%s%s\n", COLOR_MUTED,
            getText(language, TXT_CURRENT_SEPARATOR_SHORT), COLOR_TEXT, wordSeparator,
@@ -241,10 +247,13 @@ void showAboutProject(const char language[])
     printf("- %s\n", getText(language, TXT_ABOUT_CONVERSION));
     printf("- %s\n", getText(language, TXT_ABOUT_TURKISH));
     printf("- %s\n", getText(language, TXT_ABOUT_FILES));
-    printf("- %s\n\n", getText(language, TXT_ABOUT_SETTINGS));
+    printf("- %s\n", getText(language, TXT_ABOUT_SETTINGS));
+    printf("- %s\n", getText(language, TXT_ABOUT_AUDIO));
+    printf("- %s\n\n", getText(language, TXT_ABOUT_PRACTICE));
     printf("%s: A-Z, 0-9\n", getText(language, TXT_ABOUT_SUPPORTED));
-    printf("%s: %d %s\n", getText(language, TXT_ABOUT_INPUT_LIMIT),
-           MAX_TEXT_LENGTH - 1, getText(language, TXT_BYTES));
+    printf("%s: . , : ? ' - / ( ) \" = + @\n", getText(language, TXT_ABOUT_PUNCTUATION));
+    printf("%s: ; ! _ $ &\n", getText(language, TXT_ABOUT_EXTENSIONS));
+    printf("%s\n", getText(language, TXT_ABOUT_INPUT_LIMIT));
 
     printSectionRule();
     printf("%s%s:%s %sMustafa Mert Akceylan%s\n", COLOR_MUTED,
@@ -253,18 +262,27 @@ void showAboutProject(const char language[])
            getText(language, TXT_ABOUT_LICENSE), COLOR_RESET, COLOR_TEXT, COLOR_RESET);
 }
 
-void printPreview(const char title[], const char content[])
+void printPreview(const char title[], const char content[], const char language[])
 {
     printSectionHeader(title);
-    printf("%s%s%s\n", COLOR_TEXT, content, COLOR_RESET);
+    size_t length = strlen(content);
+    size_t shown = length > 512 ? 512 : length;
+    if (shown < length) {
+        while (shown > 0 && ((unsigned char) content[shown] & 0xC0U) == 0x80U) shown--;
+    }
+    printf("%s%.*s%s\n", COLOR_TEXT, (int) shown, content, COLOR_RESET);
+    if (shown < length) {
+        printf("%s[%s: %zu %s]%s\n", COLOR_MUTED, getText(language, TXT_PREVIEW_TRUNCATED),
+               length, getText(language, TXT_BYTES), COLOR_RESET);
+    }
     printSectionRule();
 }
 
 int askToSaveOutput(const char output[], const char language[])
 {
     char answer[20];
-    char fileName[100];
-    char fullPath[200];
+    char fileName[MAX_FILE_NAME_LENGTH];
+    char fullPath[MAX_FILE_PATH_LENGTH];
 
     printf("\n%s  > %s%s%s", COLOR_YELLOW, COLOR_TEXT, getText(language, TXT_DO_YOU_WANT_TO_SAVE), COLOR_RESET);
     fflush(stdout);
@@ -272,12 +290,15 @@ int askToSaveOutput(const char output[], const char language[])
 
     if (strcmp(answer, "y") == 0 || strcmp(answer, "Y") == 0) {
         generateNextFileName(fileName, MORSE_OUTPUT_PREFIX, DEFAULT_FILE_EXTENSION);
-        buildDataFilePath(fullPath, fileName);
+        if (fileName[0] == '\0' || !buildDataFilePath(fullPath, fileName)) {
+            printError(RESULT_FILE_WRITE_ERROR, language);
+            return 0;
+        }
 
         if (writeToFile(fullPath, output)) {
-            printf("%s[+] %s: data/%s%s\n", COLOR_GREEN,
+            printf("%s[+] %s: %s%s\n", COLOR_GREEN,
                    getText(language, TXT_OUTPUT_SAVED_SUCCESSFULLY),
-                   fileName, COLOR_RESET);
+                   fullPath, COLOR_RESET);
             return 1;
         }
 

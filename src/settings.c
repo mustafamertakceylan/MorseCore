@@ -14,7 +14,7 @@ void loadDefaultSettings(AppSettings *settings)
 
 int loadSettings(AppSettings *settings)
 {
-    FILE *file = fopen(SETTINGS_FILE_PATH, "r");
+    FILE *file = openUtf8File(SETTINGS_FILE_PATH, "r");
 
     loadDefaultSettings(settings);
 
@@ -45,7 +45,7 @@ int loadSettings(AppSettings *settings)
 
 int saveSettings(const AppSettings *settings)
 {
-    FILE *file = fopen(SETTINGS_FILE_PATH, "w");
+    FILE *file = openUtf8File(SETTINGS_FILE_PATH, "w");
 
     if (file == NULL) {
         return 0;

@@ -1,6 +1,7 @@
-"""Exercise the real executable; restore settings and remove only test-created files."""
+"""Exercise the executable in isolated runtime directories; leave the checkout untouched."""
 from pathlib import Path
 import hashlib
+import os
 import re
 import subprocess
 import sys
@@ -8,32 +9,38 @@ import tempfile
 import unittest
 
 EXE = Path(sys.argv.pop(1)).resolve()
-ROOT = Path(sys.argv.pop(1)).resolve()
-DATA = ROOT / "data"
-SETTINGS = ROOT / "config/settings.txt"
+SOURCE_ROOT = Path(sys.argv.pop(1)).resolve()
+ROOT = DATA = SETTINGS = None
 HELLO = ".... . .-.. .-.. --- / .-- --- .-. .-.. -.."
 
 
 class CliTests(unittest.TestCase):
     def setUp(self):
-        self.settings_backup = SETTINGS.read_bytes()
-        self.original_files = {p: hashlib.sha256(p.read_bytes()).digest() for p in DATA.glob("*.txt")}
+        global ROOT, DATA, SETTINGS
+        self.runtime = tempfile.TemporaryDirectory(dir=EXE.parent, prefix="cli-runtime-")
+        ROOT = Path(self.runtime.name)
+        DATA = ROOT / "data"
+        DATA.mkdir()
+        SETTINGS = ROOT / "config/settings.txt"
+        SETTINGS.parent.mkdir()
+        self.original_files = {p: hashlib.sha256(p.read_bytes()).digest()
+                               for directory in (SOURCE_ROOT / "data", SOURCE_ROOT / "config")
+                               for p in directory.glob("*.txt")}
         self.created = set()
         SETTINGS.write_text("word_separator=/\nlanguage=EN\n", encoding="utf-8")
 
     def tearDown(self):
-        SETTINGS.write_bytes(self.settings_backup)
-        for path in self.created:
-            path.unlink(missing_ok=True)
+        self.runtime.cleanup()
         for path, digest in self.original_files.items():
             self.assertEqual(hashlib.sha256(path.read_bytes()).digest(), digest, str(path))
 
-    def run_cli(self, text, cwd=ROOT):
+    def run_cli(self, text, cwd=None):
         before = set(DATA.glob("*.txt"))
         try:
             process = subprocess.run([str(EXE)], input=text.encode("utf-8"),
                                      stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                     cwd=cwd, timeout=10)
+                                     cwd=cwd or ROOT, timeout=10,
+                                     env={**os.environ, "MORSECORE_HOME": str(ROOT)})
         finally:
             self.created.update(set(DATA.glob("*.txt")) - before)
         self.assertEqual(process.returncode, 0, process.stderr.decode(errors="replace"))
@@ -96,7 +103,7 @@ class CliTests(unittest.TestCase):
         self.assertIn("Kelime sayisi: 2\nDonusturulen karakterler: 2\nBosluk sayisi: 1", output)
 
     def test_invalid_input_and_missing_file(self):
-        output = self.run_cli("1\nHELLO!\n\n2\n......\n\n3\n../config/settings\n\n4\nqa_missing_file\n\n0\n")
+        output = self.run_cli("1\nHELLO%\n\n2\n......\n\n3\n../config/settings\n\n4\nqa_missing_file\n\n0\n")
         self.assertIn("Unsupported character detected", output)
         self.assertIn("Invalid or empty Morse input", output)
         self.assertIn("Invalid input", output)
@@ -104,11 +111,12 @@ class CliTests(unittest.TestCase):
         self.assertIn("Invalid inputs: 4", output)
 
     def test_long_input_and_menu_recovery(self):
-        output = self.run_cli("1\n" + "9" * 999 + "\nn\n\n1\n" + "9" * 1000 + "\n\n0\n")
+        output = self.run_cli("1\n" + "9" * 999 + "\nn\n\n1\n" + "9" * 1000 + "\nn\n\n0\n")
         self.assertIn("Output length: 5994", output)
-        self.assertIn("Text to Morse operations: 1", output)
-        self.assertIn("Invalid inputs: 1", output)
-        self.assertEqual(self.statistics(output), [(999, 5994, 1, 999, 0)])
+        self.assertIn("Output length: 6000", output)
+        self.assertIn("Text to Morse operations: 2", output)
+        self.assertIn("Invalid inputs: 0", output)
+        self.assertEqual(self.statistics(output), [(999, 5994, 1, 999, 0), (1000, 6000, 1, 1000, 0)])
 
     def test_statistics_all_separators_and_repeated_spaces(self):
         inputs = [HELLO.replace("/", separator) for separator in "/|#*"]
@@ -120,16 +128,18 @@ class CliTests(unittest.TestCase):
     def test_statistics_utf8_and_whitespace(self):
         name = self.fixture(" \tHello\r\n\t  World\n")
         output = self.run_cli(f"1\nÇığ ÖŞÜ 2026\nn\n\n3\n{name}\n\n0\n")
-        # On Windows text-mode file reading translates CRLF to LF.
-        file_length = 17 if sys.platform == "win32" else 18
-        self.assertEqual(self.statistics(output), [(12, 52, 3, 10, 2), (file_length, 44, 2, 10, 3)])
+        # Dynamic file reading preserves CRLF bytes on every platform.
+        self.assertEqual(self.statistics(output), [(12, 52, 3, 10, 2), (18, 44, 2, 10, 3)])
 
-    def test_large_file_is_rejected(self):
-        name = self.fixture("9" * 1000)
+    def test_large_file_is_converted(self):
+        name = self.fixture("9" * 4096)
         output = self.run_cli(f"3\n{name}\n\n0\n")
-        self.assertIn("File could not be opened", output)
-        self.assertNotIn("File converted successfully", output)
-        self.assertFalse(any(p.name.startswith("morse_output_") for p in self.created))
+        self.assertIn("File converted successfully", output)
+        self.assertIn("Invalid inputs: 0", output)
+        encoded = [p for p in self.created if p.name.startswith("morse_output_")]
+        self.assertEqual(len(encoded), 1)
+        self.assertEqual(encoded[0].read_text(), "----. " * 4096)
+        self.assertEqual(self.statistics(output), [(4096, 24576, 1, 4096, 0)])
 
     def test_menu_validation_table_and_about(self):
         output = self.run_cli("1junk\n\n5\n\n6\n\n0\n")

@@ -1,6 +1,8 @@
 #ifndef UI_H
 #define UI_H
 
+#include <stddef.h>
+
 typedef enum {
     UI_RESET, UI_ACCENT, UI_SUCCESS, UI_ERROR, UI_KEY, UI_TEXT, UI_MUTED
 } ConsoleColor;
@@ -18,7 +20,7 @@ void initializeConsoleUi(void);
 void printSectionHeader(const char title[]);
 void printSectionRule(void);
 void printResult(const char title[], const char content[]);
-void printStatLine(const char label[], int value);
+void printStatLine(const char label[], size_t value);
 
 void clearConsole(void);
 void waitForEnter(const char language[]);
@@ -35,7 +37,7 @@ void printSeparatorSavedMessage(char newSeparator, const char language[]);
 void printLanguageSavedMessage(const char language[]);
 
 void showAboutProject(const char language[]);
-void printPreview(const char title[], const char content[]);
+void printPreview(const char title[], const char content[], const char language[]);
 
 int askToSaveOutput(const char output[], const char language[]);
 

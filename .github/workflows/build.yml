@@ -1,0 +1,104 @@
+name: Build and test
+
+on:
+  workflow_call:
+    inputs:
+      release-tag:
+        description: Optional release tag; must equal v plus the CMake project version.
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  PYTHONUTF8: "1"
+
+jobs:
+  windows:
+    name: Windows / GCC UCRT64
+    runs-on: windows-2022
+    timeout-minutes: 25
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up GCC, CMake, Ninja and Python
+        uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e # v2.33.0
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-cmake
+            mingw-w64-ucrt-x86_64-ninja
+            mingw-w64-ucrt-x86_64-python
+            mingw-w64-ucrt-x86_64-binutils
+
+      - name: Configure release build
+        run: cmake --preset release -DPython3_EXECUTABLE="$(cygpath -m "$(command -v python)")"
+
+      - name: Verify release tag
+        if: inputs.release-tag != ''
+        env:
+          MORSECORE_RELEASE_TAG: ${{ inputs.release-tag }}
+        run: cmake "-DCPACK_CONFIG=cmake-build-release/CPackConfig.cmake" -P scripts/verify_release_tag.cmake
+
+      - name: Build
+        run: cmake --build --preset release --parallel 2
+
+      - name: Run all tests without audio hardware
+        run: ctest --preset release --no-tests=error --timeout 180
+
+      - name: Package tested Windows executable
+        run: |
+          cpack --config cmake-build-release/CPackConfig.cmake -G ZIP -B dist
+          cd dist
+          sha256sum -- *.zip > SHA256SUMS
+
+      - name: Upload portable ZIP and checksums
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: MorseCore-Windows-x64
+          path: |
+            dist/*.zip
+            dist/SHA256SUMS
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
+
+  linux:
+    name: Linux / GCC
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y gcc cmake ninja-build python3
+
+      - name: Configure release build
+        run: cmake --preset release -DPython3_EXECUTABLE="$(command -v python3)"
+
+      - name: Verify release tag
+        if: inputs.release-tag != ''
+        env:
+          MORSECORE_RELEASE_TAG: ${{ inputs.release-tag }}
+        run: cmake "-DCPACK_CONFIG=cmake-build-release/CPackConfig.cmake" -P scripts/verify_release_tag.cmake
+
+      - name: Build
+        run: cmake --build --preset release --parallel 2
+
+      - name: Run all tests without audio hardware
+        run: ctest --preset release --no-tests=error --timeout 180

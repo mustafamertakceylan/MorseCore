@@ -14,7 +14,7 @@ int isValidFileName(const char fileName[])
         return 0;
     }
 
-    for (int i = 0; fileName[i] != '\0'; i++) {
+    for (size_t i = 0; fileName[i] != '\0'; i++) {
         char ch = fileName[i];
 
         if (ch == '/' || ch == '\\' || ch == ':' || ch == '*' ||
@@ -28,9 +28,9 @@ int isValidFileName(const char fileName[])
 
 int hasTxtExtension(const char fileName[])
 {
-    int length = strlen(fileName);
+    size_t length = strlen(fileName);
     const char extension[] = ".txt";
-    int extensionLength = strlen(extension);
+    size_t extensionLength = strlen(extension);
 
     if (length < extensionLength) {
         return 0;
@@ -42,9 +42,9 @@ int hasTxtExtension(const char fileName[])
 void ensureTxtExtension(char fileName[], int maxLength)
 {
     if (!hasTxtExtension(fileName)) {
-        int length = strlen(fileName);
+        size_t length = strlen(fileName);
 
-        if (length + 4 < maxLength) {
+        if (maxLength > 4 && length < (size_t) maxLength - 4) {
             strcat(fileName, ".txt");
         }
     }

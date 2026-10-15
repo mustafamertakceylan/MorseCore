@@ -1,13 +1,15 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-#define MAX_TEXT_LENGTH 1000 // Maksimum girdi uzunluğu
-#define MAX_OUTPUT_LENGTH (MAX_TEXT_LENGTH * MAX_MORSE_LENGTH) // Kod + bosluk + sonlandirici
+/* Only the legacy bounded APIs use these limits. UI/CLI use allocated buffers. */
+#define MAX_TEXT_LENGTH 1000
+#define MAX_OUTPUT_LENGTH (MAX_TEXT_LENGTH * MAX_MORSE_LENGTH)
 
 #define MAX_FILE_NAME_LENGTH 100
-#define MAX_FILE_PATH_LENGTH 200
+#define MAX_FILE_PATH_LENGTH 4096
 
-#define MORSE_COUNT 36 //mors karakter uzunluğu
-#define MAX_MORSE_LENGTH 6
+#define MORSE_COUNT 54
+/* Longest supported code has seven signals; reserve one byte for NUL/space. */
+#define MAX_MORSE_LENGTH 8
 
 #endif

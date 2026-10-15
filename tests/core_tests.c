@@ -20,10 +20,10 @@ static int testConversionStats(void)
 {
     const struct {
         const char *text;
-        int length;
-        int words;
-        int letters;
-        int spaces;
+        size_t length;
+        size_t words;
+        size_t letters;
+        size_t spaces;
     } cases[] = {
         {"Hello World", 11, 2, 10, 1},
         {"Merhaba D\xc3\xbcnya", 13, 2, 12, 1},
@@ -32,7 +32,8 @@ static int testConversionStats(void)
         {"\xc7\xe7\xd0\xf0\xdd\xfd\xd6\xf6\xde\xfe\xdc\xfc", 12, 1, 12, 0},
         {" \tHello\r\n\t  World\n", 18, 2, 10, 3},
         {"2026 123", 8, 2, 7, 1},
-        {"E", 1, 1, 1, 0}
+        {"E", 1, 1, 1, 0},
+        {"HELLO, WORLD!", 13, 2, 12, 1}
     };
     char encoded[MAX_OUTPUT_LENGTH];
     char decoded[MAX_OUTPUT_LENGTH];
@@ -43,14 +44,14 @@ static int testConversionStats(void)
             CHECK(textToMorse(cases[i].text, encoded, separator));
             calculateConversionStats(cases[i].text, encoded, CONVERSION_TEXT_TO_MORSE, &stats);
             CHECK(stats.inputLength == cases[i].length);
-            CHECK(stats.outputLength == (int) strlen(encoded));
+            CHECK(stats.outputLength == strlen(encoded));
             CHECK(stats.wordCount == cases[i].words);
             CHECK(stats.convertedCharacterCount == cases[i].letters);
             CHECK(stats.spaceCount == cases[i].spaces);
 
             CHECK(morseToText(encoded, decoded, separator));
             calculateConversionStats(encoded, decoded, CONVERSION_MORSE_TO_TEXT, &stats);
-            CHECK(stats.inputLength == (int) strlen(encoded));
+            CHECK(stats.inputLength == strlen(encoded));
             CHECK(stats.outputLength == cases[i].letters + cases[i].words - 1);
             CHECK(stats.wordCount == cases[i].words);
             CHECK(stats.convertedCharacterCount == cases[i].letters);
@@ -119,7 +120,7 @@ int main(void)
 
     CHECK(!textToMorse("", output, '/'));
     CHECK(!textToMorse(" \t\r\n", output, '/'));
-    CHECK(!textToMorse("HELLO!", output, '/'));
+    CHECK(!textToMorse("HELLO%", output, '/'));
     CHECK(!textToMorse("\xc3", output, '/'));
     CHECK(!morseToText("", decoded, '/'));
     CHECK(!morseToText("......", decoded, '/'));
@@ -133,6 +134,10 @@ int main(void)
         unsigned char guard[1024];
     } bounded;
     memset(bounded.guard, 0xa5, sizeof(bounded.guard));
+    CHECK(textToMorse(digits, bounded.output, '/'));
+    CHECK(strlen(bounded.output) == (MAX_TEXT_LENGTH - 1) * 6);
+    for (size_t i = 0; i < sizeof(bounded.guard); i++) CHECK(bounded.guard[i] == 0xa5);
+    memset(digits, '$', sizeof(digits) - 1);
     CHECK(textToMorse(digits, bounded.output, '/'));
     CHECK(strlen(bounded.output) == (MAX_TEXT_LENGTH - 1) * MAX_MORSE_LENGTH);
     for (size_t i = 0; i < sizeof(bounded.guard); i++) CHECK(bounded.guard[i] == 0xa5);

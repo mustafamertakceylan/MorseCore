@@ -5,3 +5,6 @@ data/*.txt
 # Build folders
 cmake-build-*/
 build/
+
+# Local progress log
+/MORSECORE_PROGRESS.md

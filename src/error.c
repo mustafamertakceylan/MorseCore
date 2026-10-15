@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 
 #include "error.h"
 #include "language.h"
@@ -7,6 +8,17 @@
 const char* getErrorMessage(ResultCode resultCode, const char language[])
 {
     switch (resultCode) {
+        case RESULT_OUT_OF_MEMORY:
+            return strcmp(language, "TR") == 0 ? "Yeterli bellek yok." : "Not enough memory.";
+
+        case RESULT_INPUT_TOO_LARGE:
+            return strcmp(language, "TR") == 0 ? "Girdi islenemeyecek kadar buyuk." : "Input is too large to process.";
+
+        case RESULT_INPUT_READ_ERROR:
+            return strcmp(language, "TR") == 0 ? "Girdi okunamadi." : "Input could not be read.";
+
+        case RESULT_FILE_READ_ERROR:
+            return strcmp(language, "TR") == 0 ? "Dosya okunamadi." : "File could not be read.";
         case RESULT_EMPTY_INPUT:
             return getText(language, TXT_ERROR_EMPTY_INPUT);
 

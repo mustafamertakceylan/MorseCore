@@ -1,9 +1,17 @@
 @echo off
 setlocal
-cd /d "%~dp0"
-if not exist "cmake-build-debug\MorseCore.exe" (
-    echo Once derleyin: cmake --preset debug ^&^& cmake --build --preset debug
-    exit /b 1
+set "MORSECORE_HOME=%~dp0"
+if exist "%~dp0MorseCore.exe" (
+    "%~dp0MorseCore.exe" %*
+    exit /b
 )
-"cmake-build-debug\MorseCore.exe"
-exit /b %errorlevel%
+if exist "%~dp0cmake-build-debug\MorseCore.exe" (
+    "%~dp0cmake-build-debug\MorseCore.exe" %*
+    exit /b
+)
+if exist "%~dp0cmake-build-release\MorseCore.exe" (
+    "%~dp0cmake-build-release\MorseCore.exe" %*
+    exit /b
+)
+echo Build first: cmake --preset release ^&^& cmake --build --preset release
+exit /b 1

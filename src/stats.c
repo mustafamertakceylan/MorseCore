@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 
 #include "stats.h"
 #include "ui.h"
@@ -15,10 +16,16 @@ static int characterByteLength(const unsigned char text[])
     return 1;
 }
 
-static int countCharacters(const char text[])
+static const unsigned char *skipBom(const char text[])
 {
-    int count = 0;
-    const unsigned char *current = (const unsigned char *) text;
+    return (const unsigned char *) text +
+        (strncmp(text, "\xEF\xBB\xBF", 3) == 0 ? 3 : 0);
+}
+
+static size_t countCharacters(const char text[])
+{
+    size_t count = 0;
+    const unsigned char *current = skipBom(text);
     while (*current != '\0') {
         count++;
         current += characterByteLength(current);
@@ -29,14 +36,15 @@ static int countCharacters(const char text[])
 static void countPlainText(const char text[], ConversionStats *stats)
 {
     int inWord = 0;
-    const unsigned char *current = (const unsigned char *) text;
+    const unsigned char *current = skipBom(text);
     stats->wordCount = 0;
     stats->convertedCharacterCount = 0;
     stats->spaceCount = 0;
 
     while (*current != '\0') {
         if (*current == ' ') stats->spaceCount++;
-        if (*current == ' ' || *current == '\t' || *current == '\r' || *current == '\n') {
+        if (*current == ' ' || *current == '\t' || *current == '\r' || *current == '\n' ||
+            *current == '\v' || *current == '\f') {
             inWord = 0;
         } else {
             stats->convertedCharacterCount++;
