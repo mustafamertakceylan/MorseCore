@@ -8,6 +8,8 @@ namespace MorseCore.Desktop;
 public sealed partial class MainPage
 {
     private bool checkingUpdates;
+    private bool installingUpdate;
+    private ContentDialog? updateDialog;
     private void BuildSettings()
     {
         Heading(T("settings"));
@@ -44,9 +46,51 @@ public sealed partial class MainPage
         if(update!=null)
         {
             updates.Children.Add(Label($"{T("updateAvailable")} · {update.Version}"));
+            if(OperatingSystem.IsWindows() && update.Installer!=null && update.Checksums!=null)
+            {
+                var install=Action("installUpdate",InstallUpdate,"\uE896",true);
+                install.IsEnabled=!installingUpdate; updates.Children.Add(install);
+            }
             updates.Children.Add(Action("openRelease",async()=> { await Launcher.LaunchUriAsync(update.Page); }));
         }
         PageContent.Children.Add(Card(updates)); BuildCredits(); PageContent.Children.Add(Label(T("about"),12,true));
+    }
+    private async Task InstallUpdate()
+    {
+        if(installingUpdate || update is not { Installer:not null,Checksums:not null } release) return;
+        await DownloadAndInstallUpdate(new UpdateService(http),release);
+    }
+    private async Task DownloadAndInstallUpdate(UpdateService updater,ReleaseUpdate release)
+    {
+        if(installingUpdate) return;
+        installingUpdate=true;
+        using var cancellation=CancellationTokenSource.CreateLinkedTokenSource(lifetime.Token);
+        var progress=new ProgressBar { Minimum=0,Maximum=100,Value=0,Width=340,FlowDirection=FlowDirection.LeftToRight };
+        var detail=Label(T("updateDownloading"),14,true); detail.TextWrapping=TextWrapping.Wrap;
+        var content=new StackPanel { Spacing=16 }; content.Children.Add(detail); content.Children.Add(progress);
+        var dialog=new ContentDialog { XamlRoot=XamlRoot,RequestedTheme=ActualTheme,FlowDirection=text.IsRtl ? FlowDirection.RightToLeft : FlowDirection.LeftToRight,Title=$"{T("updateAvailable")} · {release.Version}",Content=content,
+            PrimaryButtonText=T("updateInstallClose"),CloseButtonText=T("cancelUpdate"),IsPrimaryButtonEnabled=false,DefaultButton=ContentDialogButton.Close };
+        dialog.Resources["ContentDialogBackground"]=Brush("CardBrush");
+        dialog.Resources["ContentDialogForeground"]=Brush("InkBrush");
+        dialog.Resources["ContentDialogTitleForeground"]=Brush("InkBrush");
+        dialog.Closing+=(_,args)=> { if(args.Result!=ContentDialogResult.Primary) cancellation.Cancel(); };
+        try
+        {
+            updateDialog=dialog;
+            var shown=dialog.ShowAsync();
+            string cache=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"MorseCore","Updates");
+            using var prepared=await updater.DownloadAsync(release,cache,new Progress<double>(value=> { if(!disposed) progress.Value=value; }),cancellation.Token);
+            if(disposed) return;
+            progress.Value=100; detail.Text=T("updateConfirm"); dialog.IsPrimaryButtonEnabled=true;
+            if(await shown==ContentDialogResult.Primary)
+            {
+                using var installer=prepared.StartInstaller(AppContext.BaseDirectory,preferences.Language);
+                App.MainWindow.Close();
+            }
+        }
+        catch(Exception e) when(e is HttpRequestException or IOException or UnauthorizedAccessException or OperationCanceledException or System.ComponentModel.Win32Exception or InvalidOperationException)
+        { if(!disposed) SetStatus(T(cancellation.IsCancellationRequested ? "cancelled" : "updateFailed")); }
+        finally { dialog.Hide(); updateDialog=null; installingUpdate=false; }
     }
     private async Task CheckUpdates(bool manual)
     {

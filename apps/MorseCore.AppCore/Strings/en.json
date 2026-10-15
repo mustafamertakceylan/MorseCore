@@ -112,5 +112,11 @@
   "thanksTitle": "Thanks to open source",
   "thanksBody": "Thank you to the developers of the open-source models and tools that make offline speech possible.",
   "voiceCredits": "Piper voices and dataset contributions",
-  "creditsLicenseNote": "Engines and voice models have separate licenses; each source retains its own license."
+  "creditsLicenseNote": "Engines and voice models have separate licenses; each source retains its own license.",
+  "installUpdate": "Download and install",
+  "updateDownloading": "Downloading and verifying the update…",
+  "updateConfirm": "Update verified. Confirm to open Setup. MorseCore will close; your files, settings and voice pack will be kept.",
+  "updateInstallClose": "Install and close app",
+  "cancelUpdate": "Cancel",
+  "updateFailed": "The update could not be downloaded or verified. Retry or download it from the release page."
 }

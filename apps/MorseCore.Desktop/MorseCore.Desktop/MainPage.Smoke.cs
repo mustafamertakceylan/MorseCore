@@ -8,16 +8,17 @@ using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Automation.Peers;
 using Microsoft.UI.Xaml.Automation.Provider;
 using MorseCore.Interop;
+using MorseCore.AppCore;
 using Windows.Graphics.Imaging;
 
 namespace MorseCore.Desktop;
 
 public sealed partial class MainPage
 {
-    private async Task Snapshot(string path)
+    private async Task Snapshot(string path,UIElement? element=null)
     {
         await Task.Delay(250); Root.UpdateLayout();
-        var bitmap=new RenderTargetBitmap(); await bitmap.RenderAsync(Root);
+        var bitmap=new RenderTargetBitmap(); await bitmap.RenderAsync(element ?? Root);
         var pixels=await bitmap.GetPixelsAsync();
         using var stream=File.Create(path);
         var encoder=await BitmapEncoder.CreateAsync(BitmapEncoder.PngEncoderId,stream.AsRandomAccessStream());
@@ -171,12 +172,40 @@ public sealed partial class MainPage
                 Check(closePosition.X>=WindowBar.ActualWidth-CloseWindowButton.ActualWidth-1,"Close button stays on the right in "+language);
             }
             preferences=preferences with { ReduceMotion=true }; SetCollapsed(true,true); Check(Pane.Width==72,"Reduced motion skips menu animation");
+            byte[] updateBytes=System.Text.Encoding.UTF8.GetBytes("UI update verification fixture");
+            string updateName="MorseCore-2.0.0-Windows-x64-Setup.exe";
+            string updateRoot="https://github.com/mustafamertakceylan/MorseCore/releases/";
+            var available=new ReleaseUpdate(new Version(2,0,0),new Uri(updateRoot+"tag/v2.0.0"),
+                new ReleaseAsset(updateName,new Uri(updateRoot+"download/v2.0.0/"+updateName),updateBytes.Length),
+                new ReleaseAsset("SHA256SUMS",new Uri(updateRoot+"download/v2.0.0/SHA256SUMS"),200));
+            update=available; Navigate("settings"); BuildPage();
+            Check(Descendants(Root).OfType<Button>().Any(b=>AutomationProperties.GetAutomationId(b)=="installUpdate"),"Settings offers installation when a verified-download-capable release is available");
+            using(var updateClient=new System.Net.Http.HttpClient(new SmokeUpdateHandler(updateBytes,updateName)))
+            {
+                var operation=DownloadAndInstallUpdate(new UpdateService(updateClient),available);
+                var deadline=DateTimeOffset.UtcNow.AddSeconds(5);
+                while(updateDialog?.IsPrimaryButtonEnabled!=true && !operation.IsCompleted && DateTimeOffset.UtcNow<deadline) await Task.Delay(50);
+                Check(updateDialog?.IsPrimaryButtonEnabled==true,"Update dialog enables installation after download verification");
+                Check(updateDialog!.RequestedTheme==ActualTheme && updateDialog.FlowDirection==Shell.FlowDirection,"Update confirmation follows the selected theme and language direction");
+                await Snapshot(Path.Combine(directory,"update-confirm.png"),updateDialog);
+                updateDialog!.Hide(); await operation;
+                Check(!installingUpdate && updateDialog==null,"Dismissing update confirmation leaves the application open");
+            }
         }
         catch(Exception e) { failure=e.ToString(); }
         var report=new { Passed=failure is null,Checks=checks,Failure=failure,NativeVersion=version,CatalogVoices=voices,SpeechSynthesized=synthesized,MouseDragTested=mouseDragTested,MouseDragEvidence=mouseDragEvidence,WorkingSetMiB=Math.Round(Process.GetCurrentProcess().WorkingSet64/1048576.0,1) };
         await File.WriteAllTextAsync(Path.Combine(directory,"ui-smoke.json"),JsonSerializer.Serialize(report,new JsonSerializerOptions { WriteIndented=true }));
         var closePeer=new ButtonAutomationPeer(CloseWindowButton);
         ((IInvokeProvider)closePeer.GetPattern(PatternInterface.Invoke)).Invoke();
+    }
+    private sealed class SmokeUpdateHandler(byte[] payload,string name) : System.Net.Http.HttpMessageHandler
+    {
+        protected override Task<System.Net.Http.HttpResponseMessage> SendAsync(System.Net.Http.HttpRequestMessage request,CancellationToken token)
+        {
+            System.Net.Http.HttpContent content=request.RequestUri!.AbsolutePath.EndsWith("/SHA256SUMS",StringComparison.Ordinal) ?
+                new System.Net.Http.StringContent(Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(payload))+"  "+name+"\n") : new System.Net.Http.ByteArrayContent(payload);
+            return Task.FromResult(new System.Net.Http.HttpResponseMessage(System.Net.HttpStatusCode.OK) { Content=content,RequestMessage=request });
+        }
     }
 }
 #endif

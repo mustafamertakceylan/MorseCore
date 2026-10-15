@@ -16,7 +16,7 @@ public sealed partial class MainPage : Page
     private CancellationTokenSource? playback;
     private readonly HttpClient http=new();
     private readonly List<Button> menuButtons=[];
-    private string page="converter", source="", version="0.4.0";
+    private string page="converter", source="", version="0.4.1";
     private ConversionResult? result;
     private bool decode, working, initialized, disposed, nativeReady;
     private int revision;

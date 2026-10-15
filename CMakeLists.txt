@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.28)
-project(MorseCore VERSION 0.4.0 LANGUAGES C)
+project(MorseCore VERSION 0.4.1 LANGUAGES C)
 
 set(CMAKE_C_STANDARD 23)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -76,7 +76,7 @@ if(MORSECORE_BUILD_DOTNET_BINDINGS)
     if(BUILD_TESTING)
         add_test(NAME dotnet_interop COMMAND "${CMAKE_COMMAND}" -E env ${MORSECORE_DOTNET_ENV}
             "${DOTNET_EXECUTABLE}" "${CMAKE_CURRENT_BINARY_DIR}/dotnet/bin/MorseCore.Interop.Smoke/native/MorseCore.Interop.Smoke.dll"
-            "$<TARGET_FILE:MorseCoreNative>")
+            "$<TARGET_FILE:MorseCoreNative>" "${PROJECT_VERSION}")
         add_test(NAME dotnet_app_core COMMAND "${CMAKE_COMMAND}" -E env ${MORSECORE_DOTNET_ENV}
             "${DOTNET_EXECUTABLE}" "${CMAKE_CURRENT_BINARY_DIR}/dotnet/bin/MorseCore.AppCore.Smoke/native/MorseCore.AppCore.Smoke.dll"
             "$<TARGET_FILE:MorseCoreNative>")
@@ -100,6 +100,7 @@ if(BUILD_TESTING)
     add_test(NAME dynamic COMMAND MorseCoreDynamicTests)
 
     add_executable(MorseCoreNativeTests tests/native_api_tests.c)
+    target_compile_definitions(MorseCoreNativeTests PRIVATE MORSECORE_EXPECTED_VERSION="${PROJECT_VERSION}")
     target_include_directories(MorseCoreNativeTests PRIVATE include)
     target_link_libraries(MorseCoreNativeTests PRIVATE MorseCoreNative)
     add_test(NAME native_c COMMAND MorseCoreNativeTests)

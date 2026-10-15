@@ -1,5 +1,12 @@
 # Changelog / Değişiklik günlüğü
 
+## 0.4.1 — Unreleased / Yayımlanmadı
+
+- Added verified in-app Windows update downloads, cancellation and confirmation before handing off to Setup.
+- Uygulama içinden doğrulanan Windows güncelleme indirmesi, iptal ve Setup öncesi onay eklendi.
+- Setup detects compatible Python and offers a bundled, signed official Python installer only with consent; the voice launcher finds it without PATH changes.
+- Setup uyumlu Python'ı algılar; eksikse paketindeki imzalı resmî kurucuyu kullanıcı seçimiyle çalıştırır. Ses başlatıcısı PATH değişikliği istemez.
+
 ## 0.4.0 — 2026-10-15
 
 - Added a Windows x64 Setup.exe build with five wizard languages, per-user shortcuts/uninstall, persistent optional speech storage and install/reinstall/removal checks. The release workflow includes Setup alongside the portable ZIPs.

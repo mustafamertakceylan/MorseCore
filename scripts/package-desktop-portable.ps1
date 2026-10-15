@@ -28,7 +28,7 @@ try {
     Copy-Item -LiteralPath LICENSE,NOTICE,CHANGELOG.md,setup-speech.cmd -Destination $taskPayload
     Copy-Item -LiteralPath docs/desktop-package.md -Destination (Join-Path $taskPayload 'README.md')
     foreach($taskDirectory in @('scripts','docs','third_party')) { New-Item -ItemType Directory -Force -Path (Join-Path $taskPayload $taskDirectory) | Out-Null }
-    Copy-Item -LiteralPath scripts/setup-speech.py,scripts/speech-models.json,scripts/speech_worker.py -Destination (Join-Path $taskPayload 'scripts')
+    Copy-Item -LiteralPath scripts/setup-speech.py,scripts/setup-speech-windows.ps1,scripts/speech-models.json,scripts/speech_worker.py -Destination (Join-Path $taskPayload 'scripts')
     Copy-Item -LiteralPath docs/desktop.md,docs/desktop.tr.md,docs/offline-speech.md,docs/offline-speech.tr.md,docs/native-api.md,docs/native-api.tr.md,docs/windows-setup.md -Destination (Join-Path $taskPayload 'docs')
     Copy-Item -LiteralPath third_party/speech -Recurse -Destination (Join-Path $taskPayload 'third_party')
     Copy-Item -LiteralPath third_party/installer -Recurse -Destination (Join-Path $taskPayload 'third_party')

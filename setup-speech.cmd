@@ -1,7 +1,7 @@
 @echo off
 setlocal
 cd /d "%~dp0"
-python -X utf8 scripts\setup-speech.py %*
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\setup-speech-windows.ps1" %*
 if errorlevel 1 (
   echo Speech pack setup failed. Python 3.11-3.13 and internet are required for setup.
   pause

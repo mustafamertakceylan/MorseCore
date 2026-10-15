@@ -16,7 +16,7 @@ Seslendirme, Windows ses paketleri yerine cihazdaki sinir ağı modellerini kull
 
 ## Bir kez kurulum
 
-Geliştirme paketi Python 3.11–3.13, `curl` ve kurulum sırasında internet gerektirir. Windows'ta kökteki `setup-speech.cmd` dosyasını çift tıklayabilir veya şu komutu çalıştırabilirsin:
+Geliştirme paketi Python 3.11–3.13 x64, `curl` ve kurulum sırasında internet gerektirir. Windows Setup 0.4.1, Python'ı kontrol eder ve eksikse paketindeki değiştirilmemiş [resmî Python 3.13.16 kurucusunu](https://www.python.org/downloads/release/python-31316/) isteğe bağlı sunar. Uyumlu kurulum varsa onu kullanır; PATH değiştirilmez. Ses modelleri ayrıca kullanıcı seçimiyle indirilir. Windows'ta kökteki `setup-speech.cmd` dosyasını çift tıklayabilir veya şu komutu çalıştırabilirsin:
 
 ```powershell
 python -X utf8 scripts/setup-speech.py

@@ -112,5 +112,11 @@
   "thanksTitle": "Açık kaynağa teşekkürler",
   "thanksBody": "Çevrimdışı seslendirmeyi mümkün kılan açık kaynak modellerin ve araçların geliştiricilerine teşekkür ederiz.",
   "voiceCredits": "Piper ses modelleri ve veri katkıları",
-  "creditsLicenseNote": "Motorların ve ses modellerinin lisansları ayrıdır; her kaynağın kendi lisansı geçerlidir."
+  "creditsLicenseNote": "Motorların ve ses modellerinin lisansları ayrıdır; her kaynağın kendi lisansı geçerlidir.",
+  "installUpdate": "İndir ve yükle",
+  "updateDownloading": "Güncelleme indiriliyor ve doğrulanıyor…",
+  "updateConfirm": "Güncelleme doğrulandı. Kurulumu açmak için onayla. MorseCore kapanacak; dosyaların, ayarların ve ses paketin korunacak.",
+  "updateInstallClose": "Kur ve uygulamayı kapat",
+  "cancelUpdate": "İptal",
+  "updateFailed": "Güncelleme indirilemedi veya doğrulanamadı. Yeniden dene ya da sürüm sayfasından indir."
 }

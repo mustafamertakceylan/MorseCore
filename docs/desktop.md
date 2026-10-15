@@ -2,7 +2,7 @@
 
 [Türkçe](desktop.tr.md) · [Home](../README.md)
 
-The Windows interface brings text and file conversion, Morse audio, speech and practice together. This is a development preview for 0.4.0. No signed installer has been released.
+The Windows interface brings text and file conversion, Morse audio, speech and practice together. This is a development preview for 0.4.1. No signed installer has been released.
 
 ## Interface
 
@@ -59,7 +59,7 @@ An unsigned per-user **Setup.exe** can be built with `pwsh -File scripts/package
 
 ## Updates and MSIX
 
-The loading screen prepares preferences and the native engine. Network checks do not hold the main interface open. Automatic checks query the latest stable GitHub Release at most once every six hours, excluding drafts, prereleases and older versions. Settings provide manual checks and an opt-out. The application check does not download or execute binaries.
+The loading screen prepares preferences and the native engine. Network checks do not hold the main interface open. Automatic checks query the latest stable GitHub Release at most once every six hours, excluding drafts, prereleases and older versions. Settings provide manual checks and an opt-out. From Settings, Download and install fetches the matching Windows x64 Setup and SHA256SUMS from that release. Downloads are streamed to disk with size limits and cancellation. The app verifies SHA-256 and the installer version, then asks before opening Setup and closing itself. Checking alone never installs anything. Releases must contain Setup.exe and SHA256SUMS; a commit alone is not an application update.
 
 ```powershell
 # Verification only; no installation or certificate creation.
@@ -73,7 +73,7 @@ The script writes `MorseCore.msix`, `MorseCore.appinstaller` and `SHA256SUMS` in
 
 The current package publisher is `O=Mustafa Mert Akceylan`, which must exactly match the signing certificate. A different production certificate requires updating the publisher and its validation together. Trusted signing and release publishing are still pending.
 
-Automatic installation/update requires publishing signed MSIX and App Installer assets under their fixed GitHub Release names, and installing via `.appinstaller`. Commits alone do not create an update. Test a real installation and an upgrade between two signed versions before release. [App Installer documentation](https://learn.microsoft.com/en-us/windows/msix/app-installer/auto-update-and-repair--overview).
+The future MSIX update channel requires publishing signed MSIX and App Installer assets under their fixed GitHub Release names, and installing via `.appinstaller`. Commits alone do not create an update. Test a real installation and an upgrade between two signed versions before release. [App Installer documentation](https://learn.microsoft.com/en-us/windows/msix/app-installer/auto-update-and-repair--overview).
 
 ## Validation and performance
 

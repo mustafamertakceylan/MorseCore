@@ -2,7 +2,7 @@
 
 [English](desktop.md) · [Ana sayfa](../README.tr.md)
 
-Windows arayüzü; metin ve dosya dönüşümünü, Morse sesini, seslendirmeyi ve alıştırmayı aynı yerde toplar. Bu, 0.4.0 için geliştirilen bir önizlemedir. İmzalı bir kurulum sürümü henüz yayımlanmadı.
+Windows arayüzü; metin ve dosya dönüşümünü, Morse sesini, seslendirmeyi ve alıştırmayı aynı yerde toplar. Bu, 0.4.1 için geliştirilen bir önizlemedir. İmzalı bir kurulum sürümü henüz yayımlanmadı.
 
 ## Görünüm ve kullanım
 
@@ -63,7 +63,7 @@ Seslendirme [çevrimdışı sinir ağı modellerini](offline-speech.tr.md) kulla
 
 ## Güncelleme ve MSIX
 
-Açılış ekranı tercihleri ve dönüşüm motorunu hazırlar. Ağ kontrolü ana ekranı engellemez. Uygulama en fazla altı saatte bir GitHub'ın son kararlı Release sürümünü kontrol eder; taslak, ön sürüm ve eski sürümler önerilmez. Ayarlardan elle kontrol edilebilir veya açılış kontrolü kapatılabilir. Sürüm kontrolü dosya indirip çalıştırmaz.
+Açılış ekranı tercihleri ve dönüşüm motorunu hazırlar. Ağ kontrolü ana ekranı engellemez. Uygulama en fazla altı saatte bir GitHub'ın son kararlı Release sürümünü kontrol eder; taslak, ön sürüm ve eski sürümler önerilmez. Ayarlardan elle kontrol edilebilir veya açılış kontrolü kapatılabilir. Ayarlardaki İndir ve yükle düğmesi, aynı sürümün Windows x64 Setup dosyasını ve SHA256SUMS listesini indirir. İndirme bellekte tutulmaz; boyut sınırı ve iptal desteği vardır. SHA-256 ve kurucu sürümü doğrulanır; kullanıcı onaylayınca Setup açılır ve uygulama kapanır. Kontrol işlemi tek başına kurulum başlatmaz. Release içinde Setup.exe ve SHA256SUMS bulunmalıdır; yalnızca commit atılması uygulama güncellemesi oluşturmaz.
 
 İmzasız doğrulama paketi:
 
@@ -81,7 +81,7 @@ pwsh -File scripts/package-desktop.ps1 -CertificateThumbprint <40-haneli-parmak-
 
 Mevcut paket yayıncısı `O=Mustafa Mert Akceylan` değeridir; sertifika kimliğiyle birebir eşleşmelidir. Gerçek dağıtım sertifikasının konusu farklıysa yayıncı ve denetim birlikte güncellenmelidir. Güvenilir sertifika ve yayın süreci henüz kurulmadı.
 
-Otomatik kurulum/güncelleme için imzalı MSIX ile App Installer dosyasının GitHub Releases altında sabit dosya adlarıyla yayımlanması ve uygulamanın `.appinstaller` üzerinden kurulması gerekir. Sadece depoya commit atılması güncelleme oluşturmaz. Kurulum ve iki gerçek sürüm arasındaki güncelleme testi yayın öncesi gereklidir. [App Installer belgeleri](https://learn.microsoft.com/en-us/windows/msix/app-installer/auto-update-and-repair--overview).
+Gelecekteki MSIX güncelleme kanalı için imzalı MSIX ile App Installer dosyasının GitHub Releases altında sabit dosya adlarıyla yayımlanması ve uygulamanın `.appinstaller` üzerinden kurulması gerekir. Sadece depoya commit atılması güncelleme oluşturmaz. Kurulum ve iki gerçek sürüm arasındaki güncelleme testi yayın öncesi gereklidir. [App Installer belgeleri](https://learn.microsoft.com/en-us/windows/msix/app-installer/auto-update-and-repair--overview).
 
 ## Test ve performans
 

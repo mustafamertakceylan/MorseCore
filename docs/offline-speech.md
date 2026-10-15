@@ -16,7 +16,7 @@ Speech uses local neural models instead of Windows speech packs. Text-to-Morse s
 
 ## Install once
 
-The development pack requires Python 3.11–3.13, `curl`, and internet during setup. On Windows, double-click `setup-speech.cmd` in the repository, or run:
+The development pack requires Python 3.11–3.13 x64, `curl`, and internet during setup. Windows Setup 0.4.1 checks Python and optionally installs the bundled, unmodified [Python 3.13.16 installer](https://www.python.org/downloads/release/python-31316/). It reuses a compatible interpreter without changing PATH. Voice models still download separately with consent. On Windows, double-click `setup-speech.cmd` in the repository, or run:
 
 ```powershell
 python -X utf8 scripts/setup-speech.py

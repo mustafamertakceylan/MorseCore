@@ -11,6 +11,9 @@
 #ifndef OutputDir
   #error OutputDir is required.
 #endif
+#ifndef PrerequisitesDir
+  #error PrerequisitesDir is required.
+#endif
 #define InstallerId "io.github.mustafamertakceylan.morsecore.desktop"
 
 [Setup]
@@ -66,6 +69,7 @@ turkish.NewerVersion=Daha yeni bir MorseCore sürümü kurulu. Kurulum bu sürü
 german.NewerVersion=Eine neuere MorseCore-Version ist bereits installiert. Sie wird nicht ersetzt.
 russian.NewerVersion=Уже установлена более новая версия MorseCore. Она не будет заменена.
 arabic.NewerVersion=تم تثبيت إصدار أحدث من MorseCore بالفعل. لن يتم استبداله.
+#include "PrerequisiteMessages.iss"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
@@ -81,8 +85,17 @@ Name: "{autodesktop}\MorseCore"; Filename: "{app}\MorseCore.Desktop.exe"; Workin
 
 [Run]
 Filename: "{app}\MorseCore.Desktop.exe"; Description: "{cm:LaunchProgram,MorseCore}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\setup-speech.cmd"; Description: "{cm:DownloadVoices}"; Flags: shellexec postinstall skipifsilent unchecked; Check: HasSpeechPython
+
+#include "PythonPrerequisite.iss"
 
 [Code]
+procedure InitializeWizard();
+begin InitializePythonPrerequisite(); end;
+
+function PrepareToInstall(var NeedsRestart: Boolean): String;
+begin Result := InstallPythonPrerequisite(NeedsRestart); end;
+
 function CompareReleaseVersions(const A, B: Int64): Integer;
 begin
   { Packed versions contain unsigned words; major versions >= 32768 set the sign bit. }

@@ -19,14 +19,15 @@ if(!$PayloadDirectory) {
     $PayloadDirectory=$taskStages[0].FullName
 }
 $taskPayload=(Resolve-Path -LiteralPath $PayloadDirectory).Path
-foreach($taskRequired in @('MorseCore.Desktop.exe','MorseCore.Native.dll','icon.ico','LICENSE','NOTICE','licenses/dependencies.json','scripts/setup-speech.py','scripts/speech-models.json','scripts/speech_worker.py','third_party/speech/antalia-mini/NOTICE','third_party/installer/Inno-Setup-LICENSE.txt')) {
+foreach($taskRequired in @('MorseCore.Desktop.exe','MorseCore.Native.dll','icon.ico','LICENSE','NOTICE','licenses/dependencies.json','scripts/setup-speech.py','scripts/setup-speech-windows.ps1','scripts/speech-models.json','scripts/speech_worker.py','third_party/speech/antalia-mini/NOTICE','third_party/installer/Inno-Setup-LICENSE.txt','third_party/installer/Python-LICENSE.txt')) {
     if(!(Test-Path -LiteralPath (Join-Path $taskPayload $taskRequired) -PathType Leaf)) { throw "Desktop payload is missing $taskRequired" }
 }
 if(Test-Path -LiteralPath (Join-Path $taskPayload 'speech-runtime')) { throw 'Model weights and local Python environments must not be included in the application installer.' }
 if((Get-Item -LiteralPath (Join-Path $taskPayload 'MorseCore.Desktop.exe')).VersionInfo.ProductVersion -notmatch ('^'+[regex]::Escape($taskVersion)+'(?:\+|$)')) { throw 'Published executable version differs from the CMake project version.' }
 if(!$IsccPath) { $IsccPath=& (Join-Path $PSScriptRoot 'ensure-inno-setup.ps1') }
+$taskPrerequisites=& (Join-Path $PSScriptRoot 'ensure-python-installer.ps1')
 if(!(Test-Path -LiteralPath $IsccPath -PathType Leaf)) { throw 'Inno Setup compiler is missing.' }
-& $IsccPath '/Qp' "/DPayloadDir=$taskPayload" "/DPackageVersion=$taskVersion" "/DOutputDir=$taskOutput" (Join-Path $taskRoot 'packaging/windows/MorseCore.iss')
+& $IsccPath '/Qp' "/DPayloadDir=$taskPayload" "/DPackageVersion=$taskVersion" "/DOutputDir=$taskOutput" "/DPrerequisitesDir=$taskPrerequisites" (Join-Path $taskRoot 'packaging/windows/MorseCore.iss')
 if($LASTEXITCODE -ne 0) { throw 'Desktop installer compilation failed.' }
 $taskSetup=Join-Path $taskOutput "MorseCore-$taskVersion-Windows-x64-Setup.exe"
 if(!(Test-Path -LiteralPath $taskSetup -PathType Leaf)) { throw 'Desktop installer was not produced.' }

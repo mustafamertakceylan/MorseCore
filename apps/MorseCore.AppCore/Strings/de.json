@@ -112,5 +112,11 @@
   "thanksTitle": "Dank an Open Source",
   "thanksBody": "Wir danken den Entwicklern der offenen Modelle und Werkzeuge, die die Offline-Sprachausgabe ermöglichen.",
   "voiceCredits": "Piper-Stimmen und Datensätze",
-  "creditsLicenseNote": "Für Engines und Sprachmodelle gelten getrennte Lizenzen; jede Quelle behält ihre eigene Lizenz."
+  "creditsLicenseNote": "Für Engines und Sprachmodelle gelten getrennte Lizenzen; jede Quelle behält ihre eigene Lizenz.",
+  "installUpdate": "Herunterladen und installieren",
+  "updateDownloading": "Update wird heruntergeladen und geprüft…",
+  "updateConfirm": "Update geprüft. Bestätige, um das Setup zu öffnen. MorseCore wird geschlossen; Dateien, Einstellungen und Sprachpaket bleiben erhalten.",
+  "updateInstallClose": "Installieren und App schließen",
+  "cancelUpdate": "Abbrechen",
+  "updateFailed": "Das Update konnte nicht heruntergeladen oder geprüft werden. Erneut versuchen oder von der Release-Seite herunterladen."
 }

@@ -2,7 +2,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using MorseCore.Interop;
 
-if (args.Length != 1) throw new ArgumentException("Pass the absolute native library path.");
+if (args.Length is <1 or >2) throw new ArgumentException("Pass the absolute native library path and optionally the expected version.");
 string nativePath = Path.GetFullPath(args[0]);
 NativeLibrary.SetDllImportResolver(typeof(MorseEngine).Assembly,
     (name, assembly, paths) => name == "MorseCore.Native" ? NativeLibrary.Load(nativePath) : 0);
@@ -19,7 +19,7 @@ void Fails(Action operation, int status)
     throw new InvalidOperationException($"Expected native failure {status}");
 }
 
-Check(MorseEngine.NativeVersion == "0.4.0", "Version");
+Check(args.Length==2 ? MorseEngine.NativeVersion==args[1] : Version.TryParse(MorseEngine.NativeVersion,out _), "Version");
 var converted = MorseEngine.Encode("Merhaba Dünya");
 Check(MorseEngine.Decode(converted.Text).Text == "MERHABA DUNYA", "Turkish UTF-8 roundtrip");
 Check(converted.Statistics == new ConversionStatistics(13, (ulong)converted.Text.Length, 2, 12, 1), "64-bit statistics layout");

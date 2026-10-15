@@ -5,6 +5,24 @@ using System.Text.Json;
 using MorseCore.AppCore;
 using MorseCore.Interop;
 
+if(args.Length>=3 && args[0] is "--download-update" or "--launch-update")
+{
+    string currentVersion=args[1],cacheDirectory=args[2];
+    using var client=new HttpClient();
+    var updater=new UpdateService(client);
+    var release=await updater.CheckAsync(Version.Parse(currentVersion)) ?? throw new Exception("No newer stable release.");
+    using var prepared=await updater.DownloadAsync(release,Path.GetFullPath(cacheDirectory));
+    if(args[0]=="--launch-update")
+    {
+        using var process=prepared.StartInstaller(Path.GetFullPath(args[3]),"en");
+        File.WriteAllText(args[4],JsonSerializer.Serialize(new { Version=release.Version.ToString(),Path=prepared.InstallerPath,ProcessId=process.Id }));
+        return;
+    }
+    string exported=Path.Combine(Path.GetFullPath(cacheDirectory),Path.GetFileName(prepared.InstallerPath));
+    File.Copy(prepared.InstallerPath,exported,true);
+    Console.WriteLine(JsonSerializer.Serialize(new { Version=release.Version.ToString(),Path=exported,Sha256=Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(File.ReadAllBytes(exported))).ToLowerInvariant() }));
+    return;
+}
 string library=Path.GetFullPath(args[0]);
 NativeLibrary.SetDllImportResolver(typeof(MorseEngine).Assembly,(_,_,_)=>NativeLibrary.Load(library));
 int checks=0;
@@ -74,6 +92,7 @@ try
         try { await new UpdateService(client).CheckAsync(new Version(0,2,0)); throw new Exception("Unbounded metadata accepted"); }
         catch(InvalidDataException) { checks++; }
     }
+    checks+=await UpdateChecks.Run(directory);
     foreach(string language in new[]{"tr-TR","ar-SA","de-DE","ru-RU","en-US"})
         Check(OfflineSpeech.ForLanguage(language).Count>0,"Offline voice coverage: "+language);
     Check(OfflineSpeech.ForLanguage("tr-TR").Select(v=>v.Engine).ToHashSet().SetEquals(["ema","antalia"]),"Two Turkish neural engines");

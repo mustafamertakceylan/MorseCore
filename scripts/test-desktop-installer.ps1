@@ -50,10 +50,15 @@ try {
     if($PreviousInstallerPath) {
         Assert-InstallerCheck (Test-Path -LiteralPath (Join-Path $taskInstall 'upgrade-user-note.txt')) 'Upgrade preserves files created before the new release'
     }
-    foreach($taskFile in @('MorseCore.Desktop.exe','MorseCore.Native.dll','coreclr.dll','Microsoft.UI.Xaml.dll','LICENSE','NOTICE','licenses/dependencies.json','third_party/speech/ema-lightning/LICENSE','third_party/speech/antalia-mini/LICENSE','third_party/speech/antalia-mini/NOTICE','third_party/installer/Inno-Setup-LICENSE.txt','scripts/setup-speech.py','setup-speech.cmd','unins000.exe')) {
+    foreach($taskFile in @('MorseCore.Desktop.exe','MorseCore.Native.dll','coreclr.dll','Microsoft.UI.Xaml.dll','LICENSE','NOTICE','licenses/dependencies.json','third_party/speech/ema-lightning/LICENSE','third_party/speech/antalia-mini/LICENSE','third_party/speech/antalia-mini/NOTICE','third_party/installer/Inno-Setup-LICENSE.txt','third_party/installer/Python-LICENSE.txt','scripts/setup-speech.py','scripts/setup-speech-windows.ps1','setup-speech.cmd','unins000.exe')) {
         Assert-InstallerCheck (Test-Path -LiteralPath (Join-Path $taskInstall $taskFile) -PathType Leaf) "Installed file: $taskFile"
     }
-    foreach($taskFile in @('LICENSE','NOTICE','third_party/speech/antalia-mini/NOTICE','third_party/installer/Inno-Setup-LICENSE.txt')) {
+    foreach($taskFile in @('LICENSE','NOTICE')) {
+        $taskExpected=(Get-Content -LiteralPath (Join-Path $taskRoot $taskFile) -Raw).Replace("`r`n","`n")
+        $taskActual=(Get-Content -LiteralPath (Join-Path $taskInstall $taskFile) -Raw).Replace("`r`n","`n")
+        Assert-InstallerCheck ($taskExpected -ceq $taskActual) "Project attribution text is preserved: $taskFile"
+    }
+    foreach($taskFile in @('third_party/speech/antalia-mini/NOTICE','third_party/installer/Inno-Setup-LICENSE.txt','third_party/installer/Python-LICENSE.txt')) {
         Assert-InstallerCheck ((Get-FileHash -LiteralPath (Join-Path $taskInstall $taskFile)).Hash -eq (Get-FileHash -LiteralPath (Join-Path $taskRoot $taskFile)).Hash) "Original attribution is preserved: $taskFile"
     }
     $taskEntry=$taskRegistry.OpenSubKey($taskRegistryPath)
@@ -72,8 +77,11 @@ try {
     [void][Runtime.InteropServices.Marshal]::FinalReleaseComObject($taskLink)
     [void][Runtime.InteropServices.Marshal]::FinalReleaseComObject($taskShell)
     $taskSpeechLauncher=Get-Content -LiteralPath (Join-Path $taskInstall 'setup-speech.cmd') -Raw
-    Assert-InstallerCheck ($taskSpeechLauncher.Contains('--home "%LOCALAPPDATA%\MorseCore\Speech"')) 'Installed speech setup uses persistent per-user model storage'
+    Assert-InstallerCheck ($taskSpeechLauncher.Contains('-SpeechHome "%LOCALAPPDATA%\MorseCore\Speech"')) 'Installed speech setup uses persistent per-user model storage'
     Assert-InstallerCheck (!(Test-Path -LiteralPath (Join-Path $taskInstall 'speech-runtime'))) 'Models and virtual environments are not bundled'
+    $taskInstallLog=Get-Content -LiteralPath (Join-Path $taskEvidence 'install.log') -Raw
+    Assert-InstallerCheck ($taskInstallLog.Contains('Speech Python detected:')) 'Setup checks for compatible Python before installation'
+    Assert-InstallerCheck ($taskInstallLog.Contains('Speech Python installation skipped')) 'Silent installation never installs optional Python without explicit consent'
     & python -X utf8 (Join-Path $taskRoot 'tests/native_abi_tests.py') (Join-Path $taskInstall 'MorseCore.Native.dll') *> (Join-Path $taskEvidence 'native-abi.log')
     Assert-InstallerCheck ($LASTEXITCODE -eq 0) 'Installed native DLL passes the foreign-ABI regression suite'
     & python -X utf8 (Join-Path $taskRoot 'tests/profile_tests.py') (Join-Path $taskInstall 'MorseCore.Native.dll') *> (Join-Path $taskEvidence 'profiles.log')
