@@ -16,7 +16,7 @@ public sealed class UpdateService(HttpClient client)
     public async Task<ReleaseUpdate?> CheckAsync(Version current, CancellationToken token=default)
     {
         using var request=new HttpRequestMessage(HttpMethod.Get,Endpoint);
-        request.Headers.UserAgent.ParseAdd("MorseCore/0.7.2");
+        request.Headers.UserAgent.ParseAdd("MorseCore/0.7.3");
         request.Headers.Accept.ParseAdd("application/vnd.github+json");
         request.Headers.Add("X-GitHub-Api-Version","2022-11-28");
         using var timeout=CancellationTokenSource.CreateLinkedTokenSource(token);

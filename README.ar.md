@@ -6,8 +6,8 @@
 
 **اكتب رسالتك. استمع إلى مورس. تعلّم بالممارسة.**
 
-[![تنزيل Windows](https://img.shields.io/badge/%D8%AA%D9%86%D8%B2%D9%8A%D9%84-Windows-5e6a42?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.7.2/MorseCore-0.7.2-Windows-x64-Setup.exe)
-[![0.7.2](https://img.shields.io/badge/v0.7.2-%D9%86%D8%B3%D8%AE%D8%A9%20%D8%AA%D8%AC%D8%B1%D9%8A%D8%A8%D9%8A%D8%A9-c58c59?style=for-the-badge)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v0.7.2)
+[![تنزيل Windows](https://img.shields.io/badge/%D8%AA%D9%86%D8%B2%D9%8A%D9%84-Windows-5e6a42?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.7.3/MorseCore-0.7.3-Windows-x64-Setup.exe)
+[![0.7.3](https://img.shields.io/badge/v0.7.3-%D9%86%D8%B3%D8%AE%D8%A9%20%D8%AA%D8%AC%D8%B1%D9%8A%D8%A8%D9%8A%D8%A9-c58c59?style=for-the-badge)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v0.7.3)
 
 [English](README.md) · [Türkçe](README.tr.md) · [Deutsch](README.de.md) · [Русский](README.ru.md) · **العربية**
 
@@ -23,7 +23,7 @@ MorseCore تطبيق مجاني لويندوز لتحويل النص إلى شف
 2. اكتب رسالتك في **المحوّل** ثم حوّلها. افتح قسم **الصوت** للاستماع.
 3. افتح **التعلّم** للأبجدية والتمارين واختصارات هواة اللاسلكي.
 
-تفضّل الاستخدام دون تثبيت؟ فك ضغط [ملف ZIP المحمول](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.7.2/MorseCore-0.7.2-Windows-x64-Desktop.zip) وافتح **MorseCore.Desktop.exe**. هذه نسخة تجريبية غير موقّعة؛ قد يعرض ويندوز تحذيراً بشأن الناشر.
+تفضّل الاستخدام دون تثبيت؟ فك ضغط [ملف ZIP المحمول](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.7.3/MorseCore-0.7.3-Windows-x64-Desktop.zip) وافتح **MorseCore.Desktop.exe**. هذه نسخة تجريبية غير موقّعة؛ قد يعرض ويندوز تحذيراً بشأن الناشر.
 
 ### ماذا يمكنك أن تفعل؟
 

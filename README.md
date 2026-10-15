@@ -4,8 +4,8 @@
 
 **Write a message. Hear Morse. Learn by practicing.**
 
-[![Download Windows](https://img.shields.io/badge/Download-Windows-5e6a42?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.7.2/MorseCore-0.7.2-Windows-x64-Setup.exe)
-[![0.7.2](https://img.shields.io/badge/v0.7.2-Preview-c58c59?style=for-the-badge)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v0.7.2)
+[![Download Windows](https://img.shields.io/badge/Download-Windows-5e6a42?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.7.3/MorseCore-0.7.3-Windows-x64-Setup.exe)
+[![0.7.3](https://img.shields.io/badge/v0.7.3-Preview-c58c59?style=for-the-badge)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v0.7.3)
 
 **English** · [Türkçe](README.tr.md) · [Deutsch](README.de.md) · [Русский](README.ru.md) · [العربية](README.ar.md)
 
@@ -21,7 +21,7 @@ MorseCore is a free Windows app for converting text to Morse code, listening and
 2. Type a message in **Converter** and choose **Convert**. Use **Audio** to listen.
 3. Open **Learning** for the alphabet, exercises and radio abbreviations.
 
-Prefer no installation? Extract the [portable ZIP](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.7.2/MorseCore-0.7.2-Windows-x64-Desktop.zip) and open **MorseCore.Desktop.exe**. This preview is unsigned; Windows may show a publisher warning.
+Prefer no installation? Extract the [portable ZIP](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.7.3/MorseCore-0.7.3-Windows-x64-Desktop.zip) and open **MorseCore.Desktop.exe**. This preview is unsigned; Windows may show a publisher warning.
 
 ### What can you do?
 

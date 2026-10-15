@@ -80,9 +80,20 @@ public sealed partial class MainPage
             var bounds=element.TransformToVisual(Pane).TransformBounds(new Windows.Foundation.Rect(0,0,element.ActualWidth,element.ActualHeight));
             return bounds.X+bounds.Width/2;
         }
+        void CheckWorkspaceGutters(string state)
+        {
+            Root.UpdateLayout();
+            Windows.Foundation.Rect Bounds(FrameworkElement element)=>element.TransformToVisual(Root).TransformBounds(new Windows.Foundation.Rect(0,0,element.ActualWidth,element.ActualHeight));
+            var frame=Bounds(WorkspaceFrame); var shell=Bounds(Shell); var pane=Bounds(Pane);
+            double sidebarGap=text.IsRtl ? pane.Left-frame.Right : frame.Left-pane.Right;
+            double outerGap=text.IsRtl ? frame.Left-shell.Left : shell.Right-frame.Right;
+            Check(frame.Top-shell.Top>=9 && shell.Bottom-frame.Bottom>=9 && sidebarGap>=11 && outerGap>=11,
+                $"Outer workspace stays separated from the title bar, sidebar and window edges in {state} (top {frame.Top-shell.Top:0.#}, bottom {shell.Bottom-frame.Bottom:0.#}, sidebar {sidebarGap:0.#}, outer {outerGap:0.#})");
+        }
         void CheckCollapsedAlignment(string language)
         {
             Root.UpdateLayout();
+            CheckWorkspaceGutters(language+" collapsed");
             double center=PaneCenter((FontIcon)((StackPanel)menuButtons[0].Content).Children[0]);
             Check(menuButtons.All(b=>Math.Abs(PaneCenter((FontIcon)((StackPanel)b.Content).Children[0])-center)<1),"Collapsed navigation and settings icons align in "+language);
             var toggle=PaneToggle.TransformToVisual(WindowBar).TransformBounds(new Windows.Foundation.Rect(0,0,PaneToggle.ActualWidth,PaneToggle.ActualHeight));
@@ -450,6 +461,7 @@ public sealed partial class MainPage
                 foreach(string feature in new[]{"converter","files","audio","practice","alphabet","keying","glossary","stationProfiles","qsoAssistant","qsoLog","settings"})
                 {
                     page=feature; Rebuild(); await Task.Delay(60); Root.UpdateLayout();
+                    if(feature=="converter") CheckWorkspaceGutters(language+" "+theme);
                     CheckPageWidth(language+" "+theme+" "+feature);
                     if(language=="tr") await Snapshot(Path.Combine(directory,"layout-"+theme+"-"+feature+".png"));
                 }

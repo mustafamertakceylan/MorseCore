@@ -1,5 +1,10 @@
 # Changelog / Değişiklik günlüğü
 
+## 0.7.3 — 2026-10-16
+
+- Add the missing top and sidebar gutters around the outer workspace; keep navigation aligned with the page heading in both themes and Arabic layout.
+- Dış çalışma panelinin eksik üst ve yan menü boşlukları eklendi; iki temada ve Arapça düzende menü ile sayfa başlığı hizası korundu.
+
 ## 0.7.2 — 2026-10-16
 
 - Show a full-window loading screen without a title bar or reserved header space. Separate dark-mode workspace, cards, editors and result surfaces with stronger green tones and borders; preserve light-mode colors and spacing.

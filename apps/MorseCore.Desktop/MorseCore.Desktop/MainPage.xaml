@@ -38,7 +38,7 @@
   <Grid x:Name="Shell" Grid.Row="1" Visibility="Collapsed">
    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
    <Border x:Name="Pane" Width="240" Background="{ThemeResource PaneSurfaceBrush}" BorderThickness="0">
-    <Grid Padding="10,14,10,12" RowSpacing="14">
+    <Grid Padding="10,24,10,12" RowSpacing="14">
      <Grid.RowDefinitions><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
      <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" HorizontalContentAlignment="Stretch">
       <StackPanel x:Name="Menu" Spacing="4"/>
@@ -48,7 +48,7 @@
      </StackPanel>
     </Grid>
    </Border>
-   <Border Grid.Column="1" Background="{ThemeResource WorkspaceSurfaceBrush}" CornerRadius="18" Margin="0,0,12,10">
+   <Border x:Name="WorkspaceFrame" Grid.Column="1" Background="{ThemeResource WorkspaceSurfaceBrush}" CornerRadius="18" Margin="12,10,12,10">
    <Grid x:Name="Workspace" Padding="24,14,24,12" RowSpacing="14">
     <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
     <TextBlock x:Name="Breadcrumb" FontSize="28" FontFamily="{StaticResource DisplayFont}" VerticalAlignment="Center"/>

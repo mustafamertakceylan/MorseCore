@@ -69,7 +69,7 @@ try {
                 $taskPattern=$null
                 if($taskControl.TryGetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern,[ref]$taskPattern)) { $taskPattern.Select() }
             }
-            if($taskControl.Current.Name -eq 'Launch MorseCore') {
+            if($taskControl.Current.Name.Replace('&','') -eq 'Launch MorseCore') {
                 $taskPattern=$null
                 if($taskControl.TryGetCurrentPattern([System.Windows.Automation.TogglePattern]::Pattern,[ref]$taskPattern) -and $taskPattern.Current.ToggleState -eq [System.Windows.Automation.ToggleState]::On) { $taskPattern.Toggle() }
             }
