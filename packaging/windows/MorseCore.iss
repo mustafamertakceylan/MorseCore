@@ -79,9 +79,9 @@ Source: "{#PayloadDir}\*"; DestDir: "{app}"; Excludes: "setup-speech.cmd,speech-
 Source: "setup-speech.cmd"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
-Name: "{group}\MorseCore"; Filename: "{app}\MorseCore.Desktop.exe"; WorkingDir: "{app}"
+Name: "{group}\MorseCore"; Filename: "{app}\MorseCore.Desktop.exe"; WorkingDir: "{app}"; AppUserModelID: "{#InstallerId}"
 Name: "{group}\{cm:SpeechSetup}"; Filename: "{app}\setup-speech.cmd"; WorkingDir: "{app}"; IconFilename: "{app}\MorseCore.Desktop.exe"
-Name: "{autodesktop}\MorseCore"; Filename: "{app}\MorseCore.Desktop.exe"; WorkingDir: "{app}"; Tasks: desktopicon
+Name: "{autodesktop}\MorseCore"; Filename: "{app}\MorseCore.Desktop.exe"; WorkingDir: "{app}"; AppUserModelID: "{#InstallerId}"; Tasks: desktopicon
 
 [Run]
 Filename: "{app}\MorseCore.Desktop.exe"; Description: "{cm:LaunchProgram,MorseCore}"; Flags: nowait postinstall skipifsilent

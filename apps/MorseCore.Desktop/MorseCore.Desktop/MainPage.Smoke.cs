@@ -139,7 +139,24 @@ public sealed partial class MainPage
             Check(presenter.State==Microsoft.UI.Windowing.OverlappedPresenterState.Restored && App.MainWindow.AppWindow.Size.Equals(fixedSize),"Maximize request cannot change fixed window");
             await ActionButton("WindowMinimize"); await Task.Delay(250);
             Check(presenter.State==Microsoft.UI.Windowing.OverlappedPresenterState.Minimized,"Custom minimize button keeps the window in the taskbar");
-            presenter.Restore(); App.MainWindow.Activate(); await Task.Delay(200);
+            Check(WindowsAppIdentity.Current()==WindowsAppIdentity.Id,"Windows process uses the same stable taskbar identity as the installed shortcuts");
+            var originalContent=App.MainWindow.Content;
+            var secondLaunch=new ProcessStartInfo(Environment.ProcessPath!) { UseShellExecute=false,CreateNoWindow=true };
+            secondLaunch.Environment.Remove("MORSECORE_DESKTOP_SMOKE");
+            secondLaunch.Environment.Remove("MORSECORE_DESKTOP_MOUSE_SMOKE");
+            secondLaunch.Environment["MORSECORE_DESKTOP_HOME"]=Path.Combine(directory,"secondary-preferences");
+            using(var secondary=Process.Start(secondLaunch)!)
+            {
+                try
+                {
+                    await WaitFor(()=>secondary.HasExited,"A second launch redirects and exits instead of leaving another application process");
+                    Check(secondary.ExitCode==0,"Redirected second launch exits successfully");
+                    await WaitFor(()=>presenter.State==Microsoft.UI.Windowing.OverlappedPresenterState.Restored,"A second launch restores the original minimized window");
+                    Check(ReferenceEquals(App.MainWindow.Content,originalContent),"Repeated launch preserves the existing page and user state");
+                }
+                finally { if(!secondary.HasExited) secondary.Kill(true); }
+            }
+            App.MainWindow.Activate(); await Task.Delay(200);
             Check(presenter.State==Microsoft.UI.Windowing.OverlappedPresenterState.Restored && App.MainWindow.AppWindow.Size.Equals(fixedSize),"Restoring after minimize preserves the fixed window size");
             var originalPosition=App.MainWindow.AppWindow.Position;
             if(Environment.GetEnvironmentVariable("MORSECORE_DESKTOP_MOUSE_SMOKE")=="1")

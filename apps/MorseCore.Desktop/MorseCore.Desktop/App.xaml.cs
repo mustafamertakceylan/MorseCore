@@ -5,6 +5,9 @@ public partial class App : Application
     public static Window MainWindow { get; private set; } = null!;
     public App()
     {
+#if MORSE_WINUI
+        WindowsAppIdentity.Configure();
+#endif
         UnhandledException+=(_,e)=>
         {
             string? directory=Environment.GetEnvironmentVariable("MORSECORE_DIAGNOSTICS_DIR");
@@ -15,12 +18,23 @@ public partial class App : Application
         };
         InitializeComponent();
     }
-    protected override void OnLaunched(LaunchActivatedEventArgs args)
+    protected override async void OnLaunched(LaunchActivatedEventArgs args)
     {
+#if MORSE_WINUI
+        if(!await RegisterWindowsInstance()) { Exit(); return; }
+#else
+        await Task.CompletedTask;
+#endif
         MainWindow=new Window { Title="MorseCore" };
         var page=new MainPage(); MainWindow.Content=page;
         WindowChrome.Configure(MainWindow);
-        MainWindow.Closed+=(_,_)=>page.Shutdown();
+        MainWindow.Closed+=(_,_)=>
+        {
+            page.Shutdown();
+#if MORSE_WINUI
+            ReleaseWindowsInstance();
+#endif
+        };
         MainWindow.Activate();
     }
     public static void InitializeLogging() { }

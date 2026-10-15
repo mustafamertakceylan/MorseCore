@@ -4,8 +4,8 @@
 
 **Mesajını yaz. Morse'u dinle. Alıştırma yaparak öğren.**
 
-[![İndir Windows](https://img.shields.io/badge/%C4%B0ndir-Windows-5e6a42?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.7.3/MorseCore-0.7.3-Windows-x64-Setup.exe)
-[![0.7.3](https://img.shields.io/badge/v0.7.3-%C3%96nizleme-c58c59?style=for-the-badge)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v0.7.3)
+[![İndir Windows](https://img.shields.io/badge/%C4%B0ndir-Windows-5e6a42?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.7.4/MorseCore-0.7.4-Windows-x64-Setup.exe)
+[![0.7.4](https://img.shields.io/badge/v0.7.4-%C3%96nizleme-c58c59?style=for-the-badge)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v0.7.4)
 
 [English](README.md) · **Türkçe** · [Deutsch](README.de.md) · [Русский](README.ru.md) · [العربية](README.ar.md)
 
@@ -21,7 +21,7 @@ MorseCore; metni Morse koduna çevirmek, dinlemek ve alıştırma yapmak için �
 2. **Dönüştürücü** bölümüne mesajını yazıp **Dönüştür** düğmesine bas. Dinlemek için **Ses** bölümünü kullan.
 3. Alfabe, alıştırmalar ve telsiz kısaltmaları için **Eğitim** bölümünü aç.
 
-Kurmak istemiyorsan [taşınabilir ZIP’i](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.7.3/MorseCore-0.7.3-Windows-x64-Desktop.zip) çıkarıp **MorseCore.Desktop.exe** dosyasını aç. Bu önizleme imzasızdır; Windows yayıncı uyarısı gösterebilir.
+Kurmak istemiyorsan [taşınabilir ZIP’i](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.7.4/MorseCore-0.7.4-Windows-x64-Desktop.zip) çıkarıp **MorseCore.Desktop.exe** dosyasını aç. Bu önizleme imzasızdır; Windows yayıncı uyarısı gösterebilir.
 
 ### Neler yapabilirsin?
 

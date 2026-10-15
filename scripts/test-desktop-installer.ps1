@@ -76,6 +76,17 @@ try {
     Assert-InstallerCheck ($taskLink.WorkingDirectory -eq $taskInstall) 'Shortcut working directory matches the installation'
     [void][Runtime.InteropServices.Marshal]::FinalReleaseComObject($taskLink)
     [void][Runtime.InteropServices.Marshal]::FinalReleaseComObject($taskShell)
+    $taskExplorer=New-Object -ComObject Shell.Application
+    try {
+        $taskFolder=$taskExplorer.NameSpace($taskShortcutDirectory)
+        $taskItem=$taskFolder.ParseName('MorseCore.lnk')
+        Assert-InstallerCheck ($taskItem.ExtendedProperty('System.AppUserModel.ID') -eq 'io.github.mustafamertakceylan.morsecore.desktop') 'Start menu shortcut shares the application taskbar identity'
+    }
+    finally {
+        if($taskItem) { [void][Runtime.InteropServices.Marshal]::FinalReleaseComObject($taskItem) }
+        if($taskFolder) { [void][Runtime.InteropServices.Marshal]::FinalReleaseComObject($taskFolder) }
+        [void][Runtime.InteropServices.Marshal]::FinalReleaseComObject($taskExplorer)
+    }
     $taskSpeechLauncher=Get-Content -LiteralPath (Join-Path $taskInstall 'setup-speech.cmd') -Raw
     Assert-InstallerCheck ($taskSpeechLauncher.Contains('-SpeechHome "%LOCALAPPDATA%\MorseCore\Speech"')) 'Installed speech setup uses persistent per-user model storage'
     Assert-InstallerCheck (!(Test-Path -LiteralPath (Join-Path $taskInstall 'speech-runtime'))) 'Models and virtual environments are not bundled'
@@ -105,6 +116,16 @@ try {
         } while($taskApplication.MainWindowHandle -eq 0 -and [DateTime]::UtcNow -lt $taskLaunchDeadline)
         Assert-InstallerCheck ($taskApplication.MainWindowHandle -ne 0) 'Installed release opens its window from a different working directory'
         Assert-InstallerCheck (!$taskApplication.WaitForExit(2500) -and !(Test-Path -LiteralPath (Join-Path $taskEvidence 'crash.txt'))) 'Installed release remains running without a startup crash'
+        $taskRepeatStart=[Diagnostics.ProcessStartInfo]::new((Join-Path $taskInstall 'MorseCore.Desktop.exe'))
+        $taskRepeatStart.UseShellExecute=$false
+        $taskRepeatStart.Environment['MORSECORE_DESKTOP_HOME']=$taskPreferences
+        $taskRepeatStart.Environment['MORSECORE_DIAGNOSTICS_DIR']=$taskEvidence
+        $taskRepeated=[Diagnostics.Process]::Start($taskRepeatStart)
+        try {
+            Assert-InstallerCheck ($taskRepeated.WaitForExit(10000) -and $taskRepeated.ExitCode -eq 0) 'Reopening the installed release redirects and exits successfully'
+            Assert-InstallerCheck (!$taskApplication.HasExited) 'Reopening preserves the original installed application process'
+        }
+        finally { if(!$taskRepeated.HasExited) { $taskRepeated.Kill($true) }; $taskRepeated.Dispose() }
         Assert-InstallerCheck ($taskApplication.CloseMainWindow()) 'Installed application accepts a normal window close'
         Assert-InstallerCheck ($taskApplication.WaitForExit(15000) -and $taskApplication.ExitCode -eq 0) 'Installed application closes cleanly'
         $taskApplication=$null

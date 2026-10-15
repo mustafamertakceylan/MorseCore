@@ -6,8 +6,8 @@
     <UnoSingleProject>true</UnoSingleProject>
     <ApplicationTitle>MorseCore</ApplicationTitle>
     <ApplicationId>io.github.mustafamertakceylan.morsecore</ApplicationId>
-    <ApplicationDisplayVersion>0.7.3</ApplicationDisplayVersion>
-    <Version>0.7.3</Version>
+    <ApplicationDisplayVersion>0.7.4</ApplicationDisplayVersion>
+    <Version>0.7.4</Version>
     <ApplicationVersion>0</ApplicationVersion>
     <ApplicationPublisher>Mustafa Mert Akceylan</ApplicationPublisher>
     <Description>Text, signals and speech. MorseCore desktop.</Description>
@@ -15,8 +15,8 @@
     <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
     <NuGetAudit>false</NuGetAudit>
     <DefaultLanguage>en-US</DefaultLanguage>
-    <UnoIconForegroundFile>Assets/Icons/icon_foreground.png</UnoIconForegroundFile>
-    <UnoIconForegroundScale>1.2</UnoIconForegroundScale>
+    <UnoIconForegroundFile>Assets/Icons/icon_foreground.svg</UnoIconForegroundFile>
+    <UnoIconForegroundScale>1.0</UnoIconForegroundScale>
     <UnoSplashScreenFile>Assets/Splash/splash_screen.png</UnoSplashScreenFile>
     <UnoSplashScreenColor>#FAF8F2</UnoSplashScreenColor>
     <NativeLibraryPath Condition="'$(NativeLibraryPath)' == '' and $([MSBuild]::IsOSPlatform('Windows'))">$(MSBuildThisFileDirectory)../../../cmake-build-debug/MorseCore.Native.dll</NativeLibraryPath>

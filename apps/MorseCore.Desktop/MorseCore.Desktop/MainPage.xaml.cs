@@ -23,7 +23,7 @@ public sealed partial class MainPage : Page
     private static readonly string[] RadioPages=["stationProfiles","qsoAssistant","qsoLog"];
     private bool educationExpanded,radioExpanded;
     private StackPanel? educationChildren,radioChildren;
-    private string page="converter", source="", version="0.7.3";
+    private string page="converter", source="", version="0.7.4";
     private ConversionResult? result;
     private bool decode, working, initialized, disposed, nativeReady;
     private int revision;

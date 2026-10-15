@@ -23,7 +23,12 @@ function Invoke-UpdateProcess([string]$File,[string[]]$Arguments) {
     finally { $taskProcess.Dispose() }
 }
 function Open-TestApp {
-    $taskProcess=Start-Process -FilePath (Join-Path $taskInstall 'MorseCore.Desktop.exe') -WorkingDirectory $taskEvidence -WindowStyle Hidden -PassThru
+    $taskExecutable=Join-Path $taskInstall 'MorseCore.Desktop.exe'
+    # Setup can launch the application itself. Adopt only this isolated installation.
+    $taskExistingProcess=Get-CimInstance Win32_Process -Filter "Name='MorseCore.Desktop.exe'" | Where-Object { $_.ExecutablePath -eq $taskExecutable } | Select-Object -First 1
+    $taskProcess=if($taskExistingProcess) { Get-Process -Id $taskExistingProcess.ProcessId } else {
+        Start-Process -FilePath $taskExecutable -WorkingDirectory $taskEvidence -WindowStyle Hidden -PassThru
+    }
     $taskDeadline=[DateTime]::UtcNow.AddSeconds(20)
     do { if($taskProcess.WaitForExit(150)) { throw 'Application exited on startup.' }; $taskProcess.Refresh() }
     while($taskProcess.MainWindowHandle -eq 0 -and [DateTime]::UtcNow -lt $taskDeadline)

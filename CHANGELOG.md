@@ -1,5 +1,12 @@
 # Changelog / Değişiklik günlüğü
 
+## 0.7.4 — 2026-10-16
+
+- Replace the square taskbar icon with a rounded green tile; give Windows and installed shortcuts a shared application identity. Reopening the app restores its existing window.
+- Kare görev çubuğu simgesi yuvarlatılmış yeşil simgeyle değiştirildi; Windows ve kurulum kısayollarına ortak uygulama kimliği verildi. Uygulamayı yeniden açmak mevcut pencereyi getirir.
+- Simplify the GitHub description and topics for users. Keep three-part versioning so existing installations can discover this update.
+- GitHub açıklaması ve etiketleri kullanıcılar için sadeleştirildi. Mevcut kurulumların güncellemeyi bulabilmesi için üç parçalı sürüm biçimi korundu.
+
 ## 0.7.3 — 2026-10-16
 
 - Add the missing top and sidebar gutters around the outer workspace; keep navigation aligned with the page heading in both themes and Arabic layout.
