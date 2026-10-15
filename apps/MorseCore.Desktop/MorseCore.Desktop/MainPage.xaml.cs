@@ -23,7 +23,7 @@ public sealed partial class MainPage : Page
     private static readonly string[] RadioPages=["stationProfiles","qsoAssistant","qsoLog"];
     private bool educationExpanded,radioExpanded;
     private StackPanel? educationChildren,radioChildren;
-    private string page="converter", source="", version="0.7.0";
+    private string page="converter", source="", version="0.7.2";
     private ConversionResult? result;
     private bool decode, working, initialized, disposed, nativeReady;
     private int revision;
@@ -69,7 +69,7 @@ public sealed partial class MainPage : Page
         var minimumSplash=Task.Delay(TimeSpan.FromSeconds(2),lifetime.Token);
 #if DEBUG
         var splashTimer=System.Diagnostics.Stopwatch.StartNew();
-        smokeLoadingControlsHidden=PaneToggle.Visibility==Visibility.Collapsed && Shell.Visibility==Visibility.Collapsed;
+        smokeLoadingControlsHidden=WindowBar.Visibility==Visibility.Collapsed && WindowBar.ActualHeight==0 && TitleBrand.Visibility==Visibility.Collapsed && PaneToggle.Visibility==Visibility.Collapsed && Shell.Visibility==Visibility.Collapsed;
         if(SmokeDirectory is { } captureDirectory) await Snapshot(Path.Combine(captureDirectory,"loading.png"));
 #endif
         if(preferences.CheckUpdates && SmokeDirectory is null)
@@ -90,12 +90,14 @@ public sealed partial class MainPage : Page
         catch(OperationCanceledException) { return; }
         if(disposed) return;
 #if DEBUG
-        smokeLoadingControlsHidden &= PaneToggle.Visibility==Visibility.Collapsed && Shell.Visibility==Visibility.Collapsed;
+        smokeLoadingControlsHidden &= WindowBar.Visibility==Visibility.Collapsed && WindowBar.ActualHeight==0 && TitleBrand.Visibility==Visibility.Collapsed && PaneToggle.Visibility==Visibility.Collapsed && Shell.Visibility==Visibility.Collapsed;
         if(SmokeDirectory is { } readyDirectory) await Snapshot(Path.Combine(readyDirectory,"loading-ready.png"));
         double splashVisibleMilliseconds=splashTimer.Elapsed.TotalMilliseconds;
 #endif
         await DismissSplash();
         if(disposed) return;
+        WindowBar.Visibility=Visibility.Visible;
+        TitleBrand.Visibility=Visibility.Visible;
         Shell.Visibility=Visibility.Visible;
         PaneToggle.Visibility=Visibility.Visible; PaneToggle.IsEnabled=true;
         AnimateContent();

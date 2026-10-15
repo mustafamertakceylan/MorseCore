@@ -1,5 +1,10 @@
 # Changelog / Değişiklik günlüğü
 
+## 0.7.2 — 2026-10-16
+
+- Show a full-window loading screen without a title bar or reserved header space. Separate dark-mode workspace, cards, editors and result surfaces with stronger green tones and borders; preserve light-mode colors and spacing.
+- Açılış ekranı üst çubuk veya ayrılmış başlık boşluğu olmadan tüm pencereyi kullanır. Karanlık temada zemin, kart, giriş ve sonuç alanları daha belirgin yeşil tonları ve kenarlıklarla ayrılır; açık tema renkleri ve aralıkları korunur.
+
 ## 0.7.0 — 2026-10-16
 
 - Wider desktop window, responsive forms, clearer cream/green surfaces and short page transitions. Added RAW-style animated corner artwork that stops when inactive or reduced motion is enabled; loading now hides navigation until ready.

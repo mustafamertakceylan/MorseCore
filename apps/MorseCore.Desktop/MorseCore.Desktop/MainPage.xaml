@@ -5,11 +5,11 @@
  <Grid x:Name="Root" Background="{ThemeResource CanvasBrush}">
   <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
   <local:RawBackdrop x:Name="Backdrop" Grid.Row="1"/>
-  <Border x:Name="WindowBar" Height="48" Background="{ThemeResource CanvasBrush}" BorderThickness="0" FlowDirection="LeftToRight">
+  <Border x:Name="WindowBar" Height="48" Background="{ThemeResource CanvasBrush}" BorderThickness="0" FlowDirection="LeftToRight" Visibility="Collapsed">
    <Grid>
     <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
     <Grid x:Name="TitleDragRegion" Grid.ColumnSpan="3" Background="Transparent">
-     <StackPanel x:Name="TitleBrand" Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False">
+     <StackPanel x:Name="TitleBrand" Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False" Visibility="Collapsed">
       <Border Width="36" Height="36" CornerRadius="9" Background="#FAF8F2"><Image x:Name="TitleLogo" Source="ms-appx:///Assets/Brand/morsecore.png" Stretch="Uniform" AutomationProperties.Name="MorseCore"/></Border>
       <TextBlock Text="MorseCore" FontFamily="{StaticResource DisplayFont}" FontSize="22" VerticalAlignment="Center"/>
      </StackPanel>

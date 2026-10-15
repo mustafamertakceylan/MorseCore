@@ -28,21 +28,21 @@
      <SolidColorBrush x:Key="NavSelectedInkBrush" Color="#4E5836"/>
     </ResourceDictionary>
     <ResourceDictionary x:Key="Default">
-     <SolidColorBrush x:Key="CanvasBrush" Color="#46513B"/>
+     <SolidColorBrush x:Key="CanvasBrush" Color="#283322"/>
      <SolidColorBrush x:Key="PaneBrush" Color="#5E6A42"/>
-     <SolidColorBrush x:Key="PaneSurfaceBrush" Color="#C45E6A42"/>
-     <SolidColorBrush x:Key="WorkspaceSurfaceBrush" Color="#C43D4935"/>
-     <SolidColorBrush x:Key="WorkspaceBrush" Color="#3D4935"/>
-     <SolidColorBrush x:Key="CardBrush" Color="#536048"/>
-     <SolidColorBrush x:Key="InputBrush" Color="#46533D"/>
-     <SolidColorBrush x:Key="ResultBrush" Color="#5A684D"/>
-     <SolidColorBrush x:Key="ExpanderHeaderBackground" Color="#4C5A41"/>
-     <SolidColorBrush x:Key="ExpanderContentBackground" Color="#536048"/>
+     <SolidColorBrush x:Key="PaneSurfaceBrush" Color="#ED5E6A42"/>
+     <SolidColorBrush x:Key="WorkspaceSurfaceBrush" Color="#F22D3A27"/>
+     <SolidColorBrush x:Key="WorkspaceBrush" Color="#2D3A27"/>
+     <SolidColorBrush x:Key="CardBrush" Color="#4C5C40"/>
+     <SolidColorBrush x:Key="InputBrush" Color="#23311F"/>
+     <SolidColorBrush x:Key="ResultBrush" Color="#35472C"/>
+     <SolidColorBrush x:Key="ExpanderHeaderBackground" Color="#3C4D32"/>
+     <SolidColorBrush x:Key="ExpanderContentBackground" Color="#4C5C40"/>
      <SolidColorBrush x:Key="InkBrush" Color="#FAF8F2"/>
      <SolidColorBrush x:Key="MutedBrush" Color="#E1E6D8"/>
-     <SolidColorBrush x:Key="LineBrush" Color="#889A76"/>
+     <SolidColorBrush x:Key="LineBrush" Color="#8FA17A"/>
      <SolidColorBrush x:Key="AccentBrush" Color="#5E6A42"/>
-     <SolidColorBrush x:Key="AccentSoftBrush" Color="#75845D"/>
+     <SolidColorBrush x:Key="AccentSoftBrush" Color="#62774D"/>
      <SolidColorBrush x:Key="AccentInkBrush" Color="#F0F4E7"/>
      <SolidColorBrush x:Key="NavSelectedBrush" Color="#FAF8F2"/>
      <SolidColorBrush x:Key="NavSelectedInkBrush" Color="#4E5836"/>

@@ -6,8 +6,8 @@
     <UnoSingleProject>true</UnoSingleProject>
     <ApplicationTitle>MorseCore</ApplicationTitle>
     <ApplicationId>io.github.mustafamertakceylan.morsecore</ApplicationId>
-    <ApplicationDisplayVersion>0.7.0</ApplicationDisplayVersion>
-    <Version>0.7.0</Version>
+    <ApplicationDisplayVersion>0.7.2</ApplicationDisplayVersion>
+    <Version>0.7.2</Version>
     <ApplicationVersion>0</ApplicationVersion>
     <ApplicationPublisher>Mustafa Mert Akceylan</ApplicationPublisher>
     <Description>Text, signals and speech. MorseCore desktop.</Description>

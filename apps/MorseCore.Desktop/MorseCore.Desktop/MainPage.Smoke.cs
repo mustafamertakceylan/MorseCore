@@ -111,9 +111,10 @@ public sealed partial class MainPage
         }
         try
         {
+            Root.UpdateLayout();
             Check(Splash.Visibility==Visibility.Collapsed && LoadingProgress.Value==100,"Loading screen completes before main interaction");
-            Check(smokeLoadingControlsHidden,"Menu button and navigation remain hidden throughout loading, including the ready frame");
-            Check(PaneToggle.Visibility==Visibility.Visible && Shell.Visibility==Visibility.Visible && PaneToggle.IsEnabled,"Navigation appears only after the loading overlay is dismissed");
+            Check(smokeLoadingControlsHidden,"Entire title bar occupies no space throughout loading, including the ready frame; navigation stays hidden");
+            Check(WindowBar.Visibility==Visibility.Visible && WindowBar.ActualHeight==48 && TitleBrand.Visibility==Visibility.Visible && PaneToggle.Visibility==Visibility.Visible && Shell.Visibility==Visibility.Visible && PaneToggle.IsEnabled,"Title bar and navigation appear only after the loading overlay is dismissed");
             Check(!Backdrop.IsHitTestVisible && !Backdrop.IsTabStop && Descendants(Backdrop).OfType<Viewbox>().Count(c=>c.ActualWidth>0 && c.ActualHeight>0)==4,"All four RAW background corners render without intercepting pointer or keyboard input");
             Check(splashVisibleMilliseconds>=1950,"Welcome screen remains visible for at least two seconds before dismissal");
 #if MORSE_WINUI
@@ -158,9 +159,31 @@ public sealed partial class MainPage
             Check(result?.Text=="-- . .-. .... .- -... .- / -.. ..- -. -.-- .- -.-.-- ","Turkish conversion through native DLL");
             Check(result!.Statistics.InputCharacters==14 && result.Statistics.Words==2,"Unicode character and word counters");
             await Snapshot(Path.Combine(directory,"light.png"));
+            var lightInput=inputBox!.TransformToVisual(PageContent).TransformBounds(new Windows.Foundation.Rect(0,0,inputBox.ActualWidth,inputBox.ActualHeight));
+            var lightOutput=outputBox!.TransformToVisual(PageContent).TransformBounds(new Windows.Foundation.Rect(0,0,outputBox.ActualWidth,outputBox.ActualHeight));
             Check(TitleLogo.Source is BitmapImage { PixelWidth: >0,PixelHeight: >0 },"Supplied logo loads in the application title bar");
             preferences=preferences with { Theme="dark" }; ApplyTheme(); Rebuild(); await Snapshot(Path.Combine(directory,"dark.png"));
             Check(ActualTheme==ElementTheme.Dark,"Dark theme applied");
+            var darkSource=inputBox!; var darkResult=outputBox!;
+            var darkInput=darkSource.TransformToVisual(PageContent).TransformBounds(new Windows.Foundation.Rect(0,0,darkSource.ActualWidth,darkSource.ActualHeight));
+            var darkOutput=darkResult.TransformToVisual(PageContent).TransformBounds(new Windows.Foundation.Rect(0,0,darkResult.ActualWidth,darkResult.ActualHeight));
+            Check(Math.Abs(darkInput.X-lightInput.X)<1 && Math.Abs(darkInput.Y-lightInput.Y)<1 && Math.Abs(darkInput.Width-lightInput.Width)<1 && Math.Abs(darkInput.Height-lightInput.Height)<1 &&
+                Math.Abs(darkOutput.X-lightOutput.X)<1 && Math.Abs(darkOutput.Y-lightOutput.Y)<1 && Math.Abs(darkOutput.Width-lightOutput.Width)<1 && Math.Abs(darkOutput.Height-lightOutput.Height)<1 && darkOutput.Left-darkInput.Right>=12,
+                "Dark converter preserves light-theme editor sizes, padding and the gap between editors");
+            var surfaces=new RenderTargetBitmap(); await surfaces.RenderAsync(Root); byte[] surfacePixels=(await surfaces.GetPixelsAsync()).ToArray();
+            double Luminance(FrameworkElement element,double x,double y)
+            {
+                var point=element.TransformToVisual(Root).TransformPoint(new Windows.Foundation.Point(x,y));
+                int px=Math.Clamp((int)Math.Round(point.X*XamlRoot!.RasterizationScale),0,surfaces.PixelWidth-1),py=Math.Clamp((int)Math.Round(point.Y*XamlRoot.RasterizationScale),0,surfaces.PixelHeight-1);
+                int offset=(py*surfaces.PixelWidth+px)*4;
+                double Linear(byte value) { double channel=value/255.0; return channel<=0.04045 ? channel/12.92 : Math.Pow((channel+0.055)/1.055,2.4); }
+                return 0.2126*Linear(surfacePixels[offset+2])+0.7152*Linear(surfacePixels[offset+1])+0.0722*Linear(surfacePixels[offset]);
+            }
+            double Contrast(double a,double b)=>(Math.Max(a,b)+0.05)/(Math.Min(a,b)+0.05);
+            var converterCard=PageContent.Children.OfType<Border>().First(b=>Descendants(b).Contains(darkSource));
+            double workspaceTone=Luminance(Workspace,Workspace.ActualWidth/2,5),cardTone=Luminance(converterCard,converterCard.ActualWidth/2,converterCard.ActualHeight-10);
+            double inputTone=Luminance(darkSource,darkSource.ActualWidth/2,darkSource.ActualHeight/2),resultTone=Luminance(darkResult,darkResult.ActualWidth/2,darkResult.ActualHeight/2);
+            Check(Contrast(workspaceTone,cardTone)>=1.5 && Contrast(cardTone,inputTone)>=1.6 && Contrast(cardTone,resultTone)>=1.2,"Rendered dark workspace, cards, inputs and results have distinct surface tones");
             preferences=preferences with { Language="ar",Alphabet=MorseAlphabet.Arabic,Theme="light" }; source="سلام"; result=null; ApplyTheme(); Rebuild(); await ConvertNow();
             Check(Shell.FlowDirection==FlowDirection.RightToLeft,"Arabic interface RTL");
             Check(inputBox!.FlowDirection==FlowDirection.RightToLeft && outputBox!.FlowDirection==FlowDirection.LeftToRight,"Arabic input RTL and Morse LTR");
@@ -419,20 +442,21 @@ public sealed partial class MainPage
                 Check(minimizePosition.X+MinimizeWindowButton.ActualWidth<=closePosition.X+1 && brandBounds.Right<=minimizePosition.X,"Minimize button stays separate from the centered brand and close button in "+language);
             }
             preferences=preferences with { ReduceMotion=true }; SetCollapsed(true,true); Check(Pane.Width==72,"Reduced motion skips menu animation");
-            SetCollapsed(false,false); preferences=preferences with { Theme="light" }; audioWorkspace=0;
+            SetCollapsed(false,false); audioWorkspace=0;
+            foreach(string theme in new[]{"light","dark"})
             foreach(string language in new[]{"tr","en","de","ru","ar"})
             {
-                preferences=preferences with { Language=language };
+                preferences=preferences with { Language=language,Theme=theme };
                 foreach(string feature in new[]{"converter","files","audio","practice","alphabet","keying","glossary","stationProfiles","qsoAssistant","qsoLog","settings"})
                 {
                     page=feature; Rebuild(); await Task.Delay(60); Root.UpdateLayout();
-                    CheckPageWidth(language+" "+feature);
-                    if(language=="tr") await Snapshot(Path.Combine(directory,"layout-"+feature+".png"));
+                    CheckPageWidth(language+" "+theme+" "+feature);
+                    if(language=="tr") await Snapshot(Path.Combine(directory,"layout-"+theme+"-"+feature+".png"));
                 }
                 foreach(int audioSection in new[]{1,2})
                 {
                     page="audio"; audioWorkspace=audioSection; Rebuild(); await Task.Delay(60); Root.UpdateLayout();
-                    CheckPageWidth(language+" audio "+audioSection);
+                    CheckPageWidth(language+" "+theme+" audio "+audioSection);
                 }
                 audioWorkspace=0;
             }

@@ -1,4 +1,4 @@
-# MorseCore 0.7.0
+# MorseCore 0.7.2
 
 [Source and full documentation / Kaynak ve tam belgeler](https://github.com/mustafamertakceylan/MorseCore)
 
