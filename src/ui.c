@@ -238,24 +238,19 @@ void showAboutProject(const char language[])
     printSectionHeader(getText(language, TXT_ABOUT_TITLE));
     printf("%s\n\n", getText(language, TXT_ABOUT_DESCRIPTION));
 
-    printf("%s\n", getText(language, TXT_ABOUT_DEMONSTRATES));
-    printf("- %s\n", getText(language, TXT_ABOUT_2D_ARRAY));
-    printf("- %s\n", getText(language, TXT_ABOUT_FILE_IO));
-    printf("- %s\n", getText(language, TXT_ABOUT_STRING_OPERATIONS));
-    printf("- %s\n", getText(language, TXT_ABOUT_MODULAR_DESIGN));
-    printf("- %s\n", getText(language, TXT_ABOUT_HEADER_SOURCE));
-    printf("- %s\n", getText(language, TXT_ABOUT_SWITCH_CASE));
-    printf("- %s\n", getText(language, TXT_ABOUT_INPUT_VALIDATION));
-    printf("- %s\n", getText(language, TXT_ABOUT_TURKISH_NORMALIZATION));
-    printf("- %s\n", getText(language, TXT_ABOUT_AUTO_FILE_NAMING));
-    printf("- %s\n", getText(language, TXT_ABOUT_PERSISTENT_SETTINGS));
-    printf("- %s\n", getText(language, TXT_ABOUT_STRUCT_POINTER));
+    printf("- %s\n", getText(language, TXT_ABOUT_CONVERSION));
+    printf("- %s\n", getText(language, TXT_ABOUT_TURKISH));
+    printf("- %s\n", getText(language, TXT_ABOUT_FILES));
+    printf("- %s\n\n", getText(language, TXT_ABOUT_SETTINGS));
+    printf("%s: A-Z, 0-9\n", getText(language, TXT_ABOUT_SUPPORTED));
+    printf("%s: %d %s\n", getText(language, TXT_ABOUT_INPUT_LIMIT),
+           MAX_TEXT_LENGTH - 1, getText(language, TXT_BYTES));
 
     printSectionRule();
     printf("%s%s:%s %sMustafa Mert Akceylan%s\n", COLOR_MUTED,
            getText(language, TXT_ABOUT_AUTHOR), COLOR_RESET, COLOR_TEXT, COLOR_RESET);
-    printf("%s%s:%s %s030240117%s\n", COLOR_MUTED,
-           getText(language, TXT_ABOUT_STUDENT_NUMBER), COLOR_RESET, COLOR_TEXT, COLOR_RESET);
+    printf("%s%s:%s %sApache-2.0%s\n", COLOR_MUTED,
+           getText(language, TXT_ABOUT_LICENSE), COLOR_RESET, COLOR_TEXT, COLOR_RESET);
 }
 
 void printPreview(const char title[], const char content[])

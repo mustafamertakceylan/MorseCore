@@ -43,7 +43,7 @@ const char* getText(const char language[], LanguageTextKey key)
             return isTurkish ? "Morse Tablosunu Goster" : "Show Morse Table";
 
         case TXT_MENU_ABOUT:
-            return isTurkish ? "Proje Hakkinda" : "About Project";
+            return isTurkish ? "MorseCore Hakkinda" : "About MorseCore";
 
         case TXT_MENU_SETTINGS:
             return isTurkish ? "Ayarlar" : "Settings";
@@ -203,50 +203,39 @@ const char* getText(const char language[], LanguageTextKey key)
 
         case TXT_ABOUT_DESCRIPTION:
             return isTurkish
-                ? "MorseCore, C dili ile gelistirilmis konsol tabanli bir Morse kodlayici ve cozucu projesidir."
-                : "MorseCore is a console-based Morse encoder and decoder written in C.";
+                ? "Metinleri ve metin dosyalarini Morse koduna cevirin veya cozumleyin."
+                : "Convert text and text files to Morse code and back.";
 
-        case TXT_ABOUT_DEMONSTRATES:
-            return isTurkish ? "Bu proje sunlari gostermektedir:" : "This project demonstrates:";
+        case TXT_ABOUT_CONVERSION:
+            return isTurkish ? "Harfleri ve rakamlari iki yonde donusturun."
+                             : "Convert letters and numbers in either direction.";
 
-        case TXT_ABOUT_2D_ARRAY:
-            return isTurkish ? "2 boyutlu dizi kullanimi" : "2D array usage";
+        case TXT_ABOUT_TURKISH:
+            return isTurkish ? "Turkce harfleri donusturun; kelime ayiracini otomatik algilayin."
+                             : "Normalize Turkish letters and detect word separators.";
 
-        case TXT_ABOUT_FILE_IO:
-            return isTurkish ? "Dosya okuma ve dosya yazma islemleri" : "File input and output";
+        case TXT_ABOUT_FILES:
+            return isTurkish ? "Sonuclari data/ klasorunde numarali .txt dosyalarina kaydedin."
+                             : "Save results as numbered .txt files in data/.";
 
-        case TXT_ABOUT_STRING_OPERATIONS:
-            return isTurkish ? "String ve karakter dizisi islemleri" : "String operations";
+        case TXT_ABOUT_SETTINGS:
+            return isTurkish ? "Dil ve ayirac tercihlerinizi sonraki oturumlarda da kullanin."
+                             : "Keep your language and separator preferences between sessions.";
 
-        case TXT_ABOUT_MODULAR_DESIGN:
-            return isTurkish ? "Fonksiyon tabanli moduler tasarim" : "Function-based modular design";
+        case TXT_ABOUT_SUPPORTED:
+            return isTurkish ? "Desteklenen karakterler" : "Supported characters";
 
-        case TXT_ABOUT_HEADER_SOURCE:
-            return isTurkish ? "Header ve source dosyalarinin ayrilmasi" : "Header/source file separation";
+        case TXT_ABOUT_INPUT_LIMIT:
+            return isTurkish ? "En fazla girdi" : "Maximum input size";
 
-        case TXT_ABOUT_SWITCH_CASE:
-            return isTurkish ? "Switch-case tabanli menu kontrolu" : "Switch-case menu structure";
-
-        case TXT_ABOUT_INPUT_VALIDATION:
-            return isTurkish ? "Input dogrulama sistemi" : "Input validation";
-
-        case TXT_ABOUT_TURKISH_NORMALIZATION:
-            return isTurkish ? "Turkce karakter normalizasyonu" : "Turkish character normalization";
-
-        case TXT_ABOUT_AUTO_FILE_NAMING:
-            return isTurkish ? "Otomatik cikti dosyasi isimlendirme" : "Automatic output file naming";
-
-        case TXT_ABOUT_PERSISTENT_SETTINGS:
-            return isTurkish ? "Kalici separator ve dil ayarlari" : "Persistent separator and language settings";
-
-        case TXT_ABOUT_STRUCT_POINTER:
-            return isTurkish ? "Struct ve pointer kullanimi" : "Struct and pointer usage through statistics";
+        case TXT_BYTES:
+            return isTurkish ? "bayt" : "bytes";
 
         case TXT_ABOUT_AUTHOR:
             return isTurkish ? "Gelistirici" : "Author";
 
-        case TXT_ABOUT_STUDENT_NUMBER:
-            return isTurkish ? "Ogrenci Numarasi" : "Student Number";
+        case TXT_ABOUT_LICENSE:
+            return isTurkish ? "Lisans" : "License";
 
         case TXT_ERROR_UNKNOWN:
             return isTurkish ? "Bilinmeyen hata." : "Unknown error.";

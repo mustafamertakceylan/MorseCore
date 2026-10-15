@@ -1,599 +1,205 @@
+<div align="center">
+
 # MorseCore
 
-<p align="center">
-  <b>A console-based Morse encoder and decoder written in C</b>
-</p>
+**Text and Morse code, in both directions.**
 
-<p align="center">
-  <code>C</code> · <code>CMake</code> · <code>File I/O</code> · <code>2D Arrays</code> · <code>Structs</code> · <code>Pointers</code> · <code>Modular Design</code>
-</p>
+Convert a message in your terminal or read it from a text file. View the Morse alphabet, save results, and keep your language and word separator preferences between runs.
 
----
+![C17](https://img.shields.io/badge/C-17-225E85?style=flat-square&logo=c&logoColor=white)
+![CMake](https://img.shields.io/badge/CMake-3.28%2B-064F8C?style=flat-square&logo=cmake&logoColor=white)
+[![License](https://img.shields.io/badge/License-Apache%202.0-2A9D8F?style=flat-square)](LICENSE)
 
-## Overview
+**English** · [Türkçe](README.tr.md)
 
-**MorseCore** is a console-based Morse encoder and decoder developed in C.
-
-The project converts plain text into Morse code and converts Morse code back into readable text. It also supports file-based conversion, Turkish character normalization, configurable word separators, persistent settings, bilingual interface messages, statistics, input validation, and centralized error handling.
-
-This project is designed as an educational C programming project. Its main goal is to demonstrate fundamental and intermediate C concepts in a clean, modular structure.
+</div>
 
 ---
 
-## Features
+## Contents
 
-- Text to Morse conversion
-- Morse to Text conversion
-- File-based Text to Morse conversion
-- File-based Morse to Text conversion
-- Turkish character normalization
-- Configurable Morse word separator
-- Persistent settings through `config/settings.txt`
-- Automatic separator detection while decoding Morse input
-- English / Turkish interface language support
-- Input validation
-- Centralized error handling
-- Conversion statistics
-- Session summary
-- Automatic output file naming
-- File preview before saving output
-- Colored console interface
-- Morse table display
-- Modular source/header separation
+- [What it does](#what-it-does)
+- [Features](#features)
+- [Getting started](#getting-started)
+- [Using MorseCore](#using-morsecore)
+- [Files](#files)
+- [Settings](#settings)
+- [Supported input](#supported-input)
+- [Statistics](#statistics)
+- [Project layout](#project-layout)
+- [Tests](#tests)
+- [License](#license)
 
----
+## What it does
 
-## Supported Characters
+MorseCore converts letters and numbers into dots and dashes, and turns Morse code back into readable uppercase text. It runs locally through a numbered console menu.
 
-MorseCore supports the following character groups:
+For example, `HELLO WORLD` becomes:
 
-| Character Type | Support |
-|---|---|
-| English letters | `A-Z` |
-| Numbers | `0-9` |
-| Spaces | Supported |
-| Turkish letters | Converted to English equivalents |
-| Unsupported symbols | Rejected |
-
----
-
-## Turkish Character Normalization
-
-Turkish characters are converted into their closest English equivalents before Morse conversion.
-
-| Turkish Character | Converted Character |
-|---|---|
-| `Ç / ç` | `C` |
-| `Ğ / ğ` | `G` |
-| `İ / ı` | `I` |
-| `Ö / ö` | `O` |
-| `Ş / ş` | `S` |
-| `Ü / ü` | `U` |
-
-Example:
-
-```txt
-Merhaba Dünya
-```
-
-is processed as:
-
-```txt
-MERHABA DUNYA
-```
-
-Morse output:
-
-```txt
--- . .-. .... .- -... .- / -.. ..- -. -.-- .-
-```
-
----
-
-## Morse Format
-
-MorseCore uses the following format rules:
-
-| Element | Format |
-|---|---|
-| Letter separation | One space |
-| Word separation | Configurable separator |
-| Default word separator | `/` |
-| Supported separators | `/`, `|`, `#`, `*` |
-| Morse symbols | `.` and `-` |
-
-Example with default separator:
-
-```txt
-HELLO WORLD
-```
-
-Output:
-
-```txt
+```text
 .... . .-.. .-.. --- / .-- --- .-. .-.. -..
 ```
 
-Example with custom separator `|`:
+Choose the reverse conversion to get `HELLO WORLD` back.
 
-```txt
-.... . .-.. .-.. --- | .-- --- .-. .-.. -..
+## Features
+
+- Convert typed text or `.txt` files in either direction.
+- Accept Turkish letters by converting them to their Latin equivalents.
+- Choose `/`, `|`, `#`, or `*` between Morse words; detect the separator when decoding.
+- Switch between English and Turkish menus and save your preferences.
+- See conversion statistics and a summary of the current session.
+- Browse the 36-entry Morse table for letters and digits.
+- Use a colored console interface with an ASCII `MORSE CORE` banner.
+
+## Getting started
+
+### Requirements
+
+| Tool | Needed for |
+|---|---|
+| CMake 3.28 or newer | Configuring and building the project |
+| GCC with C17 support | The included `debug` preset |
+| Ninja | The included `debug` preset |
+| Python 3 | CLI integration tests; not needed to run the application |
+
+The build and tests have been checked on Windows with MSYS2 UCRT64 GCC. Other platforms have not been verified.
+
+### Build and run
+
+Clone the repository, then run these commands from its root directory. Make sure `cmake`, `gcc`, and `ninja` are available in your terminal.
+
+```powershell
+git clone https://github.com/mustafamertakceylan/MorseCore.git
+cd MorseCore
+cmake --preset debug
+cmake --build --preset debug
+.\run.cmd
 ```
 
----
+After building, you can also double-click `run.cmd` on Windows or start the executable directly:
 
-## Persistent Settings
-
-MorseCore stores user settings in:
-
-```txt
-config/settings.txt
+```powershell
+.\cmake-build-debug\MorseCore.exe
 ```
 
-Default settings:
+The build stores this checkout's absolute path for `data/` and `config/`, so launching from another working directory still uses the same files. If you move the checkout, configure and build it again. The executable alone is not a standalone distribution.
 
-```txt
+## Using MorseCore
+
+Type a menu number and press Enter:
+
+```text
+1  Text to Morse
+2  Morse to text
+3  Text file to Morse
+4  Morse file to text
+5  Show Morse table
+6  About MorseCore
+7  Settings
+0  Exit
+```
+
+### Convert a message
+
+Choose **1**, enter `HELLO WORLD`, and press Enter. The application shows the result and its statistics, then asks whether to save the Morse output. Enter `y` to save or `n` to continue without saving.
+
+Choose **2** to decode this message:
+
+```text
+.... . .-.. .-.. --- / .-- --- .-. .-.. -..
+```
+
+Each letter is a separate Morse group, separated by whitespace. A word separator must be a group of its own, as in `... --- ... / .-`. Decoding detects the supported separator in the message, even if your saved preference is different. Interactive decoding displays the text without a save prompt; use option **4** to save decoded file output.
+
+## Files
+
+Place input files in `data/`. For a file named `message.txt`, choose **3** or **4** and enter `message` or `message.txt`. The application adds `.txt` when needed; enter a filename rather than a full path.
+
+File conversions display the input and output, then automatically save a numbered result in the same directory:
+
+```text
+data/
+  message.txt
+  morse_output_1.txt
+  morse_output_2.txt
+  decoded_output_1.txt
+```
+
+Numbering skips existing filenames to avoid overwriting them. Saving an interactively encoded message also uses a numbered `morse_output_*.txt` file.
+
+New runtime `.txt` files in `data/` are ignored by Git. Sample files already tracked in the repository remain tracked.
+
+## Settings
+
+Open **7 → Settings** to change the word separator or interface language. Changes are saved in `config/settings.txt` and reused on the next launch.
+
+The defaults are:
+
+```ini
 word_separator=/
 language=EN
 ```
 
-The program remembers the selected word separator and interface language between runs.
+Supported languages are `EN` and `TR`. Turkish menu labels use ASCII spelling for terminal compatibility; Turkish input letters are still accepted.
 
----
-
-## Separator Detection
-
-When decoding Morse input, MorseCore can automatically detect the word separator from the input.
-
-Example:
-
-```txt
-.... . .-.. .-.. --- # .-- --- .-. .-.. -..
-```
-
-Even if the saved separator is `/`, the program detects `#` and decodes the input as:
-
-```txt
-HELLO WORLD
-```
-
-If no separator is detected, the saved separator from `config/settings.txt` is used.
-
----
-
-## Interface Language Support
-
-MorseCore supports two interface languages:
-
-| Language | Code |
-|---|---|
-| English | `EN` |
-| Turkish | `TR` |
-
-The Turkish interface uses ASCII Turkish text for console compatibility.
-
-Example:
-
-```txt
-Metni Morse'a Cevir
-Morse'u Metne Cevir
-Ayarlar
-Cikis
-```
-
-This avoids terminal encoding problems while preserving Turkish input support for Morse conversion.
-
----
-
-## Menu Options
-
-Default English menu:
-
-```txt
-+---------------------------------------------------+
-|                     MorseCore                     |
-+---------------------------------------------------+
-| [1] Text to Morse                                 |
-| [2] Morse to Text                                 |
-| [3] Read text from file and convert to Morse      |
-| [4] Read Morse from file and convert to Text      |
-| [5] Show Morse Table                              |
-| [6] About Project                                 |
-| [7] Settings                                      |
-| [0] Exit                                          |
-+---------------------------------------------------+
-```
-
-Settings menu:
-
-```txt
-+---------------------------------------------------+
-|                      Settings                     |
-+---------------------------------------------------+
-| Current word separator: /                         |
-| Current language      : EN                        |
-+---------------------------------------------------+
-| [1] Change word separator                         |
-| [2] Change language                               |
-| [0] Back                                          |
-+---------------------------------------------------+
-```
-
----
-
-## Project Structure
-
-```txt
-MorseCore/
-├── CMakeLists.txt
-├── README.md
-├── LICENSE
-├── .gitignore
-├── config/
-│   └── settings.txt
-├── data/
-│   └── .gitkeep
-├── include/
-│   ├── app.h
-│   ├── app_config.h
-│   ├── constants.h
-│   ├── error.h
-│   ├── error_codes.h
-│   ├── error_messages.h
-│   ├── file_utils.h
-│   ├── language.h
-│   ├── morse.h
-│   ├── separator.h
-│   ├── settings.h
-│   ├── stats.h
-│   ├── ui.h
-│   └── validation.h
-└── src/
-    ├── app.c
-    ├── error.c
-    ├── file_utils.c
-    ├── language.c
-    ├── main.c
-    ├── morse.c
-    ├── separator.c
-    ├── settings.c
-    ├── stats.c
-    ├── ui.c
-    └── validation.c
-```
-
----
-
-## Source File Responsibilities
-
-| File | Responsibility |
-|---|---|
-| `main.c` | Program entry point and console encoding setup |
-| `app.c` | Main application flow, menu case handling, settings flow |
-| `ui.c` | Console output, menus, previews, input prompts, waiting functions |
-| `morse.c` | Text/Morse conversion and Turkish character normalization |
-| `file_utils.c` | File reading, writing, path building, automatic output file naming |
-| `settings.c` | Loading and saving persistent settings |
-| `separator.c` | Separator validation and automatic separator detection |
-| `language.c` | English/Turkish interface text system |
-| `stats.c` | Conversion statistics and session summary |
-| `validation.c` | Empty input, file name, and `.txt` extension validation |
-| `error.c` | Error code to localized error message conversion |
-
----
-
-## Used C Concepts
-
-| Concept | Usage in Project |
-|---|---|
-| 1D arrays | Character table |
-| 2D arrays | Morse code table |
-| Character arrays | Text, Morse, file paths, and settings |
-| Strings | Input processing and conversion |
-| Functions | Modular program structure |
-| Header files | Function declarations and shared types |
-| Source file separation | Clear module responsibility |
-| `switch-case` | Main menu and settings menu control |
-| Loops | Character scanning and Morse table search |
-| Conditional statements | Validation and conversion decisions |
-| File operations | Reading/writing text and settings files |
-| `FILE *` | File handling |
-| `struct` | Conversion statistics, session statistics, app settings |
-| Pointers | Updating structs through function parameters |
-| `enum` | Language text keys and result/error codes |
-| CMake | Build configuration |
-
----
-
-## Struct Usage
-
-MorseCore uses structs to group related data.
-
-### `ConversionStats`
-
-Used for storing statistics about a single conversion.
-
-```c
-typedef struct {
-    int inputLength;
-    int outputLength;
-    int wordCount;
-    int convertedCharacterCount;
-    int spaceCount;
-} ConversionStats;
-```
-
-Statistics are calculated after a successful conversion with an explicit
-`ConversionDirection` (`CONVERSION_TEXT_TO_MORSE` or `CONVERSION_MORSE_TO_TEXT`).
-
-| Field | Meaning |
-|---|---|
-| `inputLength` / `outputLength` | Character count of the actual input/output, including whitespace and Morse formatting. A supported Turkish letter counts as one character in both UTF-8 and Windows-1254. |
-| `wordCount` | Words in the plain text: encoding input or decoding output. Repeated spaces, tabs, and line breaks do not create extra words. |
-| `convertedCharacterCount` | Plain-text letters and digits, excluding whitespace; each Morse letter token represents one converted character. |
-| `spaceCount` | Literal spaces in the plain text, including leading/trailing spaces. Tabs and line breaks are word boundaries but are not literal spaces. |
-
-For example, `Merhaba Dünya` has 13 input characters, 12 converted letters,
-2 words, and 1 space. Decoding the Morse representation of `HELLO WORLD` has
-10 converted letters, 2 words, and 1 space regardless of which word separator is used.
-
-### `SessionStats`
-
-Used for storing program-wide operation counters during a session.
-
-```c
-typedef struct {
-    int textToMorseCount;
-    int morseToTextCount;
-    int fileOperationCount;
-    int invalidInputCount;
-    int savedOutputCount;
-} SessionStats;
-```
-
-### `AppSettings`
-
-Used for storing persistent application settings.
-
-```c
-typedef struct {
-    char wordSeparator;
-    char language[3];
-} AppSettings;
-```
-
----
-
-## Pointer Usage
-
-Pointers are used to update structs through function parameters.
-
-Example:
-
-```c
-initializeSessionStats(&sessionStats);
-calculateConversionStats(text, output, CONVERSION_TEXT_TO_MORSE, &conversionStats);
-printSessionSummary(&sessionStats, settings.language);
-```
-
-This avoids unnecessary copying and allows functions to directly update the original structs.
-
----
-
-## 2D Array Usage
-
-The Morse codes are stored in a 2D character array.
-
-```c
-char morseCodes[MORSE_COUNT][MAX_MORSE_LENGTH];
-```
-
-This structure is used because each Morse code is stored as a string.
-
-```txt
-36 entries  ->  26 letters + 10 numbers
-6 columns   ->  maximum 5 Morse symbols + '\0'
-```
-
-The character table and Morse table share the same index.
-
-Example:
-
-```txt
-characters[0] = 'A'
-morseCodes[0] = ".-"
-
-characters[1] = 'B'
-morseCodes[1] = "-..."
-```
-
----
-
-## File Operations
-
-The program uses the `data` folder for runtime file operations.
-
-For file-based conversion, the user enters the file name manually.
-
-Example:
-
-```txt
-input
-```
-
-The program automatically converts it to:
-
-```txt
-input.txt
-```
-
-and reads:
-
-```txt
-data/input.txt
-```
-
-Generated output files are automatically numbered to prevent overwriting existing files.
-
-Example:
-
-```txt
-morse_output_1.txt
-morse_output_2.txt
-decoded_output_1.txt
-decoded_output_2.txt
-```
-
-Runtime `.txt` files inside `data/` are ignored by Git.
-
----
-
-## Example Usage
-
-### Text to Morse
-
-Input:
-
-```txt
-HELLO WORLD
-```
-
-Output:
-
-```txt
-.... . .-.. .-.. --- / .-- --- .-. .-.. -..
-```
-
----
-
-### Morse to Text
-
-Input:
-
-```txt
-.... . .-.. .-.. --- / .-- --- .-. .-.. -..
-```
-
-Output:
-
-```txt
-HELLO WORLD
-```
-
----
-
-### Turkish Input
-
-Input:
-
-```txt
-Merhaba Dünya
-```
-
-Processed as:
-
-```txt
-MERHABA DUNYA
-```
-
-Output:
-
-```txt
--- . .-. .... .- -... .- / -.. ..- -. -.-- .-
-```
-
----
-
-## Build Instructions
-
-This project uses CMake.
-
-Requirements: CMake 3.28 or newer, a C17 compiler, and Ninja for the
-included `debug` preset. The Windows setup was built with MSYS2 UCRT64 GCC.
-Python 3 is optional for building the application and required for the CLI tests.
-
-From the project directory, the checked-in presets provide a repeatable setup:
+Colors are enabled when the terminal supports them. Redirected output contains no ANSI escape sequences. To disable colors in PowerShell:
 
 ```powershell
-cmake --preset debug
-cmake --build --preset debug
-ctest --preset debug
+$env:NO_COLOR = "1"
 .\run.cmd
 ```
 
-`run.cmd` can also be double-clicked on Windows after building.
-The CMake build embeds this checkout's absolute path for `data/` and `config/`,
-so the executable can be launched from another working directory. Reconfigure
-and rebuild after moving the checkout; the executable is not a standalone package.
+## Supported input
 
-### Configure
+Plain text accepts `A–Z`, `a–z`, digits `0–9`, spaces, tabs, and line breaks. Turkish letters are accepted in UTF-8 or Windows-1254:
 
-```bash
-cmake -S . -B cmake-build-debug
+```text
+Ç/ç → C    Ğ/ğ → G    İ/ı → I
+Ö/ö → O    Ş/ş → S    Ü/ü → U
+
+Merhaba Dünya → MERHABA DUNYA
 ```
 
-### Build
+Decoding produces uppercase Latin letters and cannot restore the original Turkish spelling. Encoding combines whitespace between words into one separator and discards leading and trailing whitespace.
 
-```bash
-cmake --build cmake-build-debug
+Input is limited to **999 bytes**, including file content; a UTF-8 Turkish letter takes two bytes. Longer input is rejected rather than partially converted. Punctuation and other unsupported characters are rejected. Morse input uses `.` and `-` for letters and one of `/`, `|`, `#`, or `*` between words.
+
+The application currently provides text conversion only; audio playback, microphone decoding, a graphical interface, and command-line conversion arguments are not implemented.
+
+## Statistics
+
+After a successful conversion, MorseCore shows the input and output character counts, word count, converted letters and digits, and literal spaces. A supported Turkish letter counts as one character rather than two UTF-8 bytes.
+
+Words, converted characters, and spaces are counted on the plain-text side: the input when encoding, the output when decoding. Tabs and line breaks separate words but do not count as literal spaces. For example, `Merhaba Dünya` has 13 characters, 12 letters, 2 words, and 1 space.
+
+The exit summary reports conversions, file operations, invalid inputs, and saved outputs for the current session. Session statistics are not saved between runs.
+
+## Project layout
+
+```text
+src/                 Application flow, conversion, console UI, files, and settings
+include/             Public headers and shared configuration
+tests/               Core tests and CLI integration scenarios
+config/settings.txt  Saved language and separator
+data/                Input files, samples, and generated output
+CMakeLists.txt       Build and test targets
+CMakePresets.json    GCC / Ninja debug preset
+run.cmd              Windows launcher for the built application
 ```
 
----
+## Tests
 
-## Run Instructions
+After configuring and building, run:
 
-After building, run the generated executable.
-
-### Windows
-
-```bash
-cmake-build-debug\MorseCore.exe
+```powershell
+ctest --preset debug
 ```
 
----
+CTest runs the C core tests and, when Python 3 is found during configuration, a CLI suite with **12 scenarios** against the real executable. Without Python, the CLI suite is omitted; the core tests still run.
 
-## Notes
-
-- The project is designed for console usage.
-- The console uses a turquoise/white ASCII `MORSE CORE` banner, grouped menus,
-  yellow selection keys, and green/red success and error messages. Windows
-  virtual-terminal colors are enabled when supported. Redirected output stays
-  plain text; setting the `NO_COLOR` environment variable disables colors.
-- Turkish input characters are normalized before Morse conversion.
-- Turkish interface text uses ASCII Turkish for terminal compatibility.
-- The default word separator is `/`.
-- Word separator and language settings are persistent.
-- File outputs are automatically numbered.
-- Runtime `.txt` files inside `data/` are excluded from Git tracking.
-- Existing sample `.txt` files already tracked in the repository remain tracked;
-  `.gitignore` only excludes newly created runtime files.
-- Input is limited to 999 bytes (UTF-8 Turkish letters use two bytes). Oversized
-  interactive lines and files are rejected rather than partially converted.
-- Spaces, tabs, and line breaks between words are encoded as one word separator;
-  leading and trailing whitespace is ignored.
-- Conversion statistics count supported text characters rather than bytes;
-  word, letter/digit, and space counts use the plain-text side of the conversion.
-- The tests cover conversion, Turkish encodings, all four separators, output
-  buffer limits, file read/write, settings persistence, invalid input, and EOF.
-  CLI tests restore settings and check that existing sample files are unchanged.
-- The project is intentionally modular for readability and future expansion.
-
----
-
-## Future Work
-
-Possible future improvements:
-
-- Punctuation support
-- Batch file conversion
-- More detailed test mode
-- Exporting session logs
-- WAV-based Morse audio analysis
-- Real-time microphone Morse decoding
-- GUI frontend
-
----
+Coverage includes conversions, Turkish encodings, all four separators, statistics, input and output limits, file operations, persistent settings, invalid input, and end-of-input handling. The CLI suite restores settings, removes its generated files, and checks that existing sample files remain unchanged. Close the application before running tests because the CLI suite temporarily changes settings.
 
 ## License
 
-This project is licensed under the MIT License.
+Copyright © 2026 Mustafa Mert Akceylan. Licensed under the [Apache License 2.0](LICENSE). See [NOTICE](NOTICE) for attribution information.
