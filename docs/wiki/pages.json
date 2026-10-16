@@ -1,0 +1,19 @@
+[
+  {"slug":"Home","source":"home.md","title":"MorseCore","language":"both"},
+  {"slug":"Baslangic","source":"tr/overview.md","title":"Başlangıç","language":"tr","peer":"Getting-Started"},
+  {"slug":"Kurulum","source":"tr/installation.md","title":"Kurulum","language":"tr","peer":"Installation"},
+  {"slug":"Ilk-Kullanim","source":"tr/first-steps.md","title":"İlk kullanım","language":"tr","peer":"First-Steps"},
+  {"slug":"Ses","source":"tr/audio.md","title":"Ses ve çevrimdışı seslendirme","language":"tr","peer":"Audio"},
+  {"slug":"Amator-Telsiz","source":"tr/radio.md","title":"Amatör telsiz","language":"tr","peer":"Amateur-Radio"},
+  {"slug":"Egitim","source":"tr/learning.md","title":"Eğitim","language":"tr","peer":"Learning"},
+  {"slug":"Guncelleme-ve-Sorun-Giderme","source":"tr/updates.md","title":"Güncelleme ve sorun giderme","language":"tr","peer":"Updates-and-Troubleshooting"},
+  {"slug":"Gelistiriciler","source":"tr/developers.md","title":"Geliştiriciler ve katkılar","language":"tr","peer":"Developers"},
+  {"slug":"Getting-Started","source":"en/overview.md","title":"Start here","language":"en","peer":"Baslangic"},
+  {"slug":"Installation","source":"en/installation.md","title":"Installation","language":"en","peer":"Kurulum"},
+  {"slug":"First-Steps","source":"en/first-steps.md","title":"First steps","language":"en","peer":"Ilk-Kullanim"},
+  {"slug":"Audio","source":"en/audio.md","title":"Audio and offline speech","language":"en","peer":"Ses"},
+  {"slug":"Amateur-Radio","source":"en/radio.md","title":"Amateur radio","language":"en","peer":"Amator-Telsiz"},
+  {"slug":"Learning","source":"en/learning.md","title":"Learning","language":"en","peer":"Egitim"},
+  {"slug":"Updates-and-Troubleshooting","source":"en/updates.md","title":"Updates and troubleshooting","language":"en","peer":"Guncelleme-ve-Sorun-Giderme"},
+  {"slug":"Developers","source":"en/developers.md","title":"Developers and contributions","language":"en","peer":"Gelistiriciler"}
+]

@@ -26,7 +26,7 @@ Seslendirme bundan sonra API anahtarı veya sürekli çalışan sunucu olmadan y
 
 ## Sınırlar ve teşekkür
 
-Ses oynatımı şu anda Windows hedefinde kullanılabilir. macOS ve Linux planlanıyor. Modeller gerektiğinde ayrı çalıştırıcıda yüklenir; üretim bitince işlem kapanır. Sınır 4000 karakter ve iki dakikalık ses üretimidir. Küçük model dosyası düşük tepe RAM tüketimi anlamına gelmez; Türkçe sesler CPU PyTorch kullanır ve üretim sırasında birkaç yüz MiB bellek tüketebilir.
+Ses oynatımı Windows x64 ve Apple Silicon macOS üzerinde kullanılabilir. Linux masaüstü arayüzü henüz yoktur. Mac'te **Ses → Ses paketleri** bölümünü kullan; gerekirse uygulama sistem PATH ayarını değiştirmeden kendine özel, doğrulanmış bir Python hazırlar. Modeller gerektiğinde ayrı çalıştırıcıda yüklenir; üretim bitince işlem kapanır. Sınır 4000 karakter ve iki dakikalık ses üretimidir. Küçük model dosyası düşük tepe RAM tüketimi anlamına gelmez; Türkçe sesler CPU PyTorch kullanır ve üretim sırasında birkaç yüz MiB bellek tüketebilir.
 
 [EMA Lightning](https://huggingface.co/canberkkkkkk/ema-lightning), [Antalia-2 Mini](https://huggingface.co/cloud0day3/antalia-mini) ve [Piper](https://github.com/OHF-Voice/piper1-gpl/tree/v1.3.0) geliştiricilerine teşekkürler. EMA ve Antalia'nın kod ve ağırlıkları Apache-2.0'dır. Piper GPL-3.0 lisansıyla ayrı işlem olarak çalışır. Modellerin ve bağımlılıkların kendi koşulları geçerlidir. Lisans ve NOTICE dosyaları kurulan pakette korunur.
 

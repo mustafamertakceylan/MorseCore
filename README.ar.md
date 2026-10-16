@@ -12,6 +12,8 @@
 
 [English](README.md) · [Türkçe](README.tr.md) · [Deutsch](README.de.md) · [Русский](README.ru.md) · **العربية**
 
+[**Wiki (EN/TR)**](https://github.com/mustafamertakceylan/MorseCore/wiki/Home)
+
 </div>
 
 MorseCore تطبيق مجاني لويندوز وmacOS لتحويل النص إلى شفرة مورس والاستماع والتدريب. تبقى رسائلك على جهازك.

@@ -1,0 +1,33 @@
+name: Wiki documentation
+
+on:
+  push:
+    branches: [main]
+    paths: ["docs/wiki/**", "docs/media/**", "scripts/build-wiki.py", "CMakeLists.txt", ".github/workflows/wiki.yml"]
+  pull_request:
+    paths: ["docs/wiki/**", "docs/media/**", "scripts/build-wiki.py", "CMakeLists.txt", ".github/workflows/wiki.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate bilingual Wiki
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Check every document, language switch and image
+        run: python3 scripts/build-wiki.py --check
+      - name: Render Wiki pages
+        run: python3 scripts/build-wiki.py
+      - name: Save generated Wiki preview
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: MorseCore-Wiki
+          path: build/wiki/*.md
+          if-no-files-found: error
+          retention-days: 14

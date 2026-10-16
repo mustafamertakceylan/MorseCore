@@ -10,6 +10,8 @@
 
 [English](README.md) · [Türkçe](README.tr.md) · [Deutsch](README.de.md) · **Русский** · [العربية](README.ar.md)
 
+[**Wiki (EN/TR)**](https://github.com/mustafamertakceylan/MorseCore/wiki/Home)
+
 </div>
 
 MorseCore — бесплатное приложение для Windows и macOS: преобразуй текст в код Морзе, слушай сигналы и тренируйся. Твои сообщения остаются на твоём компьютере.

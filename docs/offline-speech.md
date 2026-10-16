@@ -26,7 +26,7 @@ Speech then uses local files with no API key or background server. Missing voice
 
 ## Limits and credits
 
-Speech playback currently targets Windows. macOS and Linux are planned. Models load in a separate worker process when needed and exit after playback preparation. The request limit is 4000 characters and two minutes of generation. Small model files do not imply small peak RAM; Turkish voices use CPU PyTorch and can consume several hundred MiB while generating.
+Speech playback is available on Windows x64 and Apple Silicon macOS. Linux has no desktop interface yet. On Mac, use **Audio → Voice packs**; if needed, the app prepares its own verified Python runtime without changing the system PATH. Models load in a separate worker process when needed and exit after playback preparation. The request limit is 4000 characters and two minutes of generation. Small model files do not imply small peak RAM; Turkish voices use CPU PyTorch and can consume several hundred MiB while generating.
 
 Thanks to the creators of [EMA Lightning](https://huggingface.co/canberkkkkkk/ema-lightning), [Antalia-2 Mini](https://huggingface.co/cloud0day3/antalia-mini) and [Piper](https://github.com/OHF-Voice/piper1-gpl/tree/v1.3.0). EMA and Antalia code/weights are Apache-2.0. Piper is GPL-3.0 and runs as a separate executable process. Individual models and dependencies retain their own terms. License and NOTICE files stay with the installed pack.
 

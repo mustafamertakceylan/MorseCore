@@ -10,6 +10,8 @@
 
 [English](README.md) · **Türkçe** · [Deutsch](README.de.md) · [Русский](README.ru.md) · [العربية](README.ar.md)
 
+[**Kullanım kılavuzu · Wiki**](https://github.com/mustafamertakceylan/MorseCore/wiki/Baslangic)
+
 </div>
 
 MorseCore; metni Morse koduna çevirmek, dinlemek ve alıştırma yapmak için ücretsiz bir Windows ve macOS uygulamasıdır. Mesajların bilgisayarında kalır.

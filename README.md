@@ -10,6 +10,8 @@
 
 **English** · [Türkçe](README.tr.md) · [Deutsch](README.de.md) · [Русский](README.ru.md) · [العربية](README.ar.md)
 
+[**User guide · Wiki**](https://github.com/mustafamertakceylan/MorseCore/wiki/Getting-Started)
+
 </div>
 
 MorseCore is a free Windows and macOS app for converting text to Morse code, listening and practicing. Your messages stay on your computer.
