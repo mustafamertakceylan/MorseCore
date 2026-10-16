@@ -19,6 +19,11 @@ build/
 /MORSECORE_PROGRESS.md
 /design-qa.md
 
+# Local agent and commit rules
+/AGENTS.md
+/AJAN_GOREV_DAGILIMI.md
+/CONTRIBUTING.md
+
 # Managed build output
 **/bin/
 **/obj/
