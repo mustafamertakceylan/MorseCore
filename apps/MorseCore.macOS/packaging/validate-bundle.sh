@@ -14,7 +14,7 @@ count=0
 while IFS= read -r -d '' binary; do
     /usr/bin/file -b "$binary" | /usr/bin/grep -q 'Mach-O' || continue
     count=$((count + 1))
-    /usr/bin/lipo -verify_arch "$ARCH" "$binary"
+    /usr/bin/lipo "$binary" -verify_arch "$ARCH"
     while IFS= read -r dependency; do
         [[ -n "$dependency" ]] || continue
         case "$dependency" in
