@@ -2,6 +2,10 @@
 
 ## 0.7.5 — 2026-10-16
 
+- Added the Apple Silicon macOS preview with a drag-and-drop DMG, native SwiftUI interface and the shared C23/AppCore engine. Windows packages and the existing version tag remain unchanged.
+- Apple Silicon için SwiftUI arayüzlü, ortak C23/AppCore motorunu kullanan macOS önizlemesi ve sürükle-bırak DMG kurulumu eklendi. Mevcut Windows paketleri ve sürüm etiketi değişmedi.
+- Shared update verification, generated language/brand/ADIF resources and AppCore map coordinates prevent platform drift. Fixed Mac service deadlines/cancellation, audio lifecycle and QSO state races.
+- Ortak güncelleme doğrulaması, üretilen dil/marka/ADIF kaynakları ve AppCore harita koordinatlarıyla platform farkları azaltıldı. Mac servis zaman aşımı/iptali, ses yaşam döngüsü ve QSO eşzamanlılık hataları düzeltildi.
 - Separate Morse audio, speech, decoding and voice packages into visible tabs; simplify WAV/microphone input, advanced settings and operation controls.
 - Morse sesi, metin seslendirme, ses çözme ve paketler görünür sekmelere ayrıldı; WAV/mikrofon girişi, gelişmiş ayarlar ve işlem düğmeleri sadeleştirildi.
 - Show contextual result actions and feedback, return first-time station setup to contact preparation, and group settings clearly in all five languages.

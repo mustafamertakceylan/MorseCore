@@ -6,16 +6,19 @@
 
 **اكتب رسالتك. استمع إلى مورس. تعلّم بالممارسة.**
 
-[![تنزيل Windows](https://img.shields.io/badge/%D8%AA%D9%86%D8%B2%D9%8A%D9%84-Windows-5e6a42?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.7.4/MorseCore-0.7.4-Windows-x64-Setup.exe)
-[![0.7.4](https://img.shields.io/badge/v0.7.4-%D9%86%D8%B3%D8%AE%D8%A9%20%D8%AA%D8%AC%D8%B1%D9%8A%D8%A8%D9%8A%D8%A9-c58c59?style=for-the-badge)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v0.7.4)
+[![تنزيل Windows](https://img.shields.io/badge/%D8%AA%D9%86%D8%B2%D9%8A%D9%84-Windows-5e6a42?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.7.5/MorseCore-0.7.5-Windows-x64-Setup.exe)
+[![تنزيل macOS](https://img.shields.io/badge/macOS-Apple_Silicon-5e6a42?style=for-the-badge&logo=apple&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.7.5/MorseCore-0.7.5-macOS-arm64.dmg)
+[![0.7.5](https://img.shields.io/badge/v0.7.5-%D9%86%D8%B3%D8%AE%D8%A9%20%D8%AA%D8%AC%D8%B1%D9%8A%D8%A8%D9%8A%D8%A9-c58c59?style=for-the-badge)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v0.7.5)
 
 [English](README.md) · [Türkçe](README.tr.md) · [Deutsch](README.de.md) · [Русский](README.ru.md) · **العربية**
 
 </div>
 
-MorseCore تطبيق مجاني لويندوز لتحويل النص إلى شفرة مورس والاستماع والتدريب. تبقى رسائلك على جهازك.
+MorseCore تطبيق مجاني لويندوز وmacOS لتحويل النص إلى شفرة مورس والاستماع والتدريب. تبقى رسائلك على جهازك.
 
 ![واجهة MorseCore العربية: النص وشفرة مورس مع قائمة على اليمين](docs/media/converter.ar.png)
+
+**macOS:** افتح [ملف DMG](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.7.5/MorseCore-0.7.5-macOS-arm64.dmg) واسحب MorseCore إلى التطبيقات. هذه النسخة غير موثّقة لدى Apple؛ قد تحتاج للسماح بفتحها في الخصوصية والأمان. [تثبيت Mac بالإنجليزية والتركية](docs/macos.md).
 
 ### ابدأ الاستخدام
 
@@ -23,7 +26,7 @@ MorseCore تطبيق مجاني لويندوز لتحويل النص إلى شف
 2. اكتب رسالتك في **المحوّل** ثم حوّلها. افتح قسم **الصوت** للاستماع.
 3. افتح **التعلّم** للأبجدية والتمارين واختصارات هواة اللاسلكي.
 
-تفضّل الاستخدام دون تثبيت؟ فك ضغط [ملف ZIP المحمول](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.7.4/MorseCore-0.7.4-Windows-x64-Desktop.zip) وافتح **MorseCore.Desktop.exe**. هذه نسخة تجريبية غير موقّعة؛ قد يعرض ويندوز تحذيراً بشأن الناشر.
+تفضّل الاستخدام دون تثبيت؟ فك ضغط [ملف ZIP المحمول](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.7.5/MorseCore-0.7.5-Windows-x64-Desktop.zip) وافتح **MorseCore.Desktop.exe**. هذه نسخة تجريبية غير موقّعة؛ قد يعرض ويندوز تحذيراً بشأن الناشر.
 
 ### ماذا يمكنك أن تفعل؟
 
@@ -50,7 +53,7 @@ MorseCore تطبيق مجاني لويندوز لتحويل النص إلى شف
 
 </details>
 
-**متاح الآن لويندوز x64. إصدارات Linux وmacOS مخطّط لها.** لم تُحدَّد مواعيد الإصدار بعد.
+**متاح لويندوز x64 وmacOS Apple Silicon (M1 فأحدث). إصدار Linux مخطّط له دون موعد محدد.**
 
 ### الشكر والترخيص
 

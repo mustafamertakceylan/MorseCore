@@ -1,0 +1,5 @@
+module CMorseCore [system] {
+    header "../../../../include/morsecore_native.h"
+    link "MorseCore.Native"
+    export *
+}

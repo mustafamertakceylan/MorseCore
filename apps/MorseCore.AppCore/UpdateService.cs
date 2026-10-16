@@ -7,51 +7,75 @@ using System.Text.Json;
 namespace MorseCore.AppCore;
 
 public sealed record ReleaseAsset(string Name, Uri Download, long Size);
-public sealed record ReleaseUpdate(Version Version, Uri Page, ReleaseAsset? Installer=null, ReleaseAsset? Checksums=null);
+public enum UpdatePlatform { WindowsX64, MacArm64, MacX64 }
+public sealed record ReleaseUpdate(Version Version, Uri Page, ReleaseAsset? Installer=null, ReleaseAsset? Checksums=null)
+{
+    public UpdatePlatform Platform { get; init; }=UpdatePlatform.WindowsX64;
+    public string Notes { get; init; }="";
+}
 public sealed class UpdateService(HttpClient client)
 {
     private const string Repository="https://github.com/mustafamertakceylan/MorseCore/releases/";
     public const long MaxInstallerBytes=512L*1024*1024;
     public static readonly Uri Endpoint=new("https://api.github.com/repos/mustafamertakceylan/MorseCore/releases/latest");
+    // Redirects are followed explicitly so every hop, including intermediate hops,
+    // is constrained to GitHub HTTPS storage on both desktop platforms.
+    public static HttpClient CreateHttpClient()=>new(new HttpClientHandler { AllowAutoRedirect=false });
+
     public async Task<ReleaseUpdate?> CheckAsync(Version current, CancellationToken token=default)
     {
-        using var request=new HttpRequestMessage(HttpMethod.Get,Endpoint);
-        request.Headers.UserAgent.ParseAdd("MorseCore/0.7.5");
-        request.Headers.Accept.ParseAdd("application/vnd.github+json");
-        request.Headers.Add("X-GitHub-Api-Version","2022-11-28");
+        var release=await LatestAsync(UpdatePlatform.WindowsX64,token).ConfigureAwait(false);
+        return release?.Version>current ? release : null;
+    }
+
+    public async Task<ReleaseUpdate?> LatestAsync(UpdatePlatform platform,CancellationToken token=default)
+    {
         using var timeout=CancellationTokenSource.CreateLinkedTokenSource(token);
-        timeout.CancelAfter(TimeSpan.FromSeconds(4));
-        using var response=await client.SendAsync(request,HttpCompletionOption.ResponseHeadersRead,timeout.Token).ConfigureAwait(false);
+        timeout.CancelAfter(TimeSpan.FromSeconds(20));
+        using var response=await GetResponse(Endpoint,timeout.Token,allowNotFound:true).ConfigureAwait(false);
         if(response.StatusCode==HttpStatusCode.NotFound) return null;
-        response.EnsureSuccessStatusCode();
         using var json=JsonDocument.Parse(await ReadBounded(response,256*1024,timeout.Token).ConfigureAwait(false));
         var root=json.RootElement;
         if(root.GetProperty("prerelease").GetBoolean() || root.GetProperty("draft").GetBoolean()) return null;
         string tag=root.GetProperty("tag_name").GetString() ?? "";
-        if(!Version.TryParse(tag.TrimStart('v','V'),out var version) || version.Build<0 || version.Revision>=0 || version<=current) return null;
+        if(!Version.TryParse(tag.TrimStart('v','V'),out var version) || version.Build<0 || version.Revision>=0) throw new InvalidDataException("Invalid stable release version.");
         if(tag!="v"+version.ToString(3)) throw new InvalidDataException("Unexpected release tag.");
         var page=ExactUrl(root.GetProperty("html_url").GetString(),Repository+"tag/"+tag);
         ReleaseAsset? installer=null,checksums=null;
-        string filename=$"MorseCore-{version}-Windows-x64-Setup.exe";
+        var names=InstallerNames(version,platform);
+        var installers=new Dictionary<string,ReleaseAsset>(StringComparer.Ordinal);
         if(root.TryGetProperty("assets",out var assets))
             foreach(var asset in assets.EnumerateArray())
             {
                 string? name=asset.GetProperty("name").GetString();
-                if(name!=filename && name!="SHA256SUMS") continue;
+                if(name==null || (!names.Contains(name,StringComparer.Ordinal) && name!="SHA256SUMS")) continue;
                 long size=asset.GetProperty("size").GetInt64();
-                if(size<=0 || size>(name==filename ? MaxInstallerBytes : 64*1024)) throw new InvalidDataException("Invalid release asset size.");
+                if(size<=0 || size>(name=="SHA256SUMS" ? 64*1024 : MaxInstallerBytes)) throw new InvalidDataException("Invalid release asset size.");
                 var download=ExactUrl(asset.GetProperty("browser_download_url").GetString(),Repository+"download/"+tag+"/"+name);
                 var selected=new ReleaseAsset(name,download,size);
-                if(name==filename) { if(installer!=null) throw new InvalidDataException("Duplicate installer."); installer=selected; }
+                if(name!="SHA256SUMS") { if(!installers.TryAdd(name,selected)) throw new InvalidDataException("Duplicate installer."); }
                 else { if(checksums!=null) throw new InvalidDataException("Duplicate checksum file."); checksums=selected; }
             }
-        return new(version,page,installer,checksums);
+        installer=names.Select(name=>installers.GetValueOrDefault(name)).FirstOrDefault(asset=>asset!=null);
+        string notes=root.TryGetProperty("body",out var body)&&body.ValueKind==JsonValueKind.String ? body.GetString()??"" : "";
+        return new(version,page,installer,checksums) { Platform=platform,Notes=notes[..Math.Min(notes.Length,32768)] };
     }
+
+    private static string[] InstallerNames(Version version,UpdatePlatform platform)=>platform switch
+    {
+        UpdatePlatform.WindowsX64=>[$"MorseCore-{version}-Windows-x64-Setup.exe"],
+        UpdatePlatform.MacArm64 or UpdatePlatform.MacX64=>new[] { platform==UpdatePlatform.MacArm64?"arm64":"x64","universal" }
+            .SelectMany(cpu=>new[] { "dmg","pkg","zip" }.Select(ext=>$"MorseCore-{version}-macOS-{cpu}.{ext}")).ToArray(),
+        _=>throw new ArgumentOutOfRangeException(nameof(platform))
+    };
 
     public async Task<PreparedUpdate> DownloadAsync(ReleaseUpdate release,string cacheDirectory,IProgress<double>? progress=null,CancellationToken token=default)
     {
-        string tag="v"+release.Version.ToString(3),filename=$"MorseCore-{release.Version}-Windows-x64-Setup.exe";
-        var installer=release.Installer ?? throw new InvalidDataException("Release has no Windows installer.");
+        if(release.Version.Build<0 || release.Version.Revision>=0) throw new InvalidDataException("Invalid release version.");
+        string tag="v"+release.Version.ToString(3);
+        var installer=release.Installer ?? throw new InvalidDataException("Release has no compatible installer.");
+        string filename=installer.Name;
+        if(!InstallerNames(release.Version,release.Platform).Contains(filename,StringComparer.Ordinal)) throw new InvalidDataException("Installer platform differs from release.");
         var checksums=release.Checksums ?? throw new InvalidDataException("Release has no checksums.");
         ExactUrl(release.Page.AbsoluteUri,Repository+"tag/"+tag);
         ExactUrl(installer.Download.AbsoluteUri,Repository+"download/"+tag+"/"+filename);
@@ -62,7 +86,9 @@ public sealed class UpdateService(HttpClient client)
         using var timeout=CancellationTokenSource.CreateLinkedTokenSource(token);
         timeout.CancelAfter(TimeSpan.FromMinutes(15));
         using var sums=await GetAsset(checksums.Download,timeout.Token).ConfigureAwait(false);
-        string checksumText=Encoding.UTF8.GetString(await ReadBounded(sums,64*1024,timeout.Token).ConfigureAwait(false));
+        byte[] checksumBytes=await ReadBounded(sums,64*1024,timeout.Token).ConfigureAwait(false);
+        if(checksumBytes.LongLength!=checksums.Size) throw new InvalidDataException("Checksum length differs from release metadata.");
+        string checksumText=new UTF8Encoding(false,true).GetString(checksumBytes);
         var matches=checksumText.Split('\n').Select(line=>line.TrimEnd('\r')).Where(line=>line.Length>=66 && line[64]==' ' && (line[65]==' ' || line[65]=='*') && line[66..]==filename).ToArray();
         if(matches.Length!=1 || matches[0][..64].Any(c=>!Uri.IsHexDigit(c))) throw new InvalidDataException("Installer checksum is missing or ambiguous.");
         string expected=matches[0][..64];
@@ -93,22 +119,42 @@ public sealed class UpdateService(HttpClient client)
             File.Move(partial,complete);
             return new PreparedUpdate(release.Version,complete,expected);
         }
-        catch { Directory.Delete(directory,true); throw; }
+        catch { try { Directory.Delete(directory,true); } catch(IOException) { } catch(UnauthorizedAccessException) { } throw; }
     }
 
     private async Task<HttpResponseMessage> GetAsset(Uri uri,CancellationToken token)
     {
-        using var request=new HttpRequestMessage(HttpMethod.Get,uri);
-        request.Headers.UserAgent.ParseAdd("MorseCore-Updater/1.0");
-        var response=await client.SendAsync(request,HttpCompletionOption.ResponseHeadersRead,token).ConfigureAwait(false);
+        return await GetResponse(uri,token).ConfigureAwait(false);
+    }
+    public static bool IsTrustedDownload(Uri uri)=>uri.IsAbsoluteUri && uri.Scheme=="https" && string.IsNullOrEmpty(uri.UserInfo) && uri.IsDefaultPort &&
+        (uri.Host is "github.com" or "api.github.com" or "githubusercontent.com" || uri.Host.EndsWith(".githubusercontent.com",StringComparison.OrdinalIgnoreCase));
+
+    private async Task<HttpResponseMessage> GetResponse(Uri uri,CancellationToken token,bool allowNotFound=false)
+    {
+        for(int hop=0;hop<=5;hop++)
+        {
+            if(!IsTrustedDownload(uri)) throw new InvalidDataException("Untrusted update URL.");
+            using var request=new HttpRequestMessage(HttpMethod.Get,uri);
+            request.Headers.UserAgent.ParseAdd("MorseCore-Updater/1.0");
+            request.Headers.Accept.ParseAdd("application/vnd.github+json");
+            request.Headers.Add("X-GitHub-Api-Version","2022-11-28");
+            var response=await client.SendAsync(request,HttpCompletionOption.ResponseHeadersRead,token).ConfigureAwait(false);
         try
         {
+            if(response.RequestMessage?.RequestUri is { } final && !IsTrustedDownload(final)) throw new InvalidDataException("Untrusted asset redirect.");
+            if((int)response.StatusCode is 301 or 302 or 303 or 307 or 308)
+            {
+                var location=response.Headers.Location ?? throw new InvalidDataException("Update redirect has no destination.");
+                uri=location.IsAbsoluteUri?location:new Uri(uri,location);
+                response.Dispose(); continue;
+            }
+            if(response.StatusCode==HttpStatusCode.NotFound && allowNotFound) return response;
             response.EnsureSuccessStatusCode();
-            // GitHub redirects release assets to its HTTPS storage CDN.
-            if(response.RequestMessage?.RequestUri is { } final && final.Scheme!="https") throw new InvalidDataException("Insecure asset redirect.");
             return response;
         }
         catch { response.Dispose(); throw; }
+        }
+        throw new InvalidDataException("Too many update redirects.");
     }
     private static Uri ExactUrl(string? value,string expected)
     {
@@ -136,12 +182,22 @@ public sealed class PreparedUpdate : IDisposable
     private readonly string checksum;
     private bool started;
     internal PreparedUpdate(Version version,string path,string checksum) { Version=version; InstallerPath=path; this.checksum=checksum; }
+    // macOS opens a verified package only after a separate user click. Ownership
+    // transfer keeps that package after this short-lived helper exits.
+    public string RetainVerifiedFile()
+    {
+        VerifyIntegrity(); started=true; return InstallerPath;
+    }
+    public void VerifyIntegrity()
+    {
+        using var stream=File.OpenRead(InstallerPath);
+        if(!Convert.ToHexString(SHA256.HashData(stream)).Equals(checksum,StringComparison.OrdinalIgnoreCase)) throw new InvalidDataException("Downloaded installer was modified.");
+    }
     public Process StartInstaller(string applicationDirectory,string language)
     {
         if(!OperatingSystem.IsWindows()) throw new PlatformNotSupportedException();
         if(!Path.IsPathFullyQualified(applicationDirectory)) throw new ArgumentException("An absolute installation path is required.",nameof(applicationDirectory));
-        using(var stream=File.OpenRead(InstallerPath))
-            if(!Convert.ToHexString(SHA256.HashData(stream)).Equals(checksum,StringComparison.OrdinalIgnoreCase)) throw new InvalidDataException("Downloaded installer was modified.");
+        VerifyIntegrity();
         string? product=FileVersionInfo.GetVersionInfo(InstallerPath).ProductVersion;
         if(!System.Version.TryParse(product,out var installed) || installed.Major!=Version.Major || installed.Minor!=Version.Minor || installed.Build!=Version.Build)
             throw new InvalidDataException("Installer product version differs from the release.");

@@ -2,3 +2,6 @@
 third_party/speech/** -text
 third_party/runtime/** -text
 third_party/installer/** -text whitespace=cr-at-eol
+
+# Preserve upstream font license wording, including its original spacing.
+apps/MorseCore.macOS/Sources/MorseCoreMac/Resources/Fonts/*-OFL.txt whitespace=-blank-at-eol

@@ -4,16 +4,19 @@
 
 **Write a message. Hear Morse. Learn by practicing.**
 
-[![Download Windows](https://img.shields.io/badge/Download-Windows-5e6a42?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.7.4/MorseCore-0.7.4-Windows-x64-Setup.exe)
-[![0.7.4](https://img.shields.io/badge/v0.7.4-Preview-c58c59?style=for-the-badge)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v0.7.4)
+[![Download Windows](https://img.shields.io/badge/Download-Windows-5e6a42?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.7.5/MorseCore-0.7.5-Windows-x64-Setup.exe)
+[![Download macOS](https://img.shields.io/badge/macOS-Apple_Silicon-5e6a42?style=for-the-badge&logo=apple&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.7.5/MorseCore-0.7.5-macOS-arm64.dmg)
+[![0.7.5](https://img.shields.io/badge/v0.7.5-Preview-c58c59?style=for-the-badge)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v0.7.5)
 
 **English** · [Türkçe](README.tr.md) · [Deutsch](README.de.md) · [Русский](README.ru.md) · [العربية](README.ar.md)
 
 </div>
 
-MorseCore is a free Windows app for converting text to Morse code, listening and practicing. Your messages stay on your computer.
+MorseCore is a free Windows and macOS app for converting text to Morse code, listening and practicing. Your messages stay on your computer.
 
 ![MorseCore in English: text on the left, Morse code on the right](docs/media/converter.en.png)
+
+**macOS:** open the [DMG](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.7.5/MorseCore-0.7.5-macOS-arm64.dmg), then drag MorseCore to Applications. This preview is not notarized; macOS may require approval in Privacy & Security. See [Mac installation](docs/macos.md).
 
 ### Get started
 
@@ -21,7 +24,7 @@ MorseCore is a free Windows app for converting text to Morse code, listening and
 2. Type a message in **Converter** and choose **Convert**. Use **Audio** to listen.
 3. Open **Learning** for the alphabet, exercises and radio abbreviations.
 
-Prefer no installation? Extract the [portable ZIP](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.7.4/MorseCore-0.7.4-Windows-x64-Desktop.zip) and open **MorseCore.Desktop.exe**. This preview is unsigned; Windows may show a publisher warning.
+Prefer no installation? Extract the [portable ZIP](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.7.5/MorseCore-0.7.5-Windows-x64-Desktop.zip) and open **MorseCore.Desktop.exe**. This preview is unsigned; Windows may show a publisher warning.
 
 ### What can you do?
 
@@ -48,7 +51,7 @@ Choose the cream light theme or the green dark theme in Settings. Gentle backgro
 
 </details>
 
-**Available now: Windows x64. Linux and macOS are planned.** Release dates are not set.
+**Available: Windows x64 and macOS Apple Silicon (M1 or newer). Linux is planned; no date yet.**
 
 ### Thanks & license
 

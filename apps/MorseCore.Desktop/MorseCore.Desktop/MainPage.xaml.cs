@@ -16,7 +16,7 @@ public sealed partial class MainPage : Page
     private Localizer text;
     private readonly CancellationTokenSource lifetime=new();
     private CancellationTokenSource? playback;
-    private readonly HttpClient http=new();
+    private readonly HttpClient http=UpdateService.CreateHttpClient();
     private readonly List<Button> menuButtons=[];
     private readonly Dictionary<Button,Border> navigationIndicators=[];
     private static readonly string[] EducationPages=["alphabet","practice","keying","glossary"];

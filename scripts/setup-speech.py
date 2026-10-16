@@ -52,7 +52,7 @@ def ensure_environment(home):
 
     # A leftover launcher is not proof of a working venv: ensurepip may have
     # been cancelled after python.exe was copied but before pip was installed.
-    probe = "import sys; from pathlib import Path; sys.exit(0 if sys.prefix != sys.base_prefix and Path(sys.prefix).resolve() == Path(sys.argv[1]).resolve() else 1)"
+    probe = "import sys,struct,sysconfig; from pathlib import Path; sys.exit(0 if (3,11)<=sys.version_info[:2]<(3,14) and struct.calcsize('P')==8 and not sysconfig.get_config_var('Py_GIL_DISABLED') and sys.prefix != sys.base_prefix and Path(sys.prefix).resolve() == Path(sys.argv[1]).resolve() else 1)"
     if not python.is_file() or not succeeds([str(python), "-I", "-c", probe, str(environment)]):
         base = getattr(sys, "_base_executable", None) or sys.executable
         if not Path(base).is_file():
@@ -69,6 +69,13 @@ def ensure_environment(home):
         if not succeeds(pip_probe):
             raise RuntimeError("Speech pip bootstrap could not be repaired; retry installation")
     return python
+
+
+def torch_install_arguments(pip):
+    # macOS wheels are published on PyPI. The CPU index is for Windows/Linux;
+    # macOS's standard wheel can still run both Turkish engines on the CPU.
+    index = [] if sys.platform == "darwin" else ["--index-url", "https://download.pytorch.org/whl/cpu"]
+    return [*pip, *index, "torch==2.10.0"]
 
 
 def install(home, skip_packages=False, voice=None, packages_only=False):
@@ -90,7 +97,7 @@ def install(home, skip_packages=False, voice=None, packages_only=False):
             print(json.dumps({"phase": "dependencies"}), flush=True)
             pip = [str(python), "-m", "pip", "--disable-pip-version-check", "--no-input", "install"]
             if "torch==2.10.0" in specifications:
-                subprocess.run([*pip, "--index-url", "https://download.pytorch.org/whl/cpu", "torch==2.10.0"], check=True)
+                subprocess.run(torch_install_arguments(pip), check=True)
             subprocess.run([*pip, *[s for s in specifications if not s.startswith("torch==")]], check=True)
     if not python.is_file():
         raise FileNotFoundError("Speech Python environment is missing")

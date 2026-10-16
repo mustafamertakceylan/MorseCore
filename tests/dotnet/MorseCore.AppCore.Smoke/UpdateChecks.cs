@@ -17,8 +17,19 @@ static class UpdateChecks
             tag_name="v2.0.0",draft=false,prerelease=false,html_url=page ?? Root+"tag/v2.0.0",
             assets=duplicate ? new[]{Asset(Filename,url,size),Asset(Filename,url,size),Asset("SHA256SUMS",null,null)} : new[]{Asset(Filename,url,size),Asset("SHA256SUMS",null,null)}
         });
-        object Asset(string name,string? url,long? size)=>new { name,browser_download_url=url ?? Root+"download/v2.0.0/"+name,size=size ?? (name==Filename ? payload.Length : 200) };
-        HttpClient Client(string? metadata=null,string? sums=null,byte[]? content=null)=>new(new Handler(metadata ?? Metadata(),sums ?? hash+"  "+Filename+"\n",content ?? payload));
+        object Asset(string name,string? url,long? size)=>new { name,browser_download_url=url ?? Root+"download/v2.0.0/"+name,size=size ?? (name==Filename ? payload.Length : 64+2+Filename.Length+1) };
+        HttpClient Client(string? metadata=null,string? sums=null,byte[]? content=null)
+        {
+            string checksumText=sums ?? hash+"  "+Filename+"\n";
+            if(metadata==null)
+            {
+                var root=System.Text.Json.Nodes.JsonNode.Parse(Metadata())!;
+                foreach(var item in root["assets"]!.AsArray())
+                    if(item!["name"]!.GetValue<string>()=="SHA256SUMS") item["size"]=Math.Min(65536,System.Text.Encoding.UTF8.GetByteCount(checksumText));
+                metadata=root.ToJsonString();
+            }
+            return new(new Handler(metadata,checksumText,content ?? payload));
+        }
         string cache=Path.Combine(directory,"updates"); Directory.CreateDirectory(cache);
         using(var client=Client())
         {
@@ -75,7 +86,61 @@ static class UpdateChecks
             try { using var prepared=await service.DownloadAsync(release with { Installer=release.Installer! with { Download=new Uri("https://example.com/other.exe") } },cache); throw new Exception("Forged release accepted"); }
             catch(InvalidDataException) { count++; }
         }
+        foreach(var platform in new[] { UpdatePlatform.MacArm64,UpdatePlatform.MacX64,UpdatePlatform.WindowsX64 })
+        {
+            string cpu=platform==UpdatePlatform.MacArm64?"arm64":"x64";
+            string expected=platform==UpdatePlatform.WindowsX64?Filename:$"MorseCore-2.0.0-macOS-{cpu}.dmg";
+            string[] filenames=["MorseCore-2.0.0-macOS-x64.pkg","MorseCore-2.0.0-macOS-arm64.zip",Filename,
+                "MorseCore-2.0.0-macOS-universal.dmg","MorseCore-2.0.0-macOS-arm64.dmg","MorseCore-2.0.0-macOS-x64.dmg"];
+            string sums=hash+"  "+expected+"\n";
+            string metadata=JsonSerializer.Serialize(new { tag_name="v2.0.0",draft=false,prerelease=false,html_url=Root+"tag/v2.0.0",body="Notes",
+                assets=filenames.Select(name=>new { name,browser_download_url=Root+"download/v2.0.0/"+name,size=payload.Length })
+                    .Cast<object>().Append(new { name="SHA256SUMS",browser_download_url=Root+"download/v2.0.0/SHA256SUMS",size=sums.Length }) });
+            using var client=Client(metadata,sums);
+            var service=new UpdateService(client);
+            var release=(await service.LatestAsync(platform))!;
+            Check(release.Installer?.Name==expected && release.Platform==platform,"CPU-specific DMG takes priority over universal and archive; Windows stays EXE");
+            Check(release.Notes=="Notes","Shared release notes preserve text");
+            using var prepared=await service.DownloadAsync(release,cache);
+            prepared.VerifyIntegrity(); count++;
+            Check(await service.CheckAsync(new Version(2,0,0))==null,"Same Windows version is not a new update");
+            Check((await service.LatestAsync(platform))?.Version==new Version(2,0,0),"Latest metadata remains available for same-version release validation");
+            string retained=prepared.RetainVerifiedFile(); prepared.Dispose();
+            Check(File.Exists(retained),"macOS verified package survives helper exit after ownership transfer");
+            File.AppendAllText(retained,"changed");
+            try { prepared.VerifyIntegrity(); throw new Exception("Changed retained package accepted"); } catch(InvalidDataException) { count++; }
+            Directory.Delete(Path.GetDirectoryName(retained)!,true);
+        }
+        foreach(string cpu in new[] { "x64","universal" })
+        {
+            string name=$"MorseCore-2.0.0-macOS-{cpu}.dmg";
+            string metadata=JsonSerializer.Serialize(new { tag_name="v2.0.0",draft=false,prerelease=false,html_url=Root+"tag/v2.0.0",assets=new[] { Asset(name,null,100) } });
+            using var client=Client(metadata);
+            var release=(await new UpdateService(client).LatestAsync(UpdatePlatform.MacArm64))!;
+            Check(cpu=="universal"?release.Installer?.Name==name:release.Installer==null,"Wrong CPU never offered; universal can be selected");
+        }
+        foreach(string invalid in new[] { "http://github.com/a","https://github.com.evil.example/a","https://user@github.com/a","https://github.com:444/a","https://example.org/a" })
+            Check(!UpdateService.IsTrustedDownload(new Uri(invalid)),"Unsafe update URL rejected: "+invalid);
+        foreach(string valid in new[] { "https://github.com/a","https://api.github.com/a","https://release-assets.githubusercontent.com/a" })
+            Check(UpdateService.IsTrustedDownload(new Uri(valid)),"Trusted HTTPS source allowed");
+        foreach(string destination in new[] { "http://github.com/a","https://evil.example/a" })
+        {
+            int requests=0;
+            using var client=new HttpClient(new ResponseHandler(request=> { requests++; var response=new HttpResponseMessage(HttpStatusCode.Redirect) { RequestMessage=request }; response.Headers.Location=new Uri(destination); return response; }));
+            try { await new UpdateService(client).LatestAsync(UpdatePlatform.MacArm64); throw new Exception("Unsafe intermediate redirect followed"); } catch(InvalidDataException) { count++; }
+            Check(requests==1,"Rejected redirect is never requested");
+        }
+        using(var client=new HttpClient(new ResponseHandler(request=>new HttpResponseMessage(HttpStatusCode.TooManyRequests) { RequestMessage=request })))
+        {
+            try { await new UpdateService(client).LatestAsync(UpdatePlatform.MacArm64); throw new Exception("Rate limit reported as up to date"); } catch(HttpRequestException error) { Check(error.StatusCode==HttpStatusCode.TooManyRequests,"Rate limits remain errors rather than no updates"); }
+        }
+        using(var client=new HttpClient(new ResponseHandler(request=>new HttpResponseMessage(HttpStatusCode.NotFound) { RequestMessage=request })))
+            Check(await new UpdateService(client).LatestAsync(UpdatePlatform.MacArm64)==null,"No releases is distinct from current version");
         return count;
+    }
+    private sealed class ResponseHandler(Func<HttpRequestMessage,HttpResponseMessage> response) : HttpMessageHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,CancellationToken token) { token.ThrowIfCancellationRequested(); return Task.FromResult(response(request)); }
     }
     private sealed class CallbackProgress(Action<double> callback) : IProgress<double> { public void Report(double value)=>callback(value); }
     private sealed class Handler(string metadata,string sums,byte[] payload) : HttpMessageHandler

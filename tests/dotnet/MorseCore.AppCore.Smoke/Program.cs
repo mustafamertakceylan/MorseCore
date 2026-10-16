@@ -5,6 +5,15 @@ using System.Text.Json;
 using MorseCore.AppCore;
 using MorseCore.Interop;
 
+if(args.Length==2 && args[0]=="--updates-only")
+{
+    string updateFixture=Path.Combine(Path.GetFullPath(args[1]),"updater-"+Guid.NewGuid().ToString("N"));
+    Directory.CreateDirectory(updateFixture);
+    try { Console.WriteLine($"Update policy checks passed: {await UpdateChecks.Run(updateFixture)}"); }
+    finally { Directory.Delete(updateFixture,true); }
+    return;
+}
+
 if(args.Length>=3 && args[0] is "--download-update" or "--launch-update")
 {
     string currentVersion=args[1],cacheDirectory=args[2];
@@ -75,11 +84,18 @@ try
     await File.WriteAllBytesAsync(input,new byte[FileConversion.MaxInputBytes+1]);
     try { await FileConversion.ConvertAsync(input,Path.Combine(directory,"large.txt"),false,MorseAlphabet.Russian,'/'); throw new Exception("Large file accepted"); }
     catch(IOException) { Check(!File.Exists(Path.Combine(directory,"large.txt")),"File size bound"); }
-    foreach(var release in new[]{("v0.4.0",false,false,true),("v0.1.0",false,false,false),("v9.0.0",true,false,false),("v9.0.0",false,true,false),("weird",false,false,false)})
+    foreach(var release in new[]{("v0.4.0",false,false,true),("v0.1.0",false,false,false),("v9.0.0",true,false,false),("v9.0.0",false,true,false)})
     {
         string body=JsonSerializer.Serialize(new { tag_name=release.Item1,prerelease=release.Item2,draft=release.Item3,html_url="https://github.com/mustafamertakceylan/MorseCore/releases/tag/"+release.Item1 });
         using var client=new HttpClient(new ResponseHandler(HttpStatusCode.OK,body));
         Check((await new UpdateService(client).CheckAsync(new Version(0,2,0))!=null)==release.Item4,"Stable release version policy");
+    }
+    foreach(string tag in new[] { "weird","v1.2","v1.2.3.4","v01.2.3","V1.2.3","v1.2.3-beta" })
+    {
+        string body=JsonSerializer.Serialize(new { tag_name=tag,prerelease=false,draft=false,html_url="https://github.com/mustafamertakceylan/MorseCore/releases/tag/"+tag });
+        using var client=new HttpClient(new ResponseHandler(HttpStatusCode.OK,body));
+        try { await new UpdateService(client).CheckAsync(new Version(0,2,0)); throw new Exception("Malformed stable release accepted as up to date"); }
+        catch(InvalidDataException) { checks++; }
     }
     using(var client=new HttpClient(new ResponseHandler(HttpStatusCode.NotFound,"")))
         Check(await new UpdateService(client).CheckAsync(new Version(0,2,0))==null,"No published release");

@@ -27,3 +27,8 @@ build/
 # Managed build output
 **/bin/
 **/obj/
+
+# SwiftPM and local macOS app bundles
+.build/
+.swiftpm/
+/apps/MorseCore.macOS/dist/

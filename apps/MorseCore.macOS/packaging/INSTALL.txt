@@ -1,0 +1,34 @@
+MorseCore for macOS / macOS için MorseCore
+
+ENGLISH
+1. Drag MorseCore.app to the Applications folder shown in this window.
+2. Eject the MorseCore disk image, then open MorseCore from Applications.
+3. To update, quit MorseCore yourself and replace the previous application.
+   Settings, voice packages and QSO records are stored outside the app.
+
+macOS 14 or later and the matching Apple silicon/Intel build are required.
+The .NET runtime is included. Voice models are optional downloads; once
+installed, speech synthesis and Morse conversion work offline.
+
+This community build may be ad-hoc signed and not notarized by Apple.
+macOS may block an unnotarized download. Only if you trust this release,
+use System Settings > Privacy & Security > Open Anyway after attempting
+to open it. Do not disable Gatekeeper or remove quarantine protections.
+
+TÜRKÇE
+1. MorseCore.app dosyasını bu penceredeki Applications klasörüne sürükleyin.
+2. Disk imajını çıkarın, MorseCore'u Applications klasöründen açın.
+3. Güncellemede MorseCore'u kendiniz kapatıp önceki uygulamayı değiştirin.
+   Ayarlar, ses paketleri ve QSO kayıtları uygulamanın dışında saklanır.
+
+macOS 14 ve sonrası; Apple silicon veya Intel için uygun paket gerekir.
+.NET çalışma ortamı dahildir. Ses modelleri isteğe bağlı indirilir;
+kurulduktan sonra seslendirme ve Morse dönüşümü çevrimdışı çalışır.
+
+Bu topluluk sürümü Apple Developer ID imzası ve noter onayı içermeyebilir.
+macOS açılışı engellerse, yalnız bu sürüme güveniyorsanız ilk açma
+denemesinden sonra Sistem Ayarları > Gizlilik ve Güvenlik > Yine de Aç
+seçeneğini kullanın. Gatekeeper'i veya karantina korumasını kaldırmayın.
+
+Source / Kaynak: https://github.com/mustafamertakceylan/MorseCore
+License / Lisans: Apache-2.0; third-party notices: app Resources and Helpers.

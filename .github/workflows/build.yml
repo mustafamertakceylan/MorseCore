@@ -16,6 +16,62 @@ env:
   PYTHONUTF8: "1"
 
 jobs:
+  macos:
+    name: macOS / Apple Silicon
+    runs-on: macos-26
+    timeout-minutes: 30
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+      DOTNET_GENERATE_ASPNET_CERTIFICATE: "false"
+      DOTNET_ADD_GLOBAL_TOOLS_TO_PATH: "false"
+      DOTNET_CLI_HOME: ${{ github.workspace }}/cmake-build-agent-work/dotnet-home
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up .NET 10
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Verify shared resources and syntax
+        run: |
+          python3 scripts/sync-macos-resources.py --check
+          bash -n apps/MorseCore.macOS/script/build_and_run.sh scripts/package-macos.sh scripts/test-macos-package.sh
+
+      - name: Test native engine and Swift interfaces
+        run: bash apps/MorseCore.macOS/script/build_and_run.sh --test
+
+      - name: Verify release tag
+        if: inputs.release-tag != ''
+        env:
+          MORSECORE_RELEASE_TAG: ${{ inputs.release-tag }}
+        run: cmake -DVERSION_FILE=build/mac-native/MorseCoreVersion.cmake -P scripts/verify_release_tag.cmake
+
+      - name: Test shared application rules and service
+        run: |
+          dotnet run --project tests/dotnet/MorseCore.AppCore.Smoke -c Release -- build/mac-native/libMorseCore.Native.dylib
+          dotnet build apps/MorseCore.MacService -c Release
+          dotnet run --project tests/MorseCore.MacService.Smoke -c Release -- apps/MorseCore.MacService/bin/Release/net10.0/MorseCore.MacService.dll build/mac-native/libMorseCore.Native.dylib
+
+      - name: Build and test DMG installation
+        run: |
+          bash scripts/package-macos.sh
+          bash scripts/test-macos-package.sh build/release-macos/*.dmg
+
+      - name: Upload Mac package
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: MorseCore-macOS-arm64
+          path: |
+            build/release-macos/*.dmg
+            build/release-macos/SHA256SUMS-macOS-arm64.txt
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
+
   windows:
     name: Windows / GCC UCRT64
     runs-on: windows-2022

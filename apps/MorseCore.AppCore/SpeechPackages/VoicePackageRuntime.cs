@@ -28,9 +28,22 @@ public sealed partial class VoicePackageManager
                 }
             candidates.Add(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"Programs","Python","Python313","python.exe"));
         }
+        else if(OperatingSystem.IsMacOS())
+        {
+            // Finder-launched applications do not inherit a shell's Homebrew PATH.
+            // Probe existing versioned interpreters only; never install or change PATH.
+            foreach(string prefix in new[]{"/opt/homebrew","/usr/local"})
+                for(int minor=13;minor>=11;minor--)
+                {
+                    candidates.Add($"{prefix}/bin/python3.{minor}");
+                    candidates.Add($"{prefix}/opt/python@3.{minor}/bin/python3.{minor}");
+                }
+            for(int minor=13;minor>=11;minor--)
+                candidates.Add($"/Library/Frameworks/Python.framework/Versions/3.{minor}/bin/python3.{minor}");
+        }
         foreach(string path in (Environment.GetEnvironmentVariable("PATH") ?? "").Split(Path.PathSeparator,StringSplitOptions.RemoveEmptyEntries))
             if(Path.IsPathFullyQualified(path) && !path.Contains("WindowsApps",StringComparison.OrdinalIgnoreCase))
-                foreach(string name in OperatingSystem.IsWindows()?new[]{"python.exe"}:new[]{"python3","python"}) candidates.Add(Path.Combine(path,name));
+                foreach(string name in OperatingSystem.IsWindows()?new[]{"python.exe"}:new[]{"python3.13","python3.12","python3.11","python3","python"}) candidates.Add(Path.Combine(path,name));
         foreach(string candidate in candidates.Distinct(OperatingSystem.IsWindows()?StringComparer.OrdinalIgnoreCase:StringComparer.Ordinal))
         {
             token.ThrowIfCancellationRequested();
