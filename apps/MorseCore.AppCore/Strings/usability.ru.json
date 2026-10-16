@@ -1,0 +1,18 @@
+{
+  "uxSelected": "Выбрано",
+  "uxMorseAudio": "Звук Морзе",
+  "uxSpeechIntro": "Введите текст, выберите голос и прослушайте.",
+  "uxMorseIntro": "Создайте звук из текста или кода Морзе.",
+  "uxWaveSource": "Файл WAV",
+  "uxMicrophoneSource": "Микрофон",
+  "uxAdvanced": "Дополнительные настройки",
+  "uxDecoderIntro": "Выберите файл WAV или расшифруйте запись с микрофона.",
+  "uxDecoderResult": "Результат расшифровки",
+  "uxAppearance": "Внешний вид и язык",
+  "uxConversion": "Преобразование и файлы",
+  "uxSpeechSettings": "Озвучивание",
+  "uxCreateStation": "Добавить первую станцию",
+  "uxSaveAndContinue": "Сохранить и подготовить QSO",
+  "uxStationStep": "Введите позывной, затем проверьте страну и класс лицензии.",
+  "uxOpenAudio": "Открыть в разделе звука"
+}

@@ -10,10 +10,13 @@ public sealed partial class MainPage
     private CancellationTokenSource? decoderOperation, decoderRecordStop;
     private string? decoderPath;
     private DecoderResult? decoderResult;
-    private bool decoderWasCapture, decoderHasCaptureDevice = false;
+    private bool decoderWasCapture, decoderHasCaptureDevice = false, decoderUseMicrophone;
     private Button? decoderChooseButton, decoderSolveButton, decoderRecordButton = null, decoderRefreshButton = null, decoderStopRecordButton = null;
     private Control? decoderDevicesChoice = null;
-    private TextBlock? decoderSource;
+    private TextBlock? decoderSource, decoderProgress;
+    private Button? decoderCancelButton;
+    private Control? decoderSourceTabs;
+    private FrameworkElement? decoderResultPanel;
     private TextBox? decoderText, decoderMorseText;
     private StackPanel? decoderDetails;
     private bool decoderAutomaticTone = true, decoderAutomaticSpeed = true;
@@ -25,23 +28,44 @@ public sealed partial class MainPage
 
     private void BuildAudioDecoderSection()
     {
+        decoderChooseButton = decoderSolveButton = decoderRecordButton = decoderRefreshButton = decoderStopRecordButton = null;
+        decoderDevicesChoice = null;
         var stack = new StackPanel { Spacing = 14 };
-        stack.Children.Add(Label(T("decoderHint"), 13, true));
-        stack.Children.Add(AlphabetChoice());
-        var pick = Action("decoderChoose", async () =>
+        stack.Children.Add(Label(T("uxDecoderIntro"), 13, true));
+        decoderSourceTabs = new ContentControl
         {
-            var picker = new FileOpenPicker(); picker.FileTypeFilter.Add(".wav"); InitializePicker(picker);
-            var selected = await picker.PickSingleFileAsync();
-            if (selected is null || disposed) return;
-            decoderPath = selected.Path; decoderWasCapture = false; decoderResult = null; BuildPage();
-        }, "\uE8B7");
-        Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(pick, "DecoderChooseWav");
-        decoderChooseButton = pick;
-        stack.Children.Add(pick);
+            HorizontalContentAlignment = HorizontalAlignment.Stretch,
+            Content = WorkspaceTabs("DecoderSourceTabs", ["uxWaveSource", "uxMicrophoneSource"], decoderUseMicrophone ? 1 : 0, selected =>
+            {
+                if (decoderOperation != null || decoderUseMicrophone == (selected == 1)) return;
+                decoderUseMicrophone = selected == 1;
+                decoderResult = null;
+                BuildPage();
+            })
+        };
+        stack.Children.Add(decoderSourceTabs);
+        stack.Children.Add(AlphabetChoice());
+        var sourceControls = new StackPanel { Spacing = 10 };
+        if (!decoderUseMicrophone)
+        {
+            var pick = Action("decoderChoose", async () =>
+            {
+                var picker = new FileOpenPicker(); picker.FileTypeFilter.Add(".wav"); InitializePicker(picker);
+                var selected = await picker.PickSingleFileAsync();
+                if (selected is null || disposed) return;
+                decoderPath = selected.Path; decoderWasCapture = false; decoderResult = null; BuildPage();
+            }, "\uE8B7");
+            Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(pick, "DecoderChooseWav");
+            decoderChooseButton = pick;
+            sourceControls.Children.Add(pick);
+        }
         var fileName = Label(DecoderSourceName(), 13, true);
         decoderSource = fileName;
         Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(fileName, "DecoderSource");
-        fileName.FlowDirection = FlowDirection.LeftToRight; stack.Children.Add(fileName);
+        fileName.FlowDirection = FlowDirection.LeftToRight;
+        if (!decoderUseMicrophone || decoderWasCapture) sourceControls.Children.Add(fileName);
+        if (decoderUseMicrophone) BuildDecoderCapture(sourceControls);
+        stack.Children.Add(sourceControls);
         var tone = new NumberBox { Header = T("decoderTone"), Minimum = 200, Maximum = 2000, Value = decoderFrequency, IsEnabled = !decoderAutomaticTone, SpinButtonPlacementMode = NumberBoxSpinButtonPlacementMode.Compact };
         tone.ValueChanged += (_, _) => { if (double.IsFinite(tone.Value)) decoderFrequency = Math.Clamp(tone.Value, 200, 2000); };
         var autoTone = new ToggleSwitch { Header = T("decoderAutoTone"), IsOn = decoderAutomaticTone };
@@ -51,18 +75,20 @@ public sealed partial class MainPage
         var autoSpeed = new ToggleSwitch { Header = T("decoderAutoSpeed"), IsOn = decoderAutomaticSpeed };
         autoSpeed.Toggled += (_, _) => { decoderAutomaticSpeed = autoSpeed.IsOn; speed.IsEnabled = !autoSpeed.IsOn; };
         var advanced = new StackPanel { Spacing = 10 };
+        advanced.Children.Add(Label(T("decoderHint"), 13, true));
+        advanced.Children.Add(Label(T("decoderCaptureHint"), 13, true));
         advanced.Children.Add(Columns(240,2,autoTone,autoSpeed,tone,speed));
         var threshold = new Slider { Header = T("decoderThreshold"), Minimum = 10, Maximum = 70, Value = decoderThreshold, StepFrequency = 5 };
         threshold.ValueChanged += (_, _) => decoderThreshold = threshold.Value;
         advanced.Children.Add(threshold);
         advanced.Children.Add(Label(T("decoderThresholdHint"), 12, true));
-        stack.Children.Add(new Expander { Header = T("decoderAdvanced"), Content = advanced, HorizontalAlignment = HorizontalAlignment.Stretch });
+        stack.Children.Add(new Expander { Header = T("uxAdvanced"), Content = advanced, HorizontalAlignment = HorizontalAlignment.Stretch });
         var controls = Row();
         var solve = Action("decoderSolve", () => decoderPath is { } path ? DecodeAudioPath(path) : Task.CompletedTask, "\uE8D4", true);
         solve.IsEnabled = decoderPath != null;
         decoderSolveButton = solve;
         Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(solve, "DecoderSolve");
-        controls.Children.Add(solve);
+        if (!decoderUseMicrophone) controls.Children.Add(solve);
         var cancel = Action("decoderCancel", () =>
         {
             CleanupAudioDecoder();
@@ -70,15 +96,23 @@ public sealed partial class MainPage
             BuildPage(); SetStatus(T("ready")); return Task.CompletedTask;
         }, "\uE711");
         Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(cancel, "DecoderCancel");
+        decoderCancelButton = cancel;
         controls.Children.Add(cancel);
         stack.Children.Add(controls); WrapActions(controls, stack);
+        decoderProgress = Label("", 13, true);
+        decoderProgress.Visibility = Visibility.Collapsed;
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(decoderProgress, "DecoderProgress");
+        stack.Children.Add(decoderProgress);
+        PageContent.Children.Add(Card(stack));
+        var results = new StackPanel { Spacing = 12 };
+        results.Children.Add(Label(T("uxDecoderResult"), 18));
         var output = new TextBox { Header = T("decodedText"), Text = decoderResult?.Text ?? "", IsReadOnly = true, AcceptsReturn = true, TextWrapping = TextWrapping.Wrap, MinHeight = 100, FlowDirection = PlainDirection, FontSize = 18 };
         Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(output, "DecoderText");
         decoderText = output;
         var code = new TextBox { Header = T("morseInput"), Text = decoderResult?.Morse ?? "", IsReadOnly = true, AcceptsReturn = true, TextWrapping = TextWrapping.Wrap, MinHeight = 72, FlowDirection = FlowDirection.LeftToRight, FontFamily = new FontFamily("Consolas") };
         decoderMorseText = code;
         code.Background=Brush("ResultBrush"); code.MinHeight=output.MinHeight=120;
-        stack.Children.Add(Columns(300,2,output,code));
+        results.Children.Add(Columns(300,2,output,code));
         decoderDetails = new StackPanel { Spacing = 8 };
         if (decoderResult is { } result)
         {
@@ -86,7 +120,7 @@ public sealed partial class MainPage
             decoderDetails.Children.Add(Label($"{result.FrequencyHz:0} Hz · {tempo} WPM · {result.DurationSeconds:0.#} s · {T("decoderUncertain")}: {result.UncertainCharacters}", 12, true));
             if (result.TimingAmbiguous) decoderDetails.Children.Add(Label(T("decoderAmbiguous"), 13, true));
         }
-        stack.Children.Add(decoderDetails);
+        results.Children.Add(decoderDetails);
         var exports = Row();
         exports.Children.Add(Action("copy", () =>
         {
@@ -99,17 +133,15 @@ public sealed partial class MainPage
             string? path = await SavePath("txt", "decoded-morse");
             if (path != null) { await File.WriteAllTextAsync(path, value, lifetime.Token); SetStatus(T("saved")); }
         }));
-        stack.Children.Add(exports); WrapActions(exports, stack);
-        PageContent.Children.Add(Card(stack));
-        BuildDecoderCapture();
+        results.Children.Add(exports); WrapActions(exports, results);
+        decoderResultPanel = Card(results);
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(decoderResultPanel, "DecoderResult");
+        PageContent.Children.Add(decoderResultPanel);
         UpdateDecoderControls();
     }
 
-    private void BuildDecoderCapture()
+    private void BuildDecoderCapture(StackPanel stack)
     {
-        var stack = new StackPanel { Spacing = 12 };
-        stack.Children.Add(Label(T("decoderCapture"), 18));
-        stack.Children.Add(Label(T("decoderCaptureHint"), 13, true));
 #if MORSE_WINUI
         int enumerationGeneration = decoderGeneration;
         var devices = new ComboBox { Header = T("decoderDevice"), HorizontalAlignment = HorizontalAlignment.Stretch, DisplayMemberPath = nameof(AudioCaptureDevice.Name) };
@@ -121,11 +153,12 @@ public sealed partial class MainPage
             int generation = decoderGeneration;
             using var operation = CancellationTokenSource.CreateLinkedTokenSource(lifetime.Token);
             using var stop = new CancellationTokenSource();
+            decoderResult = null;
             decoderOperation = operation; decoderRecordStop = stop; UpdateDecoderControls();
             string? path = null;
             try
             {
-                SetStatus(T("decoderRecording"));
+                SetDecoderStatus(T("decoderRecording"));
                 path = await MorseAudioCapture.RecordAsync(device.Id, stop.Token, operation.Token);
                 if (disposed || generation != decoderGeneration) return;
                 decoderPath = null; decoderWasCapture = true;
@@ -134,8 +167,8 @@ public sealed partial class MainPage
                 await DecodeAudioPath(path);
             }
             catch (OperationCanceledException) { }
-            catch (UnauthorizedAccessException) { if (!disposed && generation == decoderGeneration) SetStatus(T("decoderPermission")); }
-            catch (Exception ex) when (ex is not OutOfMemoryException) { if (!disposed && generation == decoderGeneration) SetStatus(T("decoderCaptureError")); }
+            catch (UnauthorizedAccessException) { if (!disposed && generation == decoderGeneration) SetDecoderStatus(T("decoderPermission")); }
+            catch (Exception ex) when (ex is not OutOfMemoryException) { if (!disposed && generation == decoderGeneration) SetDecoderStatus(T("decoderCaptureError")); }
             finally
             {
                 if (ReferenceEquals(decoderOperation, operation)) decoderOperation = null;
@@ -177,7 +210,6 @@ public sealed partial class MainPage
 #else
         stack.Children.Add(Label(T("decoderWindowsCapture"), 13, true));
 #endif
-        PageContent.Children.Add(Card(stack));
     }
 
     private async Task DecodeAudioPath(string path)
@@ -191,21 +223,27 @@ public sealed partial class MainPage
         if (decoderText != null) decoderText.Text = "";
         if (decoderMorseText != null) decoderMorseText.Text = "";
         decoderDetails?.Children.Clear();
-        UpdateDecoderControls(); SetStatus(T("decoderWorking"));
+        UpdateDecoderControls(); SetDecoderStatus(T("decoderWorking"));
         try
         {
             var result = await MorseDecoder.DecodeFileAsync(path, options, operation.Token);
             if (disposed || generation != decoderGeneration) return;
             decoderResult = result; decoderOperation = null; BuildPage(); SetStatus(T("ready"));
+            Root.UpdateLayout();
+            if(decoderResultPanel is { Visibility:Visibility.Visible } panel)
+            {
+                double top=panel.TransformToVisual(ContentScroll).TransformPoint(new Windows.Foundation.Point(0,0)).Y+ContentScroll.VerticalOffset;
+                ContentScroll.ChangeView(null,Math.Max(0,top-16),null,true);
+            }
         }
         catch (OperationCanceledException) { }
         catch (InvalidDataException ex)
         {
             if (!disposed && generation == decoderGeneration)
-                SetStatus(T(ex.Message.StartsWith("decoder", StringComparison.Ordinal) && text.Keys.Contains(ex.Message) ? ex.Message : "decoderFormat"));
+                SetDecoderStatus(T(ex.Message.StartsWith("decoder", StringComparison.Ordinal) && text.Keys.Contains(ex.Message) ? ex.Message : "decoderFormat"));
         }
-        catch (IOException) { if (!disposed && generation == decoderGeneration) SetStatus(T("fileError")); }
-        catch (UnauthorizedAccessException) { if (!disposed && generation == decoderGeneration) SetStatus(T("fileError")); }
+        catch (IOException) { if (!disposed && generation == decoderGeneration) SetDecoderStatus(T("fileError")); }
+        catch (UnauthorizedAccessException) { if (!disposed && generation == decoderGeneration) SetDecoderStatus(T("fileError")); }
         finally
         {
             if (ReferenceEquals(decoderOperation, operation)) decoderOperation = null;
@@ -224,14 +262,28 @@ public sealed partial class MainPage
 
     private string DecoderSourceName() => decoderWasCapture ? T("decoderRecordedSource") : decoderPath is null ? T("decoderNoFile") : Path.GetFileName(decoderPath);
 
+    private void SetDecoderStatus(string value)
+    {
+        SetStatus(value);
+        if (decoderProgress != null) { decoderProgress.Text = value; decoderProgress.Visibility = Visibility.Visible; }
+    }
+
     private void UpdateDecoderControls()
     {
         bool idle = decoderOperation is null;
+        if (decoderSourceTabs != null) decoderSourceTabs.IsEnabled = idle;
+        if (decoderCancelButton != null) decoderCancelButton.Visibility = idle ? Visibility.Collapsed : Visibility.Visible;
+        if (decoderResultPanel != null) decoderResultPanel.Visibility = idle && decoderResult != null ? Visibility.Visible : Visibility.Collapsed;
+        if (decoderProgress != null && idle && decoderResult != null) decoderProgress.Visibility = Visibility.Collapsed;
         if (decoderChooseButton != null) decoderChooseButton.IsEnabled = idle;
         if (decoderSolveButton != null) decoderSolveButton.IsEnabled = idle && decoderPath != null;
         if (decoderRecordButton != null) decoderRecordButton.IsEnabled = idle && decoderHasCaptureDevice;
         if (decoderRefreshButton != null) decoderRefreshButton.IsEnabled = idle;
         if (decoderDevicesChoice != null) decoderDevicesChoice.IsEnabled = idle;
-        if (decoderStopRecordButton != null) decoderStopRecordButton.IsEnabled = decoderRecordStop != null;
+        if (decoderStopRecordButton != null)
+        {
+            decoderStopRecordButton.IsEnabled = decoderRecordStop != null;
+            decoderStopRecordButton.Visibility = decoderRecordStop != null ? Visibility.Visible : Visibility.Collapsed;
+        }
     }
 }

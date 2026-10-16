@@ -265,6 +265,9 @@ public sealed partial class MainPage
             Check(page=="qsoAssistant" && Breadcrumb.Text==T("qsoAssistant") && Descendants(PageContent).OfType<TextBlock>().Any(b=>b.Text==T("stationRequired")),"Contact preparation explains the missing station");
             await ActionButton("stationProfiles");
             Check(page=="stationProfiles" && Breadcrumb.Text==T("stationProfiles"),"Missing-station action opens the station subpage");
+            Check(!Descendants(PageContent).OfType<Button>().Any(b=>AutomationProperties.GetAutomationId(b)=="deleteStation"),"A new station has no delete action");
+            await ActionButton("saveStation");
+            Check(Descendants(PageContent).OfType<TextBlock>().Any(b=>AutomationProperties.GetAutomationId(b)=="StationFormError" && b.Visibility==Visibility.Visible && b.Text==T("invalidCall")),"Missing call sign is explained beside the station form");
             Check(!Descendants(PageContent).OfType<ComboBox>().Any(c=>c.ItemsSource is string[] items && items.SequenceEqual(RadioPages.Select(T))),"Radio subpages no longer repeat the sidebar as a page selector");
             var callInput=Descendants(Root).OfType<TextBox>().First(b=>AutomationProperties.GetAutomationId(b)=="callSign");
             callInput.Text="TA1PDM"; await Task.Delay(100); await ActionButton("analyzeCall");
@@ -274,6 +277,8 @@ public sealed partial class MainPage
             Descendants(Root).OfType<TextBox>().First(b=>AutomationProperties.GetAutomationId(b)=="qth").Text="Ankara";
             await ActionButton("saveStation");
             Check(ActiveStation?.CallSign=="TA1PDM" && radioStore.LoadProfiles().Profiles.Count==1,"Station profile saves through UI");
+            Check(page=="qsoAssistant","First station setup returns to the contact being prepared");
+            Navigate("stationProfiles");
             preferences=preferences with { Theme="light" }; ApplyTheme(); Rebuild();
             await ExpandSection("CountryRules");
             Check(Descendants(PageContent).OfType<Border>().Any(b=>AutomationProperties.GetAutomationId(b)=="BandGuideCard" && AutomationProperties.GetName(b)=="20m: 14 MHz – 14.35 MHz; 75 W; "+T("powerOutput")),"Band infographic shows exact Turkish class A frequency limits and transmitter output");
@@ -364,6 +369,8 @@ public sealed partial class MainPage
             Check(radioChildren?.Visibility==Visibility.Visible && radioChildren.FlowDirection==FlowDirection.RightToLeft,"Arabic radio sidebar restores mirrored subpages after expansion");
             preferences=preferences with { Language="tr" }; Rebuild();
             audioWorkspace=1; Navigate("audio"); BuildPage();
+            Check(decoderResultPanel?.Visibility==Visibility.Collapsed && decoderCancelButton?.Visibility==Visibility.Collapsed,"Empty decoder hides result and cancellation actions");
+            Check(!Descendants(PageContent).OfType<ComboBox>().Any(b=>AutomationProperties.GetAutomationId(b)=="DecoderInputs"),"File decoding does not enumerate microphone inputs");
             string decoderWave=Path.Combine(directory,"decoder-sos.wav");
             MorseAudio.WriteWav(decoderWave,"... --- ...",new(20,700));
             decoderPath=decoderWave; decoderResult=null; BuildPage();
@@ -372,7 +379,11 @@ public sealed partial class MainPage
             var decoderText=Descendants(Root).OfType<TextBox>().First(b=>AutomationProperties.GetAutomationId(b)=="DecoderText");
             Check(decoderText.Text=="SOS" && decoderText.IsReadOnly,"Decoded audio appears in the readable results field");
             await Snapshot(Path.Combine(directory,"decoder.png"));
+            using var cancelUiOperation=new CancellationTokenSource();
+            decoderOperation=cancelUiOperation; UpdateDecoderControls();
             await ActionButton("DecoderCancel");
+            Check(cancelUiOperation.IsCancellationRequested && decoderOperation==null,"Decoder cancellation cancels its owner and restores idle controls");
+            await ActionButton("DecoderSourceTabs-1");
             var refreshedInputs=Descendants(PageContent).OfType<ComboBox>().First(b=>AutomationProperties.GetAutomationId(b)=="DecoderInputs");
             await ActionButton("DecoderRefreshInputs");
             await WaitFor(()=>refreshedInputs.ItemsSource!=null,"Audio inputs can be refreshed after cancellation");
@@ -411,10 +422,11 @@ public sealed partial class MainPage
                 preferences=preferences with { Language=language }; page="keying"; Rebuild();
                 Check(PageContent.Children.Count>0 && Breadcrumb.Text==T("keyingTitle"),"Keying page translates in "+language);
                 page="audio"; audioWorkspace=1; Rebuild();
-                Check(Descendants(Root).OfType<TextBox>().Any(b=>AutomationProperties.GetAutomationId(b)=="DecoderText"),"Decoder page translates in "+language);
+                await Task.Delay(60); Root.UpdateLayout();
+                Check(Descendants(Root).OfType<Button>().Any(b=>AutomationProperties.GetAutomationId(b)=="DecoderSourceTabs-0"),"Decoder source choices translate in "+language);
                 if(language=="ar")
                 {
-                    Check(Descendants(PageContent).OfType<TextBox>().First(b=>Equals(b.Header,T("morseInput"))).FlowDirection==FlowDirection.LeftToRight,"Arabic audio decoder keeps Morse LTR");
+                    Check(decoderMorseText!.FlowDirection==FlowDirection.LeftToRight,"Arabic audio decoder keeps Morse LTR");
                     await Snapshot(Path.Combine(directory,"decoder-arabic.png"));
                 }
             }
@@ -428,7 +440,7 @@ public sealed partial class MainPage
             {
                 foreach(bool fromMorse in new[]{false,true})
                 {
-                    page="audio"; audioIsMorse=fromMorse; audioSource=fromMorse ? "... --- ..." : "Merhaba."; Rebuild();
+                    page="audio"; audioWorkspace=3; audioIsMorse=fromMorse; audioSource=fromMorse ? "... --- ..." : "Merhaba."; Rebuild();
                     await ActionButton("speak");
                     var deadline=DateTimeOffset.UtcNow+TimeSpan.FromSeconds(20);
                     while(speaking && DateTimeOffset.UtcNow<deadline) await Task.Delay(100);
@@ -482,7 +494,7 @@ public sealed partial class MainPage
                     CheckPageWidth(language+" "+theme+" "+feature);
                     if(language=="tr") await Snapshot(Path.Combine(directory,"layout-"+theme+"-"+feature+".png"));
                 }
-                foreach(int audioSection in new[]{1,2})
+                foreach(int audioSection in new[]{1,2,3})
                 {
                     page="audio"; audioWorkspace=audioSection; Rebuild(); await Task.Delay(60); Root.UpdateLayout();
                     CheckPageWidth(language+" "+theme+" audio "+audioSection);

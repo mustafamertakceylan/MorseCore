@@ -10,10 +10,12 @@ public sealed partial class MainPage
     private bool checkingUpdates;
     private bool installingUpdate;
     private ContentDialog? updateDialog;
+    private bool speechSettingsExpanded;
     private void BuildSettings()
     {
         Heading(T("settings"));
         var appearance=new StackPanel { Spacing=18 };
+        appearance.Children.Add(Label(T("uxAppearance"),22));
         var theme=Choice(T("theme"),[T("system"),T("light"),T("dark")],preferences.Theme switch { "light"=>1,"dark"=>2,_=>0 },i=>
         { preferences=preferences with { Theme=i==1?"light":i==2?"dark":"system" }; ApplyTheme(); SavePreferences(); Rebuild(); AnimateContent(); });
         Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(theme,"ThemeChoice");
@@ -24,6 +26,7 @@ public sealed partial class MainPage
         motion.Toggled+=(_,_)=> { preferences=preferences with { ReduceMotion=motion.IsOn }; SavePreferences(); UpdateBackdropMotion(); };
         appearance.Children.Add(motion);
         var conversions=new StackPanel { Spacing=18 };
+        conversions.Children.Add(Label(T("uxConversion"),22));
         conversions.Children.Add(AlphabetChoice());
         conversions.Children.Add(Choice(T("separator"),["/","|","#","*"],"/|#*".IndexOf(preferences.Separator),i=>
         { preferences=preferences with { Separator="/|#*"[i] }; result=null; revision++; SavePreferences(); }));
@@ -31,13 +34,18 @@ public sealed partial class MainPage
         conversions.Children.Add(Action("chooseFolder",ChooseDirectory));
         PageContent.Children.Add(Columns(340,2,Card(appearance),Card(conversions)));
         var voices=new StackPanel { Spacing=10 };
+        voices.Children.Add(Label(T("uxSpeechSettings"),22));
+        voices.Children.Add(Label(T("speechPackHelp"),13,true));
         voices.Children.Add(Action("workspaceManageVoices",()=>
         {
             audioWorkspace=2; Navigate("audio"); return Task.CompletedTask;
         },"\uE896",true));
-        voices.Children.Add(Label(T("speechPack"),22)); voices.Children.Add(Label(T("speechPackHelp"),13,true));
-        voices.Children.Add(Label(OfflineSpeech.ResolveHome(preferences.SpeechHome),12,true));
-        voices.Children.Add(Action("chooseSpeechPack",async()=>
+        var speechLocation=new StackPanel { Spacing=12 };
+        speechLocation.Children.Add(Label(T("speechPack"),16));
+        speechLocation.Children.Add(Label(OfflineSpeech.ResolveHome(preferences.SpeechHome),12,true));
+        var locationError=Label("",13,true); locationError.Visibility=Visibility.Collapsed;
+        speechLocation.Children.Add(locationError);
+        speechLocation.Children.Add(Action("chooseSpeechPack",async()=>
         {
             var picker=new Windows.Storage.Pickers.FolderPicker(); picker.FileTypeFilter.Add("*"); InitializePicker(picker);
             var folder=await picker.PickSingleFolderAsync();
@@ -45,12 +53,17 @@ public sealed partial class MainPage
             {
                 try { _=new MorseCore.AppCore.SpeechPackages.VoicePackageManager(folder.Path,http); }
                 catch(Exception error) when(error is ArgumentException or IOException or UnauthorizedAccessException)
-                { SetStatus(T("voicesLocationInvalid")); return; }
+                { locationError.Text=T("voicesLocationInvalid"); locationError.Visibility=Visibility.Visible; SetStatus(locationError.Text); return; }
                 preferences=preferences with { SpeechHome=folder.Path }; SavePreferences(); BuildPage();
             }
         },"\uE8B7"));
+        var speechAdvanced=new Expander { Header=T("uxAdvanced"),Content=speechLocation,IsExpanded=speechSettingsExpanded,HorizontalAlignment=HorizontalAlignment.Stretch,HorizontalContentAlignment=HorizontalAlignment.Stretch };
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(speechAdvanced,"SpeechSettingsAdvanced");
+        speechAdvanced.Expanding+=(_,_)=>speechSettingsExpanded=true;
+        speechAdvanced.Collapsed+=(_,_)=>speechSettingsExpanded=false;
+        voices.Children.Add(speechAdvanced);
         var updates=new StackPanel { Spacing=18 };
-        updates.Children.Add(Label(T("updates"),23)); updates.Children.Add(Label($"{T("currentVersion")} {version}",14,true));
+        updates.Children.Add(Label(T("updates"),22)); updates.Children.Add(Label($"{T("currentVersion")} {version}",14,true));
         var automatic=new ToggleSwitch { Header=T("updateNotice"),IsOn=preferences.CheckUpdates };
         automatic.Toggled+=(_,_)=> { preferences=preferences with { CheckUpdates=automatic.IsOn }; SavePreferences(); };
         updates.Children.Add(automatic); updates.Children.Add(Action("checkUpdates",()=>CheckUpdates(true)));
@@ -90,7 +103,9 @@ public sealed partial class MainPage
         {
             updateDialog=dialog;
             var shown=dialog.ShowAsync();
-            string cache=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"MorseCore","Updates");
+            string cache=SmokeDirectory is { } smoke
+                ? Path.Combine(smoke,"Updates")
+                : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"MorseCore","Updates");
             using var prepared=await updater.DownloadAsync(release,cache,new Progress<double>(value=> { if(!disposed) progress.Value=value; }),cancellation.Token);
             if(disposed) return;
             progress.Value=100; detail.Text=T("updateConfirm"); dialog.IsPrimaryButtonEnabled=true;

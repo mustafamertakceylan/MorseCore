@@ -8,6 +8,8 @@ namespace MorseCore.Desktop;
 
 public sealed partial class MainPage
 {
+    private StackPanel? converterResultActions;
+    private Button? converterSwap;
     private void BuildConverter()
     {
         Heading(T("converter"),T("converterHint"));
@@ -40,7 +42,8 @@ public sealed partial class MainPage
         var resultHeader=new Grid { MinHeight=34 };
         resultHeader.ColumnDefinitions.Add(new ColumnDefinition { Width=new GridLength(1,GridUnitType.Star) }); resultHeader.ColumnDefinitions.Add(new ColumnDefinition { Width=GridLength.Auto }); resultHeader.Children.Add(Label(T(decode?"decodedText":"morseInput"),13,true));
         var resultActions=Row(); resultActions.Spacing=4; Grid.SetColumn(resultActions,1);
-        resultActions.Children.Add(IconAction("copy",CopyResult,"\uE8C8")); resultActions.Children.Add(IconAction("save",SaveResult,"\uE74E")); resultHeader.Children.Add(resultActions); output.Children.Add(resultHeader);
+        resultActions.Children.Add(Action("copy",CopyResult,"\uE8C8")); resultActions.Children.Add(Action("save",SaveResult,"\uE74E")); output.Children.Add(resultHeader);
+        converterResultActions=resultActions;
         inputBox=new TextBox { Text=source,PlaceholderText=decode ? "... --- ..." : T("inputPlaceholder"),AcceptsReturn=true,TextWrapping=TextWrapping.Wrap,Height=200,MaxLength=200_000,Padding=new Thickness(12),FontSize=17,FlowDirection=decode ? FlowDirection.LeftToRight : PlainDirection };
         outputBox=new TextBox { Text=result?.Text ?? "",PlaceholderText=T("outputPlaceholder"),AcceptsReturn=true,TextWrapping=TextWrapping.Wrap,Height=200,IsReadOnly=true,Padding=new Thickness(12),FontSize=17,FlowDirection=decode ? PlainDirection : FlowDirection.LeftToRight };
         outputBox.Background=Brush("ResultBrush");
@@ -51,7 +54,7 @@ public sealed partial class MainPage
         editor.TextChanged+=(_,_)=> { bool hadResult=result!=null; source=editor.Text; result=null; revision++; if(outputBox!=null) outputBox.Text=""; UpdateStatistics(); if(hadResult) SetStatus(T("ready")); };
         var shortcut=new KeyboardAccelerator { Key=VirtualKey.Enter,Modifiers=VirtualKeyModifiers.Control };
         shortcut.Invoked+=async(_,e)=> { e.Handled=true; await Guard(ConvertNow); }; inputBox.KeyboardAccelerators.Add(shortcut);
-        input.Children.Add(inputBox); output.Children.Add(outputBox);
+        input.Children.Add(inputBox); output.Children.Add(outputBox); output.Children.Add(resultActions); WrapActions(resultActions,output);
         Grid.SetColumn(output,1); editors.Children.Add(input); editors.Children.Add(output);
         editors.SizeChanged+=(_,e)=>
         {
@@ -62,13 +65,20 @@ public sealed partial class MainPage
         workspace.Children.Add(editors);
         var controls=Row();
         controls.Children.Add(Action("convert",ConvertNow,"\uE8D4",true));
-        controls.Children.Add(IconAction("swap",()=>
+        converterSwap=Action("swap",()=>
         {
             if(result==null) return Task.CompletedTask;
             source=result.Text; result=null; decode=!decode; revision++; BuildPage(); return Task.CompletedTask;
-        },"\uE8AB"));
+        },"\uE8AB");
+        controls.Children.Add(converterSwap);
+        resultActions.Children.Add(Action("uxOpenAudio",()=>
+        {
+            if(result==null) return Task.CompletedTask;
+            audioSource=result.Text; audioIsMorse=!decode; audioWorkspace=0; Navigate("audio"); return Task.CompletedTask;
+        },"\uE8D6"));
         workspace.Children.Add(controls); WrapActions(controls,workspace);
         statistics=Label("",12,true); workspace.Children.Add(statistics); UpdateStatistics();
+        workspace.Children.Add(WorkspaceFeedback());
         PageContent.Children.Add(Card(workspace));
         var note=new Expander { Header=T("conversionNotes"),HorizontalAlignment=HorizontalAlignment.Stretch,Content=Label(T("normalizationNote"),12,true) };
         PageContent.Children.Add(note);
@@ -97,6 +107,8 @@ public sealed partial class MainPage
     }
     private void UpdateStatistics()
     {
+        if(converterResultActions!=null) converterResultActions.Visibility=result==null?Visibility.Collapsed:Visibility.Visible;
+        if(converterSwap!=null) converterSwap.Visibility=result==null?Visibility.Collapsed:Visibility.Visible;
         if(statistics==null) return;
         if(result is null) { statistics.Text="Ctrl + Enter"; return; }
         statistics.Text=StatisticsText();
@@ -124,11 +136,12 @@ public sealed partial class MainPage
         if(playback!=null) return;
         speech?.Stop();
         using var token=CancellationTokenSource.CreateLinkedTokenSource(lifetime.Token); playback=token;
+        UpdateAudioActions();
         try
         {
             string morse=await getMorse(); token.Token.ThrowIfCancellationRequested();
             SetStatus(T("play")); await MorseAudio.PlayAsync(morse,new(options.Wpm,options.Frequency),options.Separator,token.Token); SetStatus(T("ready"));
         }
-        finally { if(ReferenceEquals(playback,token)) playback=null; }
+        finally { if(ReferenceEquals(playback,token)) playback=null; UpdateAudioActions(); }
     }
 }

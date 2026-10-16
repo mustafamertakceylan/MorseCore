@@ -1,0 +1,18 @@
+{
+  "uxSelected": "Ausgewählt",
+  "uxMorseAudio": "Morse-Audio",
+  "uxSpeechIntro": "Text eingeben, Stimme wählen und anhören.",
+  "uxMorseIntro": "Audio aus Text oder Morsecode erzeugen.",
+  "uxWaveSource": "WAV-Datei",
+  "uxMicrophoneSource": "Mikrofon",
+  "uxAdvanced": "Erweiterte Einstellungen",
+  "uxDecoderIntro": "WAV-Datei wählen oder eine Mikrofonaufnahme dekodieren.",
+  "uxDecoderResult": "Dekodiertes Ergebnis",
+  "uxAppearance": "Darstellung und Sprache",
+  "uxConversion": "Umwandlung und Dateien",
+  "uxSpeechSettings": "Sprachausgabe",
+  "uxCreateStation": "Erste Station hinzufügen",
+  "uxSaveAndContinue": "Speichern und QSO vorbereiten",
+  "uxStationStep": "Rufzeichen eingeben, dann Land und Lizenzklasse prüfen.",
+  "uxOpenAudio": "In Audio öffnen"
+}

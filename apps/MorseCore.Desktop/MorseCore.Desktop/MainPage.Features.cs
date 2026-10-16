@@ -27,7 +27,7 @@ public sealed partial class MainPage
         var destination=new StackPanel { Spacing=14 };
         destination.Children.Add(Label(T("outputFolder"),18));
         destination.Children.Add(Label(preferences.OutputDirectory,14,true)); destination.Children.Add(Action("chooseFolder",ChooseDirectory));
-        stack.Children.Add(Action("convert",async()=>
+        var convertFiles=Action("convert",async()=>
         {
             if(batchWorking || files.Count==0) return;
             batchWorking=true; int done=0;
@@ -44,51 +44,74 @@ public sealed partial class MainPage
             }
             catch(IOException) { SetStatus($"{done}/{selected.Length} · {T("fileError")}"); }
             finally { batchWorking=false; }
-        },"\uE8D4",true));
+        },"\uE8D4",true);
+        convertFiles.IsEnabled=files.Count>0;
+        stack.Children.Add(convertFiles);
+        stack.Children.Add(WorkspaceFeedback());
         PageContent.Children.Add(Columns(320,2,Card(stack),Card(destination)));
     }
     private string audioSource="";
     private bool audioIsMorse;
     private int audioWorkspace;
+    private Button? audioPlayButton,audioStopButton,audioExportButton;
+    private void UpdateAudioActions()
+    {
+        bool active=playback!=null;
+        if(audioPlayButton!=null) audioPlayButton.IsEnabled=!active && !string.IsNullOrWhiteSpace(audioSource);
+        if(audioStopButton!=null) audioStopButton.Visibility=active?Visibility.Visible:Visibility.Collapsed;
+        if(audioExportButton!=null) audioExportButton.IsEnabled=!active && !string.IsNullOrWhiteSpace(audioSource);
+    }
     private string AudioMorse()=>audioIsMorse ? audioSource : MorseEngine.Encode(audioSource,preferences.Alphabet,preferences.Separator).Text;
     private void BuildAudio()
     {
         Heading(T("audio"));
-        var workspace=Choice("",[T("workspaceCompose"),T("workspaceDecode"),T("workspaceVoices")],audioWorkspace,index=>
+        int[] sections=[0,3,1,2];
+        var workspace=WorkspaceTabs("AudioWorkspace",["uxMorseAudio","speech","workspaceDecode","workspaceVoices"],Array.IndexOf(sections,audioWorkspace),selected=>
         {
+            int index=sections[selected];
             if(audioWorkspace==index) return;
             StopPlayback(); audioWorkspace=index; BuildPage();
         });
-        Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(workspace,"AudioWorkspace");
         PageContent.Children.Add(workspace);
         if(audioWorkspace==1) { BuildAudioDecoderSection(); return; }
         if(audioWorkspace==2) { BuildVoicePacksPage(); return; }
         var stack=new StackPanel { Spacing=18 };
+        stack.Children.Add(Label(T(audioWorkspace==3?"uxSpeechIntro":"uxMorseIntro"),14,true));
         stack.Children.Add(Columns(260,2,AlphabetChoice(),Choice(T("audioInputType"),[T("plainText"),T("morseInput")],audioIsMorse?1:0,i=> { if(audioIsMorse==(i==1)) return; audioIsMorse=i==1; BuildPage(); })));
-        stack.Children.Add(Action("useConversion",()=> { audioSource=result?.Text ?? source; audioIsMorse=result!=null ? !decode : decode; BuildPage(); return Task.CompletedTask; }));
+        if(result!=null || !string.IsNullOrWhiteSpace(source))
+            stack.Children.Add(Action("useConversion",()=> { audioSource=result?.Text ?? source; audioIsMorse=result!=null ? !decode : decode; BuildPage(); return Task.CompletedTask; }));
         var morse=new TextBox { Header=T(audioIsMorse?"morseInput":"plainText"),Text=audioSource,PlaceholderText=audioIsMorse?"... --- ...":T("inputPlaceholder"),AcceptsReturn=true,TextWrapping=TextWrapping.Wrap,Height=160,MaxLength=200_000,FlowDirection=audioIsMorse?FlowDirection.LeftToRight:PlainDirection,FontFamily=new FontFamily(audioIsMorse?"Consolas":"Segoe UI"),FontSize=18 };
-        morse.TextChanged+=(_,_)=>audioSource=morse.Text; stack.Children.Add(morse);
+        morse.TextChanged+=(_,_)=> { audioSource=morse.Text; UpdateAudioActions(); UpdateSpeechActions(); }; stack.Children.Add(morse);
+        if(audioWorkspace==3)
+        {
+            PageContent.Children.Add(Card(stack));
+            BuildSpeech(async()=>
+            {
+                string value=audioSource; var options=preferences; bool fromMorse=audioIsMorse;
+                return fromMorse ? (await Task.Run(()=>MorseEngine.Decode(value,options.Alphabet,options.Separator))).Text : value;
+            });
+            PageContent.Children.Add(WorkspaceFeedback());
+            return;
+        }
         var controls=Row();
-        controls.Children.Add(Action("play",()=>PlayMorse(AudioMorse()),"\uE768",true));
-        controls.Children.Add(Action("stop",()=> { StopPlayback(); return Task.CompletedTask; },"\uE71A"));
-        controls.Children.Add(Action("exportWav",async()=>
+        audioPlayButton=Action("play",()=>PlayMorse(AudioMorse()),"\uE768",true);
+        audioStopButton=Action("stop",()=> { StopPlayback(); return Task.CompletedTask; },"\uE71A");
+        audioExportButton=Action("exportWav",async()=>
         {
             string snapshot=AudioMorse(); var options=preferences;
             string? path=await SavePath("wav","morse");
             if(path!=null) { await Task.Run(()=>MorseAudio.WriteWav(path,snapshot,new(options.Wpm,options.Frequency),options.Separator)); SetStatus(T("saved")); }
-        },"\uE74E")); stack.Children.Add(controls);
+        },"\uE74E");
+        controls.Children.Add(audioPlayButton); controls.Children.Add(audioStopButton); controls.Children.Add(audioExportButton);
+        stack.Children.Add(controls); UpdateAudioActions();
+        stack.Children.Add(WorkspaceFeedback());
         WrapActions(controls,stack);
         var speed=new NumberBox { Header=T("speed"),Minimum=5,Maximum=60,Value=preferences.Wpm,SpinButtonPlacementMode=NumberBoxSpinButtonPlacementMode.Compact };
         speed.ValueChanged+=(_,_)=> { if(!double.IsNaN(speed.Value)) { preferences=preferences with { Wpm=(uint)Math.Clamp(speed.Value,5,60) }; SavePreferences(); } };
         var frequency=new NumberBox { Header=T("frequency"),Minimum=200,Maximum=2000,Value=preferences.Frequency,SpinButtonPlacementMode=NumberBoxSpinButtonPlacementMode.Compact };
         frequency.ValueChanged+=(_,_)=> { if(!double.IsNaN(frequency.Value)) { preferences=preferences with { Frequency=(uint)Math.Clamp(frequency.Value,200,2000) }; SavePreferences(); } };
-        stack.Children.Add(Columns(220,2,speed,frequency));
+        stack.Children.Add(new Expander { Header=T("uxAdvanced"),Content=Columns(220,2,speed,frequency),HorizontalAlignment=HorizontalAlignment.Stretch,HorizontalContentAlignment=HorizontalAlignment.Stretch });
         PageContent.Children.Add(Card(stack));
-        BuildSpeech(async()=>
-        {
-            string value=audioSource; var options=preferences; bool fromMorse=audioIsMorse;
-            return fromMorse ? (await Task.Run(()=>MorseEngine.Decode(value,options.Alphabet,options.Separator))).Text : value;
-        });
     }
     private void BuildAlphabet()
     {

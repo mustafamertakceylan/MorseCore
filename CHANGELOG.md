@@ -1,5 +1,12 @@
 # Changelog / Değişiklik günlüğü
 
+## 0.7.5 — 2026-10-16
+
+- Separate Morse audio, speech, decoding and voice packages into visible tabs; simplify WAV/microphone input, advanced settings and operation controls.
+- Morse sesi, metin seslendirme, ses çözme ve paketler görünür sekmelere ayrıldı; WAV/mikrofon girişi, gelişmiş ayarlar ve işlem düğmeleri sadeleştirildi.
+- Show contextual result actions and feedback, return first-time station setup to contact preparation, and group settings clearly in all five languages.
+- Sonuç eylemleri ve geri bildirim ilgili panelde gösterilir; ilk istasyon kaydı görüşme hazırlığına döner, ayarlar beş dilde açık başlıklarla gruplanır.
+
 ## 0.7.4 — 2026-10-16
 
 - Replace the square taskbar icon with a rounded green tile; give Windows and installed shortcuts a shared application identity. Reopening the app restores its existing window.

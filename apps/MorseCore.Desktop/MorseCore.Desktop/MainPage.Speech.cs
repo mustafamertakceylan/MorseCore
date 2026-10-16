@@ -7,6 +7,13 @@ public sealed partial class MainPage
 {
     private bool speaking;
     private CancellationTokenSource? speechRequest;
+    private Button? speechPlayButton,speechStopButton;
+    private bool speechVoiceInstalled;
+    private void UpdateSpeechActions()
+    {
+        if(speechPlayButton!=null) speechPlayButton.IsEnabled=!speaking && speechVoiceInstalled && !string.IsNullOrWhiteSpace(audioSource);
+        if(speechStopButton!=null) speechStopButton.Visibility=speaking?Visibility.Visible:Visibility.Collapsed;
+    }
     private void BuildSpeech(Func<Task<string>> getText)
     {
         var stack=new StackPanel { Spacing=10 };
@@ -34,6 +41,7 @@ public sealed partial class MainPage
             if(voices.SelectedItem is not ComboBoxItem { Tag: OfflineVoice voice }) return;
             preferences=preferences with { VoiceId=voice.Id }; SavePreferences();
             info.Text=OfflineSpeech.IsInstalled(home,voice) ? T(voice.Language=="ar-SA" ? "arabicVoiceNote" : "speechLocalNote") : T("speechPackMissing");
+            speechVoiceInstalled=OfflineSpeech.IsInstalled(home,voice); UpdateSpeechActions();
         };
         language.SelectionChanged+=(_,_)=>
         {
@@ -42,8 +50,10 @@ public sealed partial class MainPage
         };
         SelectVoices();
         var speak=Action("speak",()=>SpeakText(getText),"\uE768",true);
+        speechPlayButton=speak;
         var actions=Row(); actions.Spacing=4; actions.VerticalAlignment=VerticalAlignment.Bottom;
-        actions.Children.Add(speak); actions.Children.Add(IconAction("stop",()=> { StopPlayback(); return Task.CompletedTask; },"\uE71A"));
+        speechStopButton=Action("stop",()=> { StopPlayback(); return Task.CompletedTask; },"\uE71A");
+        actions.Children.Add(speak); actions.Children.Add(speechStopButton); UpdateSpeechActions();
         Grid.SetColumn(actions,2); choices.Children.Add(actions);
         choices.SizeChanged+=(_,e)=>
         {
@@ -59,6 +69,7 @@ public sealed partial class MainPage
     {
         if(speaking) return;
         speaking=true;
+        UpdateSpeechActions();
         try
         {
             StopPlayback();
@@ -75,6 +86,6 @@ public sealed partial class MainPage
             await speech.SpeakAsync(value,voice.Id,home,cancellation.Token,muted:SmokeDirectory!=null); SetStatus(T("ready"));
         }
         catch(IOException) { SetStatus(T("speechError")); }
-        finally { speechRequest=null; speaking=false; }
+        finally { speechRequest=null; speaking=false; UpdateSpeechActions(); }
     }
 }

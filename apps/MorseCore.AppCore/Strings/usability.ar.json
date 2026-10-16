@@ -1,0 +1,18 @@
+{
+  "uxSelected": "محدد",
+  "uxMorseAudio": "صوت مورس",
+  "uxSpeechIntro": "أدخل النص واختر صوتًا ثم استمع.",
+  "uxMorseIntro": "أنشئ صوتًا من النص أو شفرة مورس.",
+  "uxWaveSource": "ملف WAV",
+  "uxMicrophoneSource": "الميكروفون",
+  "uxAdvanced": "إعدادات متقدمة",
+  "uxDecoderIntro": "اختر ملف WAV أو فك ترميز تسجيل من الميكروفون.",
+  "uxDecoderResult": "نتيجة فك الترميز",
+  "uxAppearance": "المظهر واللغة",
+  "uxConversion": "التحويل والملفات",
+  "uxSpeechSettings": "تحويل النص إلى كلام",
+  "uxCreateStation": "أضف محطتك الأولى",
+  "uxSaveAndContinue": "حفظ وتحضير الاتصال",
+  "uxStationStep": "أدخل إشارة النداء ثم تحقق من البلد وفئة الترخيص.",
+  "uxOpenAudio": "فتح في قسم الصوت"
+}

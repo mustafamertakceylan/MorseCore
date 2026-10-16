@@ -1,0 +1,18 @@
+{
+  "uxSelected": "Seçili",
+  "uxMorseAudio": "Morse sesi",
+  "uxSpeechIntro": "Metni yaz, bir ses seç ve dinle.",
+  "uxMorseIntro": "Metin veya Morse kodundan ses oluştur.",
+  "uxWaveSource": "WAV dosyası",
+  "uxMicrophoneSource": "Mikrofon",
+  "uxAdvanced": "Gelişmiş ayarlar",
+  "uxDecoderIntro": "Bir WAV dosyası seç veya mikrofon kaydını Morse metnine çevir.",
+  "uxDecoderResult": "Çözüm sonucu",
+  "uxAppearance": "Görünüm ve dil",
+  "uxConversion": "Dönüşüm ve dosyalar",
+  "uxSpeechSettings": "Seslendirme",
+  "uxCreateStation": "İlk istasyonunu ekle",
+  "uxSaveAndContinue": "Kaydet ve görüşmeye geç",
+  "uxStationStep": "Çağrı işaretini gir, ardından ülke ve belge sınıfını kontrol et.",
+  "uxOpenAudio": "Seste aç"
+}

@@ -23,7 +23,7 @@ public sealed partial class MainPage : Page
     private static readonly string[] RadioPages=["stationProfiles","qsoAssistant","qsoLog"];
     private bool educationExpanded,radioExpanded;
     private StackPanel? educationChildren,radioChildren;
-    private string page="converter", source="", version="0.7.4";
+    private string page="converter", source="", version="0.7.5";
     private ConversionResult? result;
     private bool decode, working, initialized, disposed, nativeReady;
     private int revision;
@@ -218,6 +218,7 @@ public sealed partial class MainPage : Page
     private void Navigate(string key)
     {
         if(key=="radio") key="stationProfiles";
+        if(key!="stationProfiles") returnToQsoAfterStation=false;
         if(page==key) return;
         StopPlayback(); revision++;
         if(EducationPages.Contains(key)) educationExpanded=true;
@@ -227,6 +228,8 @@ public sealed partial class MainPage : Page
     private void BuildPage()
     {
         CleanupKeying(); CleanupAudioDecoder(); CleanupVoicePacks();
+        audioPlayButton=audioStopButton=audioExportButton=speechPlayButton=speechStopButton=null;
+        workspaceFeedback=null;
         inputBox=null; outputBox=null; statistics=null;
         PageContent.Children.Clear(); Breadcrumb.Text=T(page);
         switch(page)
@@ -243,7 +246,16 @@ public sealed partial class MainPage : Page
         }
         AnimateContent();
     }
-    private void SetStatus(string value) { if(!disposed) Status.Text=value; }
+    private void SetStatus(string value)
+    {
+        if(disposed) return;
+        Status.Text=value;
+        if(workspaceFeedback!=null)
+        {
+            workspaceFeedback.Text=value;
+            workspaceFeedback.Visibility=value==T("ready")?Visibility.Collapsed:Visibility.Visible;
+        }
+    }
     private async Task Guard(Func<Task> operation)
     {
         try { await operation(); }

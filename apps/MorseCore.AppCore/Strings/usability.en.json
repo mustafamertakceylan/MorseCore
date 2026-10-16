@@ -1,0 +1,18 @@
+{
+  "uxSelected": "Selected",
+  "uxMorseAudio": "Morse audio",
+  "uxSpeechIntro": "Enter text, choose a voice and listen.",
+  "uxMorseIntro": "Create audio from text or Morse code.",
+  "uxWaveSource": "WAV file",
+  "uxMicrophoneSource": "Microphone",
+  "uxAdvanced": "Advanced settings",
+  "uxDecoderIntro": "Choose a WAV file or decode a microphone recording.",
+  "uxDecoderResult": "Decoded result",
+  "uxAppearance": "Appearance and language",
+  "uxConversion": "Conversion and files",
+  "uxSpeechSettings": "Speech",
+  "uxCreateStation": "Add your first station",
+  "uxSaveAndContinue": "Save and prepare contact",
+  "uxStationStep": "Enter your call sign, then check the country and licence class.",
+  "uxOpenAudio": "Open in Audio"
+}

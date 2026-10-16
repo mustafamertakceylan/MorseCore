@@ -16,6 +16,7 @@ public sealed partial class MainPage
     private QsoStage qsoStage;
     private bool practiceLog=true,showPracticeLog=true;
     private bool operatingDetailsExpanded,stationDetailsExpanded,qsoRecordExpanded,countryRulesExpanded;
+    private bool returnToQsoAfterStation;
     private TextBox? qsoTextBox,qsoCodeBox;
     private void InvalidateQso()
     {
@@ -48,7 +49,8 @@ public sealed partial class MainPage
     {
         var stack=new StackPanel { Spacing=12 };
         var profiles=stations!.Profiles.ToArray();
-        stack.Children.Add(Choice(T("stationPicker"),new[]{T("newStation")}.Concat(profiles.Select(p=>p.Label==p.CallSign?p.CallSign:$"{p.Label} · {p.CallSign}")),Array.FindIndex(profiles,p=>p.Id==stationDraft.Id)+1,i=>
+        stack.Children.Add(Label(T("uxStationStep"),14,true));
+        if(profiles.Length>0) stack.Children.Add(Choice(T("stationPicker"),new[]{T("newStation")}.Concat(profiles.Select(p=>p.Label==p.CallSign?p.CallSign:$"{p.Label} · {p.CallSign}")),Array.FindIndex(profiles,p=>p.Id==stationDraft.Id)+1,i=>
         { if(i==0) { if(!profiles.Any(p=>p.Id==stationDraft.Id)) return; stationDraft=new(); } else { if(stationDraft.Id==profiles[i-1].Id) return; LoadStation(profiles[i-1]); } BuildPage(); }));
         stack.Children.Add(RadioInput("callSign",stationDraft.CallSign,v=>stationDraft=stationDraft with { CallSign=v },true,32));
         var analysis=Label("",14,true); stack.Children.Add(analysis);
@@ -60,7 +62,7 @@ public sealed partial class MainPage
                 stationDraft=stationDraft with { CallSign=info.Normalized,CountryId=info.CountryId ?? "OTHER",ClassId=info.ClassId ?? "" };
                 BuildPage(); SetStatus(CallDescription(info));
             }
-            catch(ArgumentException) { analysis.Text=T("invalidCall"); }
+            catch(ArgumentException) { analysis.Text=T("invalidCall"); SetStatus(analysis.Text); }
             return Task.CompletedTask;
         },"\uE721"));
         if(stationDraft.CallSign.Length>0)
@@ -80,15 +82,31 @@ public sealed partial class MainPage
         stack.Children.Add(optional);
         stack.Children.Add(Label(T("callOfflineNote"),12,true));
         var controls=Row();
-        controls.Children.Add(Action("saveStation",()=>
+        var formError=Label("",14,true); formError.Visibility=Visibility.Collapsed;
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(formError,"StationFormError");
+        stack.Children.Add(formError);
+        var save=Action("saveStation",()=>
         {
-            var info=CallSigns.Parse(stationDraft.CallSign);
-            if(!country.Classes.Contains(stationDraft.ClassId) || info.CountryId is { } recognized && recognized!=stationDraft.CountryId) { SetStatus(T("stationCheck")); return Task.CompletedTask; }
+            CallSignInfo info;
+            try { info=CallSigns.Parse(stationDraft.CallSign); }
+            catch(ArgumentException)
+            { formError.Text=T("invalidCall"); formError.Visibility=Visibility.Visible; SetStatus(formError.Text); return Task.CompletedTask; }
+            if(!country.Classes.Contains(stationDraft.ClassId) || info.CountryId is { } recognized && recognized!=stationDraft.CountryId)
+            { formError.Text=T("stationCheck"); formError.Visibility=Visibility.Visible; SetStatus(formError.Text); return Task.CompletedTask; }
             var profile=stationDraft with { CallSign=info.Normalized,Label=stationDraft.Label.Trim().Length==0?info.Normalized:stationDraft.Label.Trim() };
             var next=stations with { ActiveId=profile.Id,Profiles=stations.Profiles.Where(p=>p.Id!=profile.Id).Append(profile).ToList() };
-            radioStore.SaveProfiles(next); stations=next; LoadStation(profile); SetStatus(T("saved")); BuildPage(); return Task.CompletedTask;
-        },"\uE74E",true));
-        controls.Children.Add(Action("deleteStation",async()=>
+            radioStore.SaveProfiles(next); stations=next; LoadStation(profile); SetStatus(T("saved"));
+            if(returnToQsoAfterStation) { returnToQsoAfterStation=false; Navigate("qsoAssistant"); }
+            else BuildPage();
+            return Task.CompletedTask;
+        },"\uE74E",true);
+        if(returnToQsoAfterStation)
+        {
+            ((TextBlock)((StackPanel)save.Content).Children.Last()).Text=T("uxSaveAndContinue");
+            Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(save,T("uxSaveAndContinue"));
+        }
+        controls.Children.Add(save);
+        if(profiles.Any(p=>p.Id==stationDraft.Id)) controls.Children.Add(Action("deleteStation",async()=>
         {
             if(!stations.Profiles.Any(p=>p.Id==stationDraft.Id)) return;
             var dialog=new ContentDialog { XamlRoot=XamlRoot,Title=T("deleteStation"),Content=stationDraft.CallSign,PrimaryButtonText=T("deleteStation"),CloseButtonText=T("cancelUpdate"),DefaultButton=ContentDialogButton.Close,RequestedTheme=RequestedTheme };
@@ -119,7 +137,13 @@ public sealed partial class MainPage
     private void BuildQso()
     {
         if(ActiveStation is not { } station)
-        { PageContent.Children.Add(Label(T("stationRequired"))); PageContent.Children.Add(Action("stationProfiles",()=> { Navigate("stationProfiles"); return Task.CompletedTask; },"\uE77B",true)); return; }
+        {
+            var empty=new StackPanel { Spacing=16 };
+            empty.Children.Add(Label(T("stationRequired")));
+            var create=Action("uxCreateStation",()=> { returnToQsoAfterStation=true; Navigate("stationProfiles"); return Task.CompletedTask; },"\uE77B",true);
+            Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(create,"stationProfiles");
+            empty.Children.Add(create); PageContent.Children.Add(Card(empty)); return;
+        }
         if(operatingCountry.Length==0) LoadStation(station);
         var stack=new StackPanel { Spacing=12 };
         var profiles=stations!.Profiles.ToArray();
