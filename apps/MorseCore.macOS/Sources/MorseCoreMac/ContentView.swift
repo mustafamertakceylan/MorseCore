@@ -55,7 +55,7 @@ struct ContentView: View {
     private var titleBar: some View {
         ZStack {
             HStack(spacing: 9) {
-                if let url = Bundle.module.url(forResource: "morsecore", withExtension: "png", subdirectory: "Resources"),
+                if let url = MacResources.bundle.url(forResource: "morsecore", withExtension: "png", subdirectory: "Resources"),
                    let image = NSImage(contentsOf: url) {
                     Image(nsImage: image).resizable().scaledToFit()
                         .frame(width: 24, height: 24)

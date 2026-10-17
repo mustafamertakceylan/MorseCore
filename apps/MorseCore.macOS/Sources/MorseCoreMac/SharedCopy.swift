@@ -4,7 +4,7 @@ enum SharedCopy {
     static let languages: [String: [String: String]] = {
         var result: [String: [String: String]] = [:]
         for language in ["tr", "en", "de", "ru", "ar"] {
-            if let url = Bundle.module.url(forResource: language, withExtension: "json", subdirectory: "Resources/Strings"),
+            if let url = MacResources.bundle.url(forResource: language, withExtension: "json", subdirectory: "Resources/Strings"),
                let data = try? Data(contentsOf: url),
                let values = try? JSONDecoder().decode([String: String].self, from: data) {
                 result[language] = values

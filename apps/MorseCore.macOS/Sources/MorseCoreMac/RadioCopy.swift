@@ -82,7 +82,7 @@ private struct RadioAdifBand: Decodable, Sendable {
     let high: Double
 }
 private let radioAdifBands: [RadioAdifBand] = {
-    guard let url = Bundle.module.url(forResource: "adif-bands", withExtension: "json", subdirectory: "Resources"),
+    guard let url = MacResources.bundle.url(forResource: "adif-bands", withExtension: "json", subdirectory: "Resources"),
           let data = try? Data(contentsOf: url),
           let bands = try? JSONDecoder().decode([RadioAdifBand].self, from: data),
           bands.allSatisfy({ !$0.name.isEmpty && $0.low.isFinite && $0.high.isFinite && $0.low > 0 && $0.low <= $0.high }) else { return [] }

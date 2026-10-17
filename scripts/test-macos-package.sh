@@ -27,6 +27,20 @@ bash "$ROOT/apps/MorseCore.macOS/packaging/validate-bundle.sh" "$WORK/mount/Mors
 MOUNTED=0
 APP="$WORK/Applications/MorseCore.app"
 bash "$ROOT/apps/MorseCore.macOS/packaging/validate-bundle.sh" "$APP"
+# Exercise the actual Release executable's CFBundle lookup without a GUI.
+# Run from a relocated app, so the builder's absolute SwiftPM path cannot help.
+python3 - "$APP" "$WORK" <<'PY'
+import pathlib, subprocess, sys
+app, work = map(pathlib.Path, sys.argv[1:])
+result = subprocess.run([str(app / 'Contents/MacOS/MorseCoreMac'), '--verify-packaged-resources'],
+    env={'PATH': '/usr/bin:/bin', 'HOME': str(work), 'TMPDIR': str(work)},
+    capture_output=True, timeout=20, check=True)
+(work / 'resources.json').write_bytes(result.stdout)
+PY
+[[ "$(/usr/bin/plutil -extract ok raw -o - "$WORK/resources.json")" == true ]]
+[[ "$(/usr/bin/plutil -extract resourceBundle raw -o - "$WORK/resources.json")" == "$APP/Contents/Resources/MorseCoreMac_MorseCoreMac.bundle" ]]
+cat "$WORK/resources.json"
+echo 'PASS: relocated Release executable decodes five translations, logo and two font files from its own resource bundle.'
 # Execute the relocated self-contained .NET helper with no dotnet/Homebrew PATH.
 printf '%s\n' '{"command":"cw.encode","payload":{"text":"SOS"}}' | \
     /usr/bin/env -i PATH=/usr/bin:/bin HOME="$WORK" TMPDIR="$WORK" \
@@ -36,19 +50,23 @@ printf '%s\n' '{"command":"cw.encode","payload":{"text":"SOS"}}' | \
 [[ "$(/usr/bin/plutil -extract data.morse raw -o - "$WORK/response.json")" == '... --- ...' ]] || { cat "$WORK/response.json" >&2; exit 1; }
 if [[ "${MORSECORE_PACKAGE_GUI_SMOKE:-0}" == 1 ]]; then
     /usr/bin/open -n --env "MORSECORE_DATA_ROOT=$WORK/data" \
+        --env "MORSECORE_PACKAGE_READY_FILE=$WORK/data/package-ready.json" \
         --env "MORSECORE_SETTINGS_SUITE=com.morsecore.mac.package-test.$(basename "$WORK")" "$APP"
-    for attempt in 1 2 3 4 5; do
+    for attempt in {1..20}; do
         sleep 1
         GUI_PID="$(/usr/bin/pgrep -f "^$APP/Contents/MacOS/MorseCoreMac$" || true)"
-        [[ -z "$GUI_PID" ]] || break
+        [[ -z "$GUI_PID" || ! -s "$WORK/data/package-ready.json" ]] || break
     done
     [[ "$GUI_PID" =~ ^[0-9]+$ ]] || { echo "Installed GUI process did not launch" >&2; exit 1; }
-    sleep 3
+    [[ -s "$WORK/data/package-ready.json" ]] || { cat "$WORK/data/package-readiness-diagnostic.json" 2>/dev/null || true; echo "Installed GUI did not decode its resources and present a window" >&2; exit 1; }
+    [[ "$(/usr/bin/plutil -extract pid raw -o - "$WORK/data/package-ready.json")" == "$GUI_PID" ]]
+    [[ "$(/usr/bin/plutil -extract visibleWindow raw -o - "$WORK/data/package-ready.json")" == true ]]
+    cat "$WORK/data/package-ready.json"
     /bin/kill -0 "$GUI_PID"
     /bin/kill -TERM "$GUI_PID"
     GUI_PID=""
     /usr/bin/defaults delete "com.morsecore.mac.package-test.$(basename "$WORK")" 2>/dev/null || true
-    echo 'PASS: relocated Release GUI launches with isolated settings/data and stays running.'
+    echo 'PASS: relocated Release GUI decodes packaged resources and presents a real window with isolated settings/data.'
 fi
 echo 'PASS: DMG integrity, read-only mount, Applications shortcut, relocation, signatures, architecture, bundled runtime and native SOS conversion.'
 echo 'Scope: isolated drag-and-drop installation; Gatekeeper approval and physical audio need separate device checks.'

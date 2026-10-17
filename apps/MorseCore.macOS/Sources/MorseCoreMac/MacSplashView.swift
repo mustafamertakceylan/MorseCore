@@ -34,6 +34,7 @@ struct MacLaunchView: View {
                 try await Task.sleep(for: .milliseconds(1_900))
                 progress = 100
                 withAnimation(reduceMotion ? nil : .easeOut(duration: 0.15)) { ready = true }
+                await PackageReadiness.writeIfRequested()
                 await UpdateChecker.onLaunch(settings)
             } catch {
                 // Closing the only window cancels its launch work.
@@ -57,7 +58,7 @@ struct MacSplashView: View {
             theme.canvas
             RawBackdrop(dark: theme.dark, reduceMotion: systemReduceMotion || settings.reduceMotion)
             VStack(spacing: 20) {
-                if let url = Bundle.module.url(forResource: "morsecore", withExtension: "png", subdirectory: "Resources"),
+                if let url = MacResources.bundle.url(forResource: "morsecore", withExtension: "png", subdirectory: "Resources"),
                    let image = NSImage(contentsOf: url) {
                     Image(nsImage: image).resizable().scaledToFit().frame(width: 144, height: 144)
                         .background(Color(hex: 0xFAF8F2))
