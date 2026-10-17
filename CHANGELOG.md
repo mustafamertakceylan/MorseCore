@@ -1,5 +1,14 @@
 # Changelog / Değişiklik günlüğü
 
+## 1.0.0 — 2026-10-17
+
+- Release Windows x64, macOS Apple Silicon and Linux x64 together, with the shared C23 engine and AppCore rules. Linux provides a portable archive, DEB package and Arch build recipe for Ubuntu, Debian, Pardus and Arch.
+- Windows x64, macOS Apple Silicon ve Linux x64 aynı C23 motoru ve AppCore kurallarıyla birlikte yayımlanır. Ubuntu, Debian, Pardus ve Arch için taşınabilir Linux arşivi, DEB paketi ve Arch derleme tarifi sunulur.
+- Add Linux audio capture/playback, single-window activation and private XDG storage. Fix repeated file pickers and portable offline speech setup; preserve existing settings and QSO records during tested upgrades.
+- Linux ses girişi/çıkışı, tek pencere etkinleştirme ve özel XDG depolaması eklendi. Tekrarlanan dosya seçiciler ve taşınabilir çevrimdışı ses kurulumu düzeltildi; test edilen yükseltmelerde mevcut ayarlar ve QSO kayıtları korundu.
+- Verify all platform packages and SHA256 manifests in the same release workflow. macOS is ad hoc signed without Apple notarization; Mac app replacement and Linux package installation remain user actions. See [release notes](docs/releases/v1.0.0.md).
+- Tüm platform paketleri ve SHA256 manifestleri aynı yayın iş akışında doğrulanır. macOS paketi Apple noter onayı olmadan ad hoc imzalıdır; Mac uygulamasının değiştirilmesi ve Linux paket kurulumu kullanıcı tarafından tamamlanır. [Sürüm notları](docs/releases/v1.0.0.md).
+
 ## 0.7.5 — 2026-10-16
 
 - Added the Apple Silicon macOS preview with a drag-and-drop DMG, native SwiftUI interface and the shared C23/AppCore engine. Windows packages and the existing version tag remain unchanged.
