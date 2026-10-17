@@ -6,10 +6,10 @@
 
 **اكتب رسالتك. استمع إلى مورس. تعلّم بالممارسة.**
 
-[![تنزيل Windows](https://img.shields.io/badge/%D8%AA%D9%86%D8%B2%D9%8A%D9%84-Windows-5e6a42?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/download/v1.0.0/MorseCore-1.0.0-Windows-x64-Setup.exe)
-[![تنزيل macOS](https://img.shields.io/badge/macOS-Apple_Silicon-5e6a42?style=for-the-badge&logo=apple&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/download/v1.0.0/MorseCore-1.0.0-macOS-arm64.dmg)
-[![تنزيل Linux](https://img.shields.io/badge/Linux-x64-5e6a42?style=for-the-badge&logo=linux&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v1.0.0)
-[![1.0.0](https://img.shields.io/badge/v1.0.0-%D8%A5%D8%B5%D8%AF%D8%A7%D8%B1-c58c59?style=for-the-badge)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v1.0.0)
+[![تنزيل Windows](https://img.shields.io/badge/%D8%AA%D9%86%D8%B2%D9%8A%D9%84-Windows-5e6a42?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/download/v1.0.1/MorseCore-1.0.1-Windows-x64-Setup.exe)
+[![تنزيل macOS](https://img.shields.io/badge/macOS-Apple_Silicon-5e6a42?style=for-the-badge&logo=apple&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/download/v1.0.1/MorseCore-1.0.1-macOS-arm64.dmg)
+[![تنزيل Linux](https://img.shields.io/badge/Linux-x64-5e6a42?style=for-the-badge&logo=linux&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v1.0.1)
+[![1.0.1](https://img.shields.io/badge/v1.0.1-%D8%A5%D8%B5%D8%AF%D8%A7%D8%B1-c58c59?style=for-the-badge)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v1.0.1)
 
 [English](README.md) · [Türkçe](README.tr.md) · [Deutsch](README.de.md) · [Русский](README.ru.md) · **العربية**
 
@@ -21,7 +21,7 @@ MorseCore تطبيق مجاني لويندوز وmacOS وLinux لتحويل ال
 
 ![واجهة MorseCore العربية: النص وشفرة مورس مع قائمة على اليمين](docs/media/converter.ar.png)
 
-**macOS:** افتح [ملف DMG](https://github.com/mustafamertakceylan/MorseCore/releases/download/v1.0.0/MorseCore-1.0.0-macOS-arm64.dmg) واسحب MorseCore إلى التطبيقات. هذه النسخة غير موثّقة لدى Apple؛ قد تحتاج للسماح بفتحها في الخصوصية والأمان. [تثبيت Mac بالإنجليزية والتركية](docs/macos.md).
+**macOS:** افتح [ملف DMG](https://github.com/mustafamertakceylan/MorseCore/releases/download/v1.0.1/MorseCore-1.0.1-macOS-arm64.dmg) واسحب MorseCore إلى التطبيقات. هذه النسخة غير موثّقة لدى Apple؛ قد تحتاج للسماح بفتحها في الخصوصية والأمان. [تثبيت Mac بالإنجليزية والتركية](docs/macos.md).
 
 **Linux:** استخدم `.deb` مع Ubuntu وDebian وPardus، أو الأرشيف المحمول و`PKGBUILD` مع Arch. [تثبيت Linux بالإنجليزية](docs/linux.md).
 
@@ -31,7 +31,7 @@ MorseCore تطبيق مجاني لويندوز وmacOS وLinux لتحويل ال
 2. اكتب رسالتك في **المحوّل** ثم حوّلها. افتح قسم **الصوت** للاستماع.
 3. افتح **التعلّم** للأبجدية والتمارين واختصارات هواة اللاسلكي.
 
-تفضّل الاستخدام دون تثبيت؟ فك ضغط [ملف ZIP المحمول](https://github.com/mustafamertakceylan/MorseCore/releases/download/v1.0.0/MorseCore-1.0.0-Windows-x64-Desktop.zip) وافتح **MorseCore.Desktop.exe**. هذه نسخة ويندوز غير موقّعة؛ قد يعرض ويندوز تحذيراً بشأن الناشر.
+تفضّل الاستخدام دون تثبيت؟ فك ضغط [ملف ZIP المحمول](https://github.com/mustafamertakceylan/MorseCore/releases/download/v1.0.1/MorseCore-1.0.1-Windows-x64-Desktop.zip) وافتح **MorseCore.Desktop.exe**. هذه نسخة ويندوز غير موقّعة؛ قد يعرض ويندوز تحذيراً بشأن الناشر.
 
 ### ماذا يمكنك أن تفعل؟
 

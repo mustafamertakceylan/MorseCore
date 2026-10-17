@@ -5,7 +5,7 @@ Linux sürümü Windows ile aynı XAML arayüzünü, C23 motorunu ve
 aynı kaynaktan gelir. İlk hedef **x86-64 ve glibc** kullanan Linux'tur;
 ARM ve musl/Alpine bu paketin kapsamında değildir.
 
-Linux paketlerini [Releases sayfasından](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v1.0.0) indir. Uygulama,
+Linux paketlerini [Releases sayfasından](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v1.0.1) indir. Uygulama,
 aşağıdaki dört sanal makinede ortak arayüz ve sekiz çevrimdışı ses dahil
 test edildi. Fiziksel mikrofon ve iki yayımlanmış Linux sürümü arasında canlı
 GitHub yükseltmesi henüz doğrulanmadı.
@@ -51,7 +51,7 @@ Kaynak: [.NET runtime açıklaması](https://github.com/dotnet/runtime/discussio
 
 ## Kurulum
 
-`.deb`, taşınabilir arşiv veya `PKGBUILD` dosyasını [Releases sayfasından](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v1.0.0) indir.
+`.deb`, taşınabilir arşiv veya `PKGBUILD` dosyasını [Releases sayfasından](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v1.0.1) indir.
 Aşağıdaki `VERSION` yerine indirdiğin dosyadaki sürümü yaz.
 
 Ubuntu, Debian ve Pardus:

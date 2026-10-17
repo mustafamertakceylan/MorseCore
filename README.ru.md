@@ -4,10 +4,10 @@
 
 **Напиши сообщение. Послушай Морзе. Учись на практике.**
 
-[![Скачать Windows](https://img.shields.io/badge/%D0%A1%D0%BA%D0%B0%D1%87%D0%B0%D1%82%D1%8C-Windows-5e6a42?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/download/v1.0.0/MorseCore-1.0.0-Windows-x64-Setup.exe)
-[![Скачать macOS](https://img.shields.io/badge/macOS-Apple_Silicon-5e6a42?style=for-the-badge&logo=apple&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/download/v1.0.0/MorseCore-1.0.0-macOS-arm64.dmg)
-[![Скачать Linux](https://img.shields.io/badge/Linux-x64-5e6a42?style=for-the-badge&logo=linux&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v1.0.0)
-[![1.0.0](https://img.shields.io/badge/v1.0.0-%D0%A0%D0%B5%D0%BB%D0%B8%D0%B7-c58c59?style=for-the-badge)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v1.0.0)
+[![Скачать Windows](https://img.shields.io/badge/%D0%A1%D0%BA%D0%B0%D1%87%D0%B0%D1%82%D1%8C-Windows-5e6a42?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/download/v1.0.1/MorseCore-1.0.1-Windows-x64-Setup.exe)
+[![Скачать macOS](https://img.shields.io/badge/macOS-Apple_Silicon-5e6a42?style=for-the-badge&logo=apple&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/download/v1.0.1/MorseCore-1.0.1-macOS-arm64.dmg)
+[![Скачать Linux](https://img.shields.io/badge/Linux-x64-5e6a42?style=for-the-badge&logo=linux&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v1.0.1)
+[![1.0.1](https://img.shields.io/badge/v1.0.1-%D0%A0%D0%B5%D0%BB%D0%B8%D0%B7-c58c59?style=for-the-badge)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v1.0.1)
 
 [English](README.md) · [Türkçe](README.tr.md) · [Deutsch](README.de.md) · **Русский** · [العربية](README.ar.md)
 
@@ -19,7 +19,7 @@ MorseCore — бесплатное приложение для Windows, macOS и
 
 ![MorseCore на русском: текст слева, код Морзе справа](docs/media/converter.ru.png)
 
-**macOS:** открой [DMG](https://github.com/mustafamertakceylan/MorseCore/releases/download/v1.0.0/MorseCore-1.0.0-macOS-arm64.dmg) и перетащи MorseCore в «Программы». Эта версия не нотарифицирована Apple; может потребоваться разрешение в разделе «Конфиденциальность и безопасность». [Установка на Mac (EN/TR)](docs/macos.md).
+**macOS:** открой [DMG](https://github.com/mustafamertakceylan/MorseCore/releases/download/v1.0.1/MorseCore-1.0.1-macOS-arm64.dmg) и перетащи MorseCore в «Программы». Эта версия не нотарифицирована Apple; может потребоваться разрешение в разделе «Конфиденциальность и безопасность». [Установка на Mac (EN/TR)](docs/macos.md).
 
 **Linux:** `.deb` для Ubuntu, Debian и Pardus; переносной архив и `PKGBUILD` для Arch. [Установка Linux (EN)](docs/linux.md).
 
@@ -29,7 +29,7 @@ MorseCore — бесплатное приложение для Windows, macOS и
 2. Введи сообщение в **Конвертере** и запусти преобразование. Для прослушивания открой **Звук**.
 3. В разделе **Обучение** находятся алфавит, упражнения и радиолюбительские сокращения.
 
-Без установки? Распакуй [переносной ZIP](https://github.com/mustafamertakceylan/MorseCore/releases/download/v1.0.0/MorseCore-1.0.0-Windows-x64-Desktop.zip) и открой **MorseCore.Desktop.exe**. Эта сборка для Windows не подписана; Windows может показать предупреждение об издателе.
+Без установки? Распакуй [переносной ZIP](https://github.com/mustafamertakceylan/MorseCore/releases/download/v1.0.1/MorseCore-1.0.1-Windows-x64-Desktop.zip) и открой **MorseCore.Desktop.exe**. Эта сборка для Windows не подписана; Windows может показать предупреждение об издателе.
 
 ### Что можно делать?
 

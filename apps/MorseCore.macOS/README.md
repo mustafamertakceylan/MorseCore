@@ -54,7 +54,7 @@ From the repository root, create and validate a drag-and-drop installer:
 ```sh
 bash scripts/package-macos.sh
 MORSECORE_PACKAGE_GUI_SMOKE=1 bash scripts/test-macos-package.sh \
-  build/release-macos/MorseCore-1.0.0-macOS-arm64.dmg
+  build/release-macos/MorseCore-1.0.1-macOS-arm64.dmg
 ```
 
 For a freshly cross-published helper, set `MORSECORE_SKIP_HELPER_PUBLISH=1` on

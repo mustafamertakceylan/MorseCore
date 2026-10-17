@@ -4,10 +4,10 @@
 
 **Mesajını yaz. Morse'u dinle. Alıştırma yaparak öğren.**
 
-[![İndir Windows](https://img.shields.io/badge/%C4%B0ndir-Windows-5e6a42?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/download/v1.0.0/MorseCore-1.0.0-Windows-x64-Setup.exe)
-[![İndir macOS](https://img.shields.io/badge/macOS-Apple_Silicon-5e6a42?style=for-the-badge&logo=apple&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/download/v1.0.0/MorseCore-1.0.0-macOS-arm64.dmg)
-[![İndir Linux](https://img.shields.io/badge/Linux-x64-5e6a42?style=for-the-badge&logo=linux&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v1.0.0)
-[![1.0.0](https://img.shields.io/badge/v1.0.0-Yay%C4%B1nda-c58c59?style=for-the-badge)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v1.0.0)
+[![İndir Windows](https://img.shields.io/badge/%C4%B0ndir-Windows-5e6a42?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/download/v1.0.1/MorseCore-1.0.1-Windows-x64-Setup.exe)
+[![İndir macOS](https://img.shields.io/badge/macOS-Apple_Silicon-5e6a42?style=for-the-badge&logo=apple&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/download/v1.0.1/MorseCore-1.0.1-macOS-arm64.dmg)
+[![İndir Linux](https://img.shields.io/badge/Linux-x64-5e6a42?style=for-the-badge&logo=linux&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v1.0.1)
+[![1.0.1](https://img.shields.io/badge/v1.0.1-Yay%C4%B1nda-c58c59?style=for-the-badge)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v1.0.1)
 
 [English](README.md) · **Türkçe** · [Deutsch](README.de.md) · [Русский](README.ru.md) · [العربية](README.ar.md)
 
@@ -19,7 +19,7 @@ MorseCore; metni Morse koduna çevirmek, dinlemek ve alıştırma yapmak için �
 
 ![Türkçe MorseCore: solda metin, sağda Morse kodu](docs/media/converter.tr.png)
 
-**macOS:** [DMG dosyasını](https://github.com/mustafamertakceylan/MorseCore/releases/download/v1.0.0/MorseCore-1.0.0-macOS-arm64.dmg) açıp MorseCore’u Applications klasörüne sürükle. Bu sürüm Apple noter onayına sahip değil; Gizlilik ve Güvenlik üzerinden açılışa izin vermen gerekebilir. [Mac kurulumu](docs/macos.md).
+**macOS:** [DMG dosyasını](https://github.com/mustafamertakceylan/MorseCore/releases/download/v1.0.1/MorseCore-1.0.1-macOS-arm64.dmg) açıp MorseCore’u Applications klasörüne sürükle. Bu sürüm Apple noter onayına sahip değil; Gizlilik ve Güvenlik üzerinden açılışa izin vermen gerekebilir. [Mac kurulumu](docs/macos.md).
 
 **Linux:** Ubuntu, Debian veya Pardus için `.deb`; Arch için taşınabilir arşiv ve `PKGBUILD` kullan. [Linux kurulumu](docs/linux.tr.md).
 
@@ -29,7 +29,7 @@ MorseCore; metni Morse koduna çevirmek, dinlemek ve alıştırma yapmak için �
 2. **Dönüştürücü** bölümüne mesajını yazıp **Dönüştür** düğmesine bas. Dinlemek için **Ses** bölümünü kullan.
 3. Alfabe, alıştırmalar ve telsiz kısaltmaları için **Eğitim** bölümünü aç.
 
-Kurmak istemiyorsan [taşınabilir ZIP’i](https://github.com/mustafamertakceylan/MorseCore/releases/download/v1.0.0/MorseCore-1.0.0-Windows-x64-Desktop.zip) çıkarıp **MorseCore.Desktop.exe** dosyasını aç. Bu Windows sürümü imzasızdır; Windows yayıncı uyarısı gösterebilir.
+Kurmak istemiyorsan [taşınabilir ZIP’i](https://github.com/mustafamertakceylan/MorseCore/releases/download/v1.0.1/MorseCore-1.0.1-Windows-x64-Desktop.zip) çıkarıp **MorseCore.Desktop.exe** dosyasını aç. Bu Windows sürümü imzasızdır; Windows yayıncı uyarısı gösterebilir.
 
 ### Neler yapabilirsin?
 

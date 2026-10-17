@@ -4,10 +4,10 @@
 
 **Write a message. Hear Morse. Learn by practicing.**
 
-[![Download Windows](https://img.shields.io/badge/Download-Windows-5e6a42?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/download/v1.0.0/MorseCore-1.0.0-Windows-x64-Setup.exe)
-[![Download macOS](https://img.shields.io/badge/macOS-Apple_Silicon-5e6a42?style=for-the-badge&logo=apple&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/download/v1.0.0/MorseCore-1.0.0-macOS-arm64.dmg)
-[![Download Linux](https://img.shields.io/badge/Linux-x64-5e6a42?style=for-the-badge&logo=linux&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v1.0.0)
-[![1.0.0](https://img.shields.io/badge/v1.0.0-Release-c58c59?style=for-the-badge)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v1.0.0)
+[![Download Windows](https://img.shields.io/badge/Download-Windows-5e6a42?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/download/v1.0.1/MorseCore-1.0.1-Windows-x64-Setup.exe)
+[![Download macOS](https://img.shields.io/badge/macOS-Apple_Silicon-5e6a42?style=for-the-badge&logo=apple&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/download/v1.0.1/MorseCore-1.0.1-macOS-arm64.dmg)
+[![Download Linux](https://img.shields.io/badge/Linux-x64-5e6a42?style=for-the-badge&logo=linux&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v1.0.1)
+[![1.0.1](https://img.shields.io/badge/v1.0.1-Release-c58c59?style=for-the-badge)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v1.0.1)
 
 **English** · [Türkçe](README.tr.md) · [Deutsch](README.de.md) · [Русский](README.ru.md) · [العربية](README.ar.md)
 
@@ -19,7 +19,7 @@ MorseCore is a free Windows, macOS and Linux app for converting text to Morse co
 
 ![MorseCore in English: text on the left, Morse code on the right](docs/media/converter.en.png)
 
-**macOS:** open the [DMG](https://github.com/mustafamertakceylan/MorseCore/releases/download/v1.0.0/MorseCore-1.0.0-macOS-arm64.dmg), then drag MorseCore to Applications. This release is not notarized; macOS may require approval in Privacy & Security. See [Mac installation](docs/macos.md).
+**macOS:** open the [DMG](https://github.com/mustafamertakceylan/MorseCore/releases/download/v1.0.1/MorseCore-1.0.1-macOS-arm64.dmg), then drag MorseCore to Applications. This release is not notarized; macOS may require approval in Privacy & Security. See [Mac installation](docs/macos.md).
 
 **Linux:** choose the `.deb` for Ubuntu, Debian or Pardus, or the portable archive and `PKGBUILD` for Arch. See [Linux installation](docs/linux.md).
 
@@ -29,7 +29,7 @@ MorseCore is a free Windows, macOS and Linux app for converting text to Morse co
 2. Type a message in **Converter** and choose **Convert**. Use **Audio** to listen.
 3. Open **Learning** for the alphabet, exercises and radio abbreviations.
 
-Prefer no installation? Extract the [portable ZIP](https://github.com/mustafamertakceylan/MorseCore/releases/download/v1.0.0/MorseCore-1.0.0-Windows-x64-Desktop.zip) and open **MorseCore.Desktop.exe**. This Windows build is unsigned; Windows may show a publisher warning.
+Prefer no installation? Extract the [portable ZIP](https://github.com/mustafamertakceylan/MorseCore/releases/download/v1.0.1/MorseCore-1.0.1-Windows-x64-Desktop.zip) and open **MorseCore.Desktop.exe**. This Windows build is unsigned; Windows may show a publisher warning.
 
 ### What can you do?
 

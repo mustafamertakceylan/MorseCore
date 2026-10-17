@@ -5,7 +5,7 @@ The Linux desktop shares the Windows XAML interface, C23 engine and
 source. The first build targets **x86-64** Linux with glibc; ARM and musl/Alpine
 are outside this build.
 
-Download Linux packages from [Releases](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v1.0.0). The application has been
+Download Linux packages from [Releases](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v1.0.1). The application has been
 tested in the four virtual machines below, including the shared interface and
 all eight offline voices. Physical microphone hardware and a live GitHub upgrade
 between two published Linux versions remain unverified.
@@ -51,7 +51,7 @@ See the [.NET runtime explanation](https://github.com/dotnet/runtime/discussions
 
 ## Install
 
-Download the `.deb`, portable archive or `PKGBUILD` from [Releases](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v1.0.0).
+Download the `.deb`, portable archive or `PKGBUILD` from [Releases](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v1.0.1).
 Use the version in the filename in place of `VERSION` below.
 
 Ubuntu, Debian and Pardus:

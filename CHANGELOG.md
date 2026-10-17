@@ -1,5 +1,14 @@
 # Changelog / Değişiklik günlüğü
 
+## 1.0.1 — 2026-10-17
+
+- Fix the macOS startup crash in the CI-built DMG by loading translations, artwork and fonts from the installed app bundle instead of the build machine's SwiftPM path.
+- CI'da üretilen Mac DMG'sindeki açılış çökmesi düzeltildi; çeviriler, görseller ve fontlar derleme makinesinin SwiftPM yolu yerine kurulu uygulama paketinden yüklenir.
+- Add relocated Release resource checks and verify that the installed Mac app presents a visible window. Windows update tests retain bounded Setup wizard diagnostics and ignore hidden or disabled controls.
+- Taşınmış Release paketinde kaynak kontrolleri ve kurulu Mac uygulamasında görünür pencere doğrulaması eklendi. Windows güncelleme testleri sınırlı kurulum sihirbazı tanılama kaydı tutar; gizli veya pasif kontrolleri atlar.
+- Windows, macOS and Linux packages use version 1.0.1. Replace the affected 1.0.0 Mac build with this release; ad hoc signing and manual Mac/Linux installation remain unchanged. See [release notes](docs/releases/v1.0.1.md).
+- Windows, macOS ve Linux paketleri 1.0.1 sürümünü kullanır. Açılış sorunu olan 1.0.0 Mac paketi yerine bu sürümü kur; ad hoc imza ve elle Mac/Linux kurulumu devam eder. [Sürüm notları](docs/releases/v1.0.1.md).
+
 ## 1.0.0 — 2026-10-17
 
 - Release Windows x64, macOS Apple Silicon and Linux x64 together, with the shared C23 engine and AppCore rules. Linux provides a portable archive, DEB package and Arch build recipe for Ubuntu, Debian, Pardus and Arch.
