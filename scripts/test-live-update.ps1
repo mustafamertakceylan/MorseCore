@@ -35,6 +35,39 @@ function Open-TestApp {
     if($taskProcess.MainWindowHandle -eq 0) { throw 'Application window did not open.' }
     return $taskProcess
 }
+function Save-WizardState($Windows,$ProcessIds) {
+    # Retain bounded evidence only for this QA Setup process tree.
+    if($script:taskWizardSnapshotCount -ge 120) { return }
+    $taskSnapshot=@()
+    foreach($taskWindow in $Windows) {
+        try {
+        if(!$ProcessIds.Contains($taskWindow.Current.ProcessId)) { continue }
+        if($taskSnapshot.Count -ge 8) { break }
+        $taskDetails=@()
+        $taskDescendants=$taskWindow.FindAll([System.Windows.Automation.TreeScope]::Descendants,[System.Windows.Automation.Condition]::TrueCondition)
+        foreach($taskElement in $taskDescendants) {
+            if($taskDetails.Count -ge 100) { break }
+            try {
+                $taskCurrent=$taskElement.Current
+                $taskName=$taskCurrent.Name
+                if($taskName.Length -gt 180) { $taskName=$taskName.Substring(0,180) }
+                $taskDetails+=@{ Name=$taskName; Id=$taskCurrent.AutomationId; Type=$taskCurrent.ControlType.ProgrammaticName; Enabled=$taskCurrent.IsEnabled; Offscreen=$taskCurrent.IsOffscreen; Class=$taskCurrent.ClassName }
+            } catch [System.Windows.Automation.ElementNotAvailableException] { }
+        }
+        $taskCurrent=$taskWindow.Current
+        $taskSnapshot+=@{ Name=$taskCurrent.Name; Pid=$taskCurrent.ProcessId; Enabled=$taskCurrent.IsEnabled; Offscreen=$taskCurrent.IsOffscreen; Class=$taskCurrent.ClassName; Controls=$taskDetails }
+        } catch [System.Windows.Automation.ElementNotAvailableException] { }
+    }
+    $taskSnapshotJson=ConvertTo-Json -InputObject @($taskSnapshot) -Depth 8 -Compress
+    if($script:taskPreviousWizardSnapshot -ceq $taskSnapshotJson) { return }
+    $taskLine=@{ Utc=[DateTime]::UtcNow.ToString('O'); Windows=$taskSnapshot } | ConvertTo-Json -Depth 10 -Compress
+    $taskLineBytes=[Text.Encoding]::UTF8.GetByteCount($taskLine)+2
+    if($script:taskWizardSnapshotBytes+$taskLineBytes -gt 2MB) { return }
+    $taskLine | Add-Content -LiteralPath (Join-Path $taskEvidence 'wizard-states.jsonl') -Encoding utf8NoBOM
+    $script:taskPreviousWizardSnapshot=$taskSnapshotJson
+    $script:taskWizardSnapshotCount++
+    $script:taskWizardSnapshotBytes+=$taskLineBytes
+}
 function Find-Wizard {
     # Inno runs a temporary child process; restrict UI discovery to that process tree.
     $taskProcessIds=[Collections.Generic.HashSet[int]]::new(); [void]$taskProcessIds.Add($taskSetup.ProcessId)
@@ -43,7 +76,11 @@ function Find-Wizard {
         foreach($taskProcess in $taskProcesses) { if($taskProcessIds.Contains([int]$taskProcess.ParentProcessId)) { [void]$taskProcessIds.Add([int]$taskProcess.ProcessId) } }
     }
     $taskWindows=[System.Windows.Automation.AutomationElement]::RootElement.FindAll([System.Windows.Automation.TreeScope]::Children,[System.Windows.Automation.Condition]::TrueCondition)
-    foreach($taskWindow in $taskWindows) { if($taskProcessIds.Contains($taskWindow.Current.ProcessId) -and $taskWindow.Current.Name -like '*MorseCore*') { return $taskWindow } }
+    Save-WizardState $taskWindows $taskProcessIds
+    foreach($taskWindow in $taskWindows) {
+        $taskCurrent=$taskWindow.Current
+        if($taskProcessIds.Contains($taskCurrent.ProcessId) -and $taskCurrent.Name -like '*MorseCore*' -and $taskCurrent.IsEnabled -and !$taskCurrent.IsOffscreen) { return $taskWindow }
+    }
     return $null
 }
 try {
@@ -64,12 +101,14 @@ try {
     Assert-Update ($taskApp.CloseMainWindow() -and $taskApp.WaitForExit(15000)) 'Running application closes cleanly after handing off to Setup'
     $taskApp.Dispose(); $taskApp=$null
     $taskTrace=[Collections.Generic.List[string]]::new()
+    $script:taskWizardSnapshotCount=0; $script:taskWizardSnapshotBytes=0; $script:taskPreviousWizardSnapshot=$null
     $taskDeadline=[DateTime]::UtcNow.AddSeconds(90); $taskFinished=$false
     while([DateTime]::UtcNow -lt $taskDeadline) {
         $taskWizard=Find-Wizard
         if(!$taskWizard) { Start-Sleep -Milliseconds 250; continue }
         $taskControls=$taskWizard.FindAll([System.Windows.Automation.TreeScope]::Descendants,[System.Windows.Automation.Condition]::TrueCondition)
         foreach($taskControl in $taskControls) {
+            if(!$taskControl.Current.IsEnabled -or $taskControl.Current.IsOffscreen) { continue }
             if($taskControl.Current.Name.Replace('&','') -eq 'I accept the agreement') {
                 $taskPattern=$null
                 if($taskControl.TryGetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern,[ref]$taskPattern)) { $taskPattern.Select() }
@@ -82,7 +121,7 @@ try {
         $taskButton=$null
         foreach($taskControl in $taskControls) {
             $taskName=$taskControl.Current.Name.Replace('&','')
-            if($taskControl.Current.ControlType -eq [System.Windows.Automation.ControlType]::Button -and $taskControl.Current.IsEnabled -and $taskName -in @('Next','Next >','Install','Finish')) { $taskButton=$taskControl; break }
+            if($taskControl.Current.ControlType -eq [System.Windows.Automation.ControlType]::Button -and $taskControl.Current.IsEnabled -and !$taskControl.Current.IsOffscreen -and $taskName -in @('Next','Next >','Install','Finish')) { $taskButton=$taskControl; break }
         }
         if($taskButton) {
             $taskName=$taskButton.Current.Name.Replace('&',''); $taskTrace.Add($taskName)
