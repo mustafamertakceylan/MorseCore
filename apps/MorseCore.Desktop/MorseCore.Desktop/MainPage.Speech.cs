@@ -45,7 +45,7 @@ public sealed partial class MainPage
         };
         language.SelectionChanged+=(_,_)=>
         {
-            if(language.SelectedIndex<0) return;
+            if(language.SelectedIndex<0 || preferences.SpeechLanguage==cultures[language.SelectedIndex]) return;
             preferences=preferences with { SpeechLanguage=cultures[language.SelectedIndex],VoiceId="" }; SelectVoices();
         };
         SelectVoices();

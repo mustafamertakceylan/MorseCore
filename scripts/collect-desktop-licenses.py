@@ -24,7 +24,11 @@ def collect(publish, packages):
             inventory.append({"name": name, "version": version, "license_source": "Microsoft.Web.WebView2/" + version})
             continue
         package = packages / name.lower() / version.lower()
-        metadata_file = package / (name.lower() + ".nuspec")
+        metadata_files = [path for path in package.iterdir()
+                          if path.is_file() and path.name.lower() == name.lower() + ".nuspec"]
+        if len(metadata_files) != 1:
+            raise ValueError("Missing or ambiguous package metadata for " + identity)
+        metadata_file = metadata_files[0]
         metadata = ET.parse(metadata_file).find("{*}metadata")
         value = lambda tag: (metadata.findtext("{*}" + tag) or "").strip()
         license_element = metadata.find("{*}license")
@@ -53,6 +57,12 @@ def collect(publish, packages):
         elif name == "Microsoft.Windows.SDK.NET.Ref":
             shutil.copy2(supplemental / "Windows-SDK-LICENSE.rtf", destination / "LICENSE.rtf")
             copied.append("LICENSE.rtf")
+        elif name == "LibVLCSharp" and version == "3.9.7.1" and expression == "LGPL-2.1-or-later":
+            shutil.copy2(supplemental / "LibVLCSharp-LICENSE", destination / "LICENSE-LGPL-2.1.txt")
+            copied.append("LICENSE-LGPL-2.1.txt")
+        elif name == "Uno.Diagnostics.Eventing" and version == "2.0.1":
+            shutil.copy2(supplemental / "Uno.Diagnostics.Eventing-LICENSE.md", destination / "LICENSE-Apache-2.0.md")
+            copied.append("LICENSE-Apache-2.0.md")
         elif not any("license" in path.lower() or "copying" in path.lower() for path in copied):
             raise ValueError("No complete license collected for " + identity)
         if name.startswith("Uno."):

@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+set -euo pipefail
+APP_DIR="$(cd -- "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")" && pwd -P)"
+if [[ "${1:-}" == --check-dependencies ]]; then
+    [[ $# == 1 ]] || { echo 'usage: morsecore --check-dependencies' >&2; exit 2; }
+    command -v ldd >/dev/null || { echo 'Missing ldd (glibc tools).' >&2; exit 1; }
+    result=0
+    while IFS= read -r -d '' binary; do
+        if [[ "${binary##*/}" == libcoreclrtraceptprovider.so ]]; then
+            # The CLR tolerates failure to load this optional LTTng provider.
+            # https://github.com/dotnet/runtime/discussions/116386
+            printf 'Note: optional .NET LTTng tracing provider is excluded from mandatory dependency checks: %s\n' "$binary" >&2
+            continue
+        fi
+        output="$(LD_LIBRARY_PATH="$APP_DIR${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" ldd "$binary" 2>&1)" || {
+            # Managed assemblies and other data may also use a .so suffix.
+            [[ "$output" == *'not a dynamic executable'* || "$output" == *'statically linked'* ]] && continue
+            printf '%s: %s\n' "$binary" "$output" >&2
+            result=1
+            continue
+        }
+        if [[ "$output" == *'not found'* ]]; then
+            printf '%s: %s\n' "$binary" "$output" >&2
+            result=1
+        fi
+    done < <(find "$APP_DIR" -type f \( -name '*.so' -o -name '*.so.*' -o -name MorseCore.Desktop \) -print0)
+    # ICU, OpenSSL and SDL are loaded dynamically and may not appear in ldd.
+    cache="$(/sbin/ldconfig -p 2>/dev/null || ldconfig -p 2>/dev/null || true)"
+    source "$APP_DIR/native-dependencies.sh"
+    for library in libSDL2-2.0.so.0 libicuuc.so libssl.so.3 libfontconfig.so.1 libX11.so.6 libXfixes.so.3; do
+        if ! morsecore_check_native_library "$library" "$APP_DIR${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" "$cache"; then
+            printf 'Missing or unloadable dynamic library: %s\n' "$library" >&2
+            result=1
+        fi
+    done
+    if ! command -v xdg-open >/dev/null || ! command -v xdg-settings >/dev/null; then
+        echo 'Missing xdg-utils (file/folder/installer launching).' >&2
+        result=1
+    fi
+    if [[ -z "${DBUS_SESSION_BUS_ADDRESS:-}" ]]; then
+        echo 'Note: no session D-Bus address is set; file pickers need a desktop D-Bus session and xdg-desktop-portal backend.' >&2
+    fi
+    [[ "$result" != 0 ]] || echo 'Required native libraries found. GUI, audio devices and permissions still need desktop testing.'
+    exit "$result"
+fi
+[[ -x "$APP_DIR/MorseCore.Desktop" ]] || { echo 'MorseCore executable is missing.' >&2; exit 1; }
+export LD_LIBRARY_PATH="$APP_DIR${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+exec "$APP_DIR/MorseCore.Desktop" "$@"

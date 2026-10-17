@@ -9,19 +9,21 @@ namespace MorseCore.Desktop;
 public sealed partial class MainPage
 {
     private readonly List<string> files=[];
-    private bool batchWorking;
+    private bool batchWorking,filePickerPending;
+    private Button? filePickerButton;
     private void BuildFiles()
     {
         Heading(T("files"),T("fileLimit"));
         var stack=new StackPanel { Spacing=18 };
         PageContent.Children.Add(Card(Columns(280,2,AlphabetChoice(),Choice(T("conversionDirection"),[T("textToMorse"),T("morseToText")],decode?1:0,i=> { decode=i==1; result=null; revision++; }))));
-        stack.Children.Add(Action("chooseFiles",async()=>
+        filePickerButton=Action("chooseFiles",()=>ChooseFiles(async()=>
         {
-            if(batchWorking) return;
             var picker=new FileOpenPicker(); picker.FileTypeFilter.Add(".txt"); InitializePicker(picker);
             var selected=await picker.PickMultipleFilesAsync();
-            if(selected.Count>0) { files.Clear(); files.AddRange(selected.Select(f=>f.Path)); BuildPage(); }
-        },"\uE8B7"));
+            return selected.Select(file=>file.Path).ToArray();
+        }),"\uE8B7");
+        filePickerButton.IsEnabled=!batchWorking && !filePickerPending;
+        stack.Children.Add(filePickerButton);
         var list=new ListView { ItemsSource=files.Select(Path.GetFileName).ToArray(),MaxHeight=240,SelectionMode=ListViewSelectionMode.None };
         stack.Children.Add(list);
         var destination=new StackPanel { Spacing=14 };
@@ -49,6 +51,24 @@ public sealed partial class MainPage
         stack.Children.Add(convertFiles);
         stack.Children.Add(WorkspaceFeedback());
         PageContent.Children.Add(Columns(320,2,Card(stack),Card(destination)));
+    }
+    private async Task ChooseFiles(Func<Task<IReadOnlyList<string>>> pickFiles)
+    {
+        if(disposed || page!="files" || batchWorking || filePickerPending) return;
+        filePickerPending=true;
+        if(filePickerButton!=null) filePickerButton.IsEnabled=false;
+        int requestedRevision=revision;
+        try
+        {
+            var selected=await pickFiles();
+            if(disposed || page!="files" || revision!=requestedRevision || selected.Count==0) return;
+            files.Clear(); files.AddRange(selected); BuildPage();
+        }
+        finally
+        {
+            filePickerPending=false;
+            if(!disposed && filePickerButton!=null) filePickerButton.IsEnabled=!batchWorking;
+        }
     }
     private string audioSource="";
     private bool audioIsMorse;
@@ -80,7 +100,7 @@ public sealed partial class MainPage
         stack.Children.Add(Columns(260,2,AlphabetChoice(),Choice(T("audioInputType"),[T("plainText"),T("morseInput")],audioIsMorse?1:0,i=> { if(audioIsMorse==(i==1)) return; audioIsMorse=i==1; BuildPage(); })));
         if(result!=null || !string.IsNullOrWhiteSpace(source))
             stack.Children.Add(Action("useConversion",()=> { audioSource=result?.Text ?? source; audioIsMorse=result!=null ? !decode : decode; BuildPage(); return Task.CompletedTask; }));
-        var morse=new TextBox { Header=T(audioIsMorse?"morseInput":"plainText"),Text=audioSource,PlaceholderText=audioIsMorse?"... --- ...":T("inputPlaceholder"),AcceptsReturn=true,TextWrapping=TextWrapping.Wrap,Height=160,MaxLength=200_000,FlowDirection=audioIsMorse?FlowDirection.LeftToRight:PlainDirection,FontFamily=new FontFamily(audioIsMorse?"Consolas":"Segoe UI"),FontSize=18 };
+        var morse=new TextBox { Header=T(audioIsMorse?"morseInput":"plainText"),Text=audioSource,PlaceholderText=audioIsMorse?"... --- ...":T("inputPlaceholder"),AcceptsReturn=true,TextWrapping=TextWrapping.Wrap,Height=160,MaxLength=200_000,FlowDirection=audioIsMorse?FlowDirection.LeftToRight:PlainDirection,FontFamily=audioIsMorse?MonoFont:(FontFamily)Application.Current.Resources["BodyFont"],FontSize=18 };
         morse.TextChanged+=(_,_)=> { audioSource=morse.Text; UpdateAudioActions(); UpdateSpeechActions(); }; stack.Children.Add(morse);
         if(audioWorkspace==3)
         {
@@ -125,7 +145,7 @@ public sealed partial class MainPage
             var entry=entries[i]; var line=Row();
             var character=Label(entry.Character.ToString(),22); character.Width=34;
             line.Children.Add(character);
-            line.Children.Add(new TextBlock { Text=entry.Code,FontFamily=new FontFamily("Consolas"),FontSize=17,VerticalAlignment=VerticalAlignment.Center,FlowDirection=FlowDirection.LeftToRight });
+            line.Children.Add(new TextBlock { Text=entry.Code,FontFamily=MonoFont,FontSize=17,VerticalAlignment=VerticalAlignment.Center,FlowDirection=FlowDirection.LeftToRight });
             var cell=Card(line); cell.Padding=new Thickness(12); cells.Add(cell);
         }
         PageContent.Children.Add(Columns(180,4,cells.ToArray()));
@@ -139,7 +159,7 @@ public sealed partial class MainPage
         var stack=new StackPanel { Spacing=14 };
         stack.Children.Add(Choice(T("mode"),[T("letters"),T("digits"),T("wordPractice"),T("qcodes"),T("callSigns"),T("prosigns")],practiceMode,i=>practiceMode=i));
         var signal=Label(lesson?.Current?.Morse ?? (lesson!=null ? T("practiceEnded") : "· — · ·"),28);
-        signal.FontFamily=new FontFamily("Consolas"); signal.FlowDirection=FlowDirection.LeftToRight;
+        signal.FontFamily=MonoFont; signal.FlowDirection=FlowDirection.LeftToRight;
         var signalCard=Card(signal); signalCard.Background=Brush("ResultBrush"); signal.HorizontalAlignment=HorizontalAlignment.Center;
         stack.Children.Add(signalCard);
         var answer=new TextBox { Header=T("answer"),Text=practiceAnswer,MaxLength=64,FlowDirection=FlowDirection.LeftToRight };

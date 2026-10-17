@@ -9,6 +9,11 @@ public sealed partial class RawBackdrop : UserControl
     private Storyboard? drift;
     private bool motionEnabled,windowActive=true,attached;
     internal bool IsAnimating=>drift!=null;
+    // The default Linux software renderer keeps the artwork static to avoid
+    // continuously repainting the window while idle. Short UI transitions
+    // still follow the user's motion preference; automatic rendering opts in.
+    internal bool SupportsContinuousMotion=>!OperatingSystem.IsLinux() ||
+        Environment.GetEnvironmentVariable("MORSECORE_LINUX_RENDERER")=="auto";
 
     public RawBackdrop()
     {
@@ -32,7 +37,7 @@ public sealed partial class RawBackdrop : UserControl
     }
     private void RefreshMotion()
     {
-        if(!motionEnabled || !windowActive || !attached) { StopMotion(); return; }
+        if(!SupportsContinuousMotion || !motionEnabled || !windowActive || !attached) { StopMotion(); return; }
         if(drift!=null) return;
         var storyboard=new Storyboard();
         (double X,double Y,double Seconds)[] offsets=[(7,-5,16),(-6,6,19),(6,5,21),(-7,-6,17)];

@@ -41,6 +41,14 @@ public sealed partial class VoicePackageManager
             for(int minor=13;minor>=11;minor--)
                 candidates.Add($"/Library/Frameworks/Python.framework/Versions/3.{minor}/bin/python3.{minor}");
         }
+        else if(OperatingSystem.IsLinux())
+        {
+            // Desktop launchers can have a minimal PATH. Prefer explicitly supported
+            // distro interpreters over a rolling release's newer, incompatible default.
+            foreach(string prefix in new[]{"/usr/bin","/usr/local/bin"})
+                for(int minor=13;minor>=11;minor--) candidates.Add($"{prefix}/python3.{minor}");
+            candidates.Add("/usr/bin/python3");
+        }
         foreach(string path in (Environment.GetEnvironmentVariable("PATH") ?? "").Split(Path.PathSeparator,StringSplitOptions.RemoveEmptyEntries))
             if(Path.IsPathFullyQualified(path) && !path.Contains("WindowsApps",StringComparison.OrdinalIgnoreCase))
                 foreach(string name in OperatingSystem.IsWindows()?new[]{"python.exe"}:new[]{"python3.13","python3.12","python3.11","python3","python"}) candidates.Add(Path.Combine(path,name));

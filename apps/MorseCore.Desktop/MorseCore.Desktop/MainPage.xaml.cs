@@ -23,7 +23,7 @@ public sealed partial class MainPage : Page
     private static readonly string[] RadioPages=["stationProfiles","qsoAssistant","qsoLog"];
     private bool educationExpanded,radioExpanded;
     private StackPanel? educationChildren,radioChildren;
-    private string page="converter", source="", version="0.7.5";
+    private string page="converter", source="", version=typeof(MainPage).Assembly.GetName().Version?.ToString(3)??"0.0.0";
     private ConversionResult? result;
     private bool decode, working, initialized, disposed, nativeReady;
     private int revision;
@@ -34,6 +34,7 @@ public sealed partial class MainPage : Page
     private Task? updateTask;
     private Storyboard? paneAnimation, contentAnimation;
     private string T(string key)=>text[key];
+    private FontFamily MonoFont=>new(OperatingSystem.IsLinux()?"monospace":"Consolas");
     private FlowDirection PlainDirection=>preferences.Alphabet==MorseAlphabet.Arabic ? FlowDirection.RightToLeft : FlowDirection.LeftToRight;
     private static string? SmokeDirectory
     {
@@ -50,14 +51,18 @@ public sealed partial class MainPage : Page
     {
         string? home=Environment.GetEnvironmentVariable("MORSECORE_DESKTOP_HOME");
         string preferencesPath=SmokeDirectory is { } directory ? Path.Combine(directory,"preferences.json") : !string.IsNullOrEmpty(home) && Path.IsPathFullyQualified(home) ? Path.Combine(home,"settings.json") : PreferencesStore.DefaultPath;
-        store=new(preferencesPath); radioStore=new(Path.Combine(Path.GetDirectoryName(preferencesPath)!,"Radio"));
+        store=new(preferencesPath);
+        string radioHome=OperatingSystem.IsLinux() && SmokeDirectory is null && string.IsNullOrEmpty(home)
+            ? DesktopPaths.DataDirectory : Path.GetDirectoryName(preferencesPath)!;
+        if(OperatingSystem.IsLinux()) DesktopPaths.CreateUserDirectory(radioHome);
+        radioStore=new(Path.Combine(radioHome,"Radio"));
         preferences=store.Load(); text=new(preferences.Language);
         InitializeComponent(); InitializeChrome(); ApplyTheme();
         InitializeBackdrop();
         LoadingTitle.Text=T("loading"); LoadingDetail.Text=T("loadingSettings");
         Loaded+=Initialize;
         ActualThemeChanged+=(_,_)=> { if(initialized && !disposed && preferences.Theme=="system") DispatcherQueue.TryEnqueue(Rebuild); };
-        SizeChanged+=(_,e)=> { if(initialized && e.NewSize.Width<850 && !preferences.Collapsed) SetCollapsed(true,false); };
+        SizeChanged+=(_,e)=> { if(initialized && e.NewSize.Width>0 && e.NewSize.Width<850 && !preferences.Collapsed) SetCollapsed(true,false); };
     }
     private async void Initialize(object sender,RoutedEventArgs e)
     {
@@ -381,7 +386,8 @@ public sealed partial class MainPage : Page
     private ComboBox Choice(string label,IEnumerable<string> options,int selected,Action<int> changed)
     {
         var choice=new ComboBox { Header=label,ItemsSource=options.ToArray(),SelectedIndex=selected,HorizontalAlignment=HorizontalAlignment.Stretch };
-        choice.SelectionChanged+=(_,_)=> { if(choice.SelectedIndex>=0) changed(choice.SelectedIndex); }; return choice;
+        int previous=selected;
+        choice.SelectionChanged+=(_,_)=> { if(choice.SelectedIndex>=0 && choice.SelectedIndex!=previous) { previous=choice.SelectedIndex; changed(previous); } }; return choice;
     }
     private ComboBox AlphabetChoice()=>Choice(T("conversionAlphabet"),[T("latin"),T("russian"),T("arabic")],(int)preferences.Alphabet,index=>
     { preferences=preferences with { Alphabet=(MorseAlphabet)index }; result=null; decoderResult=null; revision++; SavePreferences(); BuildPage(); });

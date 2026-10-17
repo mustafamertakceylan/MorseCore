@@ -31,7 +31,13 @@ public sealed partial class MainPage
     {
         var box=new TextBox { Header=T(key),Text=value,MaxLength=maximum,FlowDirection=ltr?FlowDirection.LeftToRight:Shell.FlowDirection };
         Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(box,key);
-        box.TextChanged+=(_,_)=>changed(box.Text); return box;
+        string previous=value;
+        box.TextChanged+=(_,_)=>
+        {
+            if(previous==box.Text) return;
+            previous=box.Text; changed(previous);
+        };
+        return box;
     }
     private void BuildRadio()
     {
@@ -165,7 +171,7 @@ public sealed partial class MainPage
         var operatingFields=details.Children.Cast<FrameworkElement>().ToArray(); details.Children.Clear();
         stack.Children.Add(Columns(260,2,operatingFields));
         var frequency=new NumberBox { Header=T("qsoFrequency"),Value=qsoFrequency,Minimum=0.000001,Maximum=300_000,SpinButtonPlacementMode=NumberBoxSpinButtonPlacementMode.Compact,FlowDirection=FlowDirection.LeftToRight };
-        frequency.ValueChanged+=(_,_)=> { qsoFrequency=frequency.Value; InvalidateQso(); }; stack.Children.Add(frequency);
+        frequency.ValueChanged+=(_,_)=> { if(qsoFrequency.Equals(frequency.Value)) return; qsoFrequency=frequency.Value; InvalidateQso(); }; stack.Children.Add(frequency);
         var bandInfo=Label("",13,true); bandInfo.Visibility=Visibility.Collapsed; stack.Children.Add(bandInfo);
         stack.Children.Add(Action("checkBand",()=> { var match=RadioCatalog.Assess(operatingCountry,operatingClass,QsoHz()); bandInfo.Text=BandDescription(match); bandInfo.Visibility=Visibility.Visible; return Task.CompletedTask; },"\uE73E"));
         string callSummary;
@@ -187,7 +193,7 @@ public sealed partial class MainPage
         if(qsoStage==QsoStage.Report) { stack.Children.Add(reports); stack.Children.Add(Label(T("rstHint"),12,true)); }
         if(qsoStage==QsoStage.Message) stack.Children.Add(RadioInput("freeMessage",qsoMessage,v=> { qsoMessage=v; InvalidateQso(); },false,2000));
         var preview=new TextBox { Header=T("qsoPreview"),Text=qsoPreview,IsReadOnly=true,AcceptsReturn=true,TextWrapping=TextWrapping.Wrap,MinHeight=100,FlowDirection=FlowDirection.LeftToRight };
-        var morse=new TextBox { Header=T("morseInput"),Text=qsoMorse,IsReadOnly=true,AcceptsReturn=true,TextWrapping=TextWrapping.Wrap,MinHeight=90,FontFamily=new FontFamily("Consolas"),FlowDirection=FlowDirection.LeftToRight };
+        var morse=new TextBox { Header=T("morseInput"),Text=qsoMorse,IsReadOnly=true,AcceptsReturn=true,TextWrapping=TextWrapping.Wrap,MinHeight=90,FontFamily=MonoFont,FlowDirection=FlowDirection.LeftToRight };
         morse.Background=Brush("ResultBrush"); morse.MinHeight=preview.MinHeight=130;
         qsoTextBox=preview; qsoCodeBox=morse;
         stack.Children.Add(Action("prepareMessage",()=>

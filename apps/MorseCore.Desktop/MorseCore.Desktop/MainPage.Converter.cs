@@ -47,11 +47,18 @@ public sealed partial class MainPage
         inputBox=new TextBox { Text=source,PlaceholderText=decode ? "... --- ..." : T("inputPlaceholder"),AcceptsReturn=true,TextWrapping=TextWrapping.Wrap,Height=200,MaxLength=200_000,Padding=new Thickness(12),FontSize=17,FlowDirection=decode ? FlowDirection.LeftToRight : PlainDirection };
         outputBox=new TextBox { Text=result?.Text ?? "",PlaceholderText=T("outputPlaceholder"),AcceptsReturn=true,TextWrapping=TextWrapping.Wrap,Height=200,IsReadOnly=true,Padding=new Thickness(12),FontSize=17,FlowDirection=decode ? PlainDirection : FlowDirection.LeftToRight };
         outputBox.Background=Brush("ResultBrush");
-        if(decode) inputBox.FontFamily=new FontFamily("Consolas"); else outputBox.FontFamily=new FontFamily("Consolas");
+        if(decode) inputBox.FontFamily=MonoFont; else outputBox.FontFamily=MonoFont;
         Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(inputBox,T("source"));
         Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(outputBox,T("result"));
         var editor=inputBox;
-        editor.TextChanged+=(_,_)=> { bool hadResult=result!=null; source=editor.Text; result=null; revision++; if(outputBox!=null) outputBox.Text=""; UpdateStatistics(); if(hadResult) SetStatus(T("ready")); };
+        editor.TextChanged+=(_,_)=>
+        {
+            // Uno can deliver the initial TextChanged after the page is laid out.
+            // Rebuilding or a late event from an old editor must preserve a valid result.
+            if(!ReferenceEquals(inputBox,editor) || source==editor.Text) return;
+            bool hadResult=result!=null; source=editor.Text; result=null; revision++;
+            if(outputBox!=null) outputBox.Text=""; UpdateStatistics(); if(hadResult) SetStatus(T("ready"));
+        };
         var shortcut=new KeyboardAccelerator { Key=VirtualKey.Enter,Modifiers=VirtualKeyModifiers.Control };
         shortcut.Invoked+=async(_,e)=> { e.Handled=true; await Guard(ConvertNow); }; inputBox.KeyboardAccelerators.Add(shortcut);
         input.Children.Add(inputBox); output.Children.Add(outputBox); output.Children.Add(resultActions); WrapActions(resultActions,output);
@@ -140,7 +147,10 @@ public sealed partial class MainPage
         try
         {
             string morse=await getMorse(); token.Token.ThrowIfCancellationRequested();
-            SetStatus(T("play")); await MorseAudio.PlayAsync(morse,new(options.Wpm,options.Frequency),options.Separator,token.Token); SetStatus(T("ready"));
+            SetStatus(T("play"));
+            if(OperatingSystem.IsLinux()) await LinuxAudio.PlayMorseAsync(morse,new(options.Wpm,options.Frequency),options.Separator,token.Token);
+            else await MorseAudio.PlayAsync(morse,new(options.Wpm,options.Frequency),options.Separator,token.Token);
+            SetStatus(T("ready"));
         }
         finally { if(ReferenceEquals(playback,token)) playback=null; UpdateAudioActions(); }
     }

@@ -5,6 +5,15 @@ using System.Text.Json;
 using MorseCore.AppCore;
 using MorseCore.Interop;
 
+if(args.Length==2 && args[0]=="--linux-platform-only")
+{
+    string fixture=Path.Combine(Path.GetFullPath(args[1]),"linux-"+Guid.NewGuid().ToString("N"));
+    Directory.CreateDirectory(fixture);
+    try { Console.WriteLine($"Linux platform checks passed: {await LinuxPlatformChecks.Run(fixture)}"); }
+    finally { Directory.Delete(fixture,true); }
+    return;
+}
+
 if(args.Length==2 && args[0]=="--updates-only")
 {
     string updateFixture=Path.Combine(Path.GetFullPath(args[1]),"updater-"+Guid.NewGuid().ToString("N"));
@@ -17,7 +26,7 @@ if(args.Length==2 && args[0]=="--updates-only")
 if(args.Length>=3 && args[0] is "--download-update" or "--launch-update")
 {
     string currentVersion=args[1],cacheDirectory=args[2];
-    using var client=new HttpClient();
+    using var client=UpdateService.CreateHttpClient();
     var updater=new UpdateService(client);
     var release=await updater.CheckAsync(Version.Parse(currentVersion)) ?? throw new Exception("No newer stable release.");
     using var prepared=await updater.DownloadAsync(release,Path.GetFullPath(cacheDirectory));
@@ -36,7 +45,8 @@ string library=Path.GetFullPath(args[0]);
 NativeLibrary.SetDllImportResolver(typeof(MorseEngine).Assembly,(_,_,_)=>NativeLibrary.Load(library));
 int checks=0;
 void Check(bool condition,string label) { if(!condition) throw new Exception(label); checks++; }
-string directory=Path.Combine(Path.GetDirectoryName(library)!,"morsecore-app-test-"+Guid.NewGuid().ToString("N"));
+// Linux permission checks need a POSIX filesystem, including when the checkout is on WSL DrvFs.
+string directory=Path.Combine(OperatingSystem.IsLinux()?Path.GetTempPath():Path.GetDirectoryName(library)!,"morsecore-app-test-"+Guid.NewGuid().ToString("N"));
 Directory.CreateDirectory(directory);
 try
 {
@@ -110,6 +120,7 @@ try
         catch(InvalidDataException) { checks++; }
     }
     checks+=await UpdateChecks.Run(directory);
+    checks+=await LinuxPlatformChecks.Run(directory);
     checks+=await RadioChecks.Run(directory);
     KeyingChecks.Run(Check);
     DecoderChecks.Run(Check);

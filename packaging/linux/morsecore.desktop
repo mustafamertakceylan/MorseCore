@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=MorseCore
+Comment=Text, Morse signals and offline speech
+Comment[tr]=Metin, Morse sinyalleri ve çevrimdışı seslendirme
+Exec=morsecore
+TryExec=morsecore
+Icon=io.github.mustafamertakceylan.morsecore
+Terminal=false
+Categories=Utility;HamRadio;
+StartupNotify=true
+StartupWMClass=io.github.mustafamertakceylan.morsecore

@@ -22,7 +22,7 @@ public sealed partial class MainPage
             foreach(var term in CwLearning.Terms.Where(t=>(glossaryCategory==0 || t.Category==categories[glossaryCategory]) && (t.Code.Contains(query,StringComparison.OrdinalIgnoreCase) || T("term_"+t.Key).Contains(query,StringComparison.CurrentCultureIgnoreCase))))
             {
                 var body=new StackPanel { Spacing=6 };
-                var header=Row(); var code=Label(term.Code,18); code.FontFamily=new FontFamily("Consolas"); code.FlowDirection=FlowDirection.LeftToRight;
+                var header=Row(); var code=Label(term.Code,18); code.FontFamily=MonoFont; code.FlowDirection=FlowDirection.LeftToRight;
                 header.Children.Add(code); header.Children.Add(IconAction("play",()=>PlayMorse(CwMessages.Encode(term.Code),'/'),"\uE768"));
                 body.Children.Add(header); body.Children.Add(Label(T("term_"+term.Key),14));
                 var example=Label(term.Example,13,true); example.FlowDirection=FlowDirection.LeftToRight; body.Children.Add(example); cards.Add(Card(body));

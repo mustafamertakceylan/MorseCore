@@ -17,6 +17,8 @@ VOICES = {
     "joe-en": ("piper", "en_US-joe-medium"),
 }
 PACKAGES = {"ema": "ema-lightning==1.1.2", "antalia": "antalia-mini==1.0.1", "piper": "piper-tts==1.3.0"}
+PIP_MINIMUM = (26, 2, 1)
+PIP_BOOTSTRAP = "pip==" + ".".join(map(str, PIP_MINIMUM))
 
 
 def model_files(catalog, voice):
@@ -78,6 +80,26 @@ def torch_install_arguments(pip):
     return [*pip, *index, "torch==2.10.0"]
 
 
+def ensure_online_pip(python):
+    """Upgrade an old private installer only when online dependencies are needed."""
+    # Old ensurepip seeds (e.g. Debian 12's pip 23.0.1) reject normalized
+    # wheel metadata on the CPU torch index. Keep modern pip as installed;
+    # pin the repair instead of choosing a different latest release each run.
+    probe = f"from importlib.metadata import version; import sys; sys.exit(0 if sys.prefix != sys.base_prefix and tuple(map(int, (version('pip').split('.') + ['0'] * 3)[:3])) >= {PIP_MINIMUM!r} else 1)"
+
+    def ready():
+        return subprocess.run([str(python), "-I", "-c", probe], stdout=subprocess.DEVNULL,
+                              stderr=subprocess.DEVNULL).returncode == 0
+
+    if ready():
+        return
+    subprocess.run([str(python), "-I", "-m", "pip", "--isolated", "--require-virtualenv",
+                    "--disable-pip-version-check", "--no-input", "install", "--upgrade",
+                    "--only-binary=:all:", "--index-url", "https://pypi.org/simple", PIP_BOOTSTRAP], check=True)
+    if not ready():
+        raise RuntimeError("Speech pip upgrade could not be verified; retry installation")
+
+
 def install(home, skip_packages=False, voice=None, packages_only=False):
     if not (3, 11) <= sys.version_info[:2] <= (3, 13):
         raise SystemExit("Python 3.11-3.13 is required for this speech pack")
@@ -95,6 +117,7 @@ def install(home, skip_packages=False, voice=None, packages_only=False):
         present = subprocess.run([str(python), "-I", "-c", probe, *specifications], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0
         if not present:
             print(json.dumps({"phase": "dependencies"}), flush=True)
+            ensure_online_pip(python)
             pip = [str(python), "-m", "pip", "--disable-pip-version-check", "--no-input", "install"]
             if "torch==2.10.0" in specifications:
                 subprocess.run(torch_install_arguments(pip), check=True)

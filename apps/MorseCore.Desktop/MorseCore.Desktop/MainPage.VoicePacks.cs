@@ -72,6 +72,7 @@ public sealed partial class MainPage
         runtimeInstall=Action("voicesInstallRuntime",()=>InstallRuntime(),"\uE896");
         runtimeInstall.Visibility=OperatingSystem.IsWindows()?Visibility.Visible:Visibility.Collapsed;
         runtimeInstall.IsEnabled=false; runtime.Children.Add(runtimeInstall); interactive.Add(runtimeInstall);
+        if(OperatingSystem.IsLinux()) runtime.Children.Add(Label(T("linuxPythonHelp"),13,true));
         bool Current()=>!disposed && generation==voicePackGeneration;
         void Refresh()
         {

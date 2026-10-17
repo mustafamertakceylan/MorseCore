@@ -35,6 +35,7 @@ class MacSpeechPortabilityTests(unittest.TestCase):
                 def run(arguments, **kwargs):
                     return subprocess.CompletedProcess(arguments, 1 if "import importlib.metadata" in str(arguments) else 0)
                 with patch.object(setup.sys, "platform", "darwin"), \
+                     patch.object(setup.sys, "version_info", (3, 12, 0)), \
                      patch.object(setup.subprocess, "run", side_effect=run) as process:
                     setup.install(home, voice=voice, packages_only=True)
                 calls = [call.args[0] for call in process.call_args_list]

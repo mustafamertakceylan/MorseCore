@@ -6,26 +6,27 @@ internal sealed class SpeechService
 {
 #if MORSE_WINUI
     public static bool IsSupported=>true;
+#else
+    public static bool IsSupported=>OperatingSystem.IsLinux();
+#endif
     private CancellationTokenSource? current;
     private readonly SemaphoreSlim gate=new(1,1);
-    public void Stop()=>current?.Cancel();
-#else
-    public static bool IsSupported=>false;
-    public void Stop() { }
-#endif
+    private readonly object sync=new();
+    public void Stop() { lock(sync) current?.Cancel(); }
     public async Task SpeakAsync(string text,string id,string home,CancellationToken token,bool muted=false)
     {
-#if MORSE_WINUI
+        if(!IsSupported) throw new PlatformNotSupportedException("Speech playback requires Windows or Linux.");
         await gate.WaitAsync(token);
-        string? path=null;
+        string? directory=null;
+        using var cancellation=CancellationTokenSource.CreateLinkedTokenSource(token);
         try
         {
-            using var cancellation=CancellationTokenSource.CreateLinkedTokenSource(token); current=cancellation;
-            string directory=Path.Combine(Path.GetTempPath(),"MorseCore-Speech");
-            Directory.CreateDirectory(directory);
-            path=Path.Combine(directory,Guid.NewGuid().ToString("N")+".wav");
+            lock(sync) current=cancellation;
+            directory=LinuxAudio.CreateTemporaryDirectory();
+            string path=Path.Combine(directory,"speech.wav");
             await OfflineSpeech.SynthesizeAsync(text,id,home,path,cancellation.Token);
             cancellation.Token.ThrowIfCancellationRequested();
+#if MORSE_WINUI
             using var stream=File.OpenRead(path);
             using var player=new Windows.Media.Playback.MediaPlayer { IsMuted=muted };
             var complete=new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -34,11 +35,15 @@ internal sealed class SpeechService
             player.Source=Windows.Media.Core.MediaSource.CreateFromStream(stream.AsRandomAccessStream(),"audio/wav");
             using var registration=cancellation.Token.Register(()=>complete.TrySetCanceled(cancellation.Token));
             cancellation.Token.ThrowIfCancellationRequested(); player.Play(); await complete.Task;
-        }
-        finally { try { if(path!=null && File.Exists(path)) File.Delete(path); } finally { current=null; gate.Release(); } }
 #else
-        await Task.CompletedTask;
-        throw new PlatformNotSupportedException("Speech playback is currently available in the Windows target.");
+            await LinuxAudio.PlayWaveAsync(path,cancellation.Token,muted);
 #endif
+        }
+        finally
+        {
+            lock(sync) current=null;
+            if(directory!=null) LinuxAudio.DeleteTemporaryDirectory(directory);
+            gate.Release();
+        }
     }
 }

@@ -18,7 +18,7 @@ public sealed record Preferences
     public string SpeechLanguage { get; init; } = "tr-TR";
     public string VoiceId { get; init; } = "";
     public string SpeechHome { get; init; } = "";
-    public string OutputDirectory { get; init; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "MorseCore");
+    public string OutputDirectory { get; init; } = DesktopPaths.OutputDirectory;
 
     public Preferences Validated() => this with
     {
@@ -31,13 +31,13 @@ public sealed record Preferences
         SpeechLanguage = SpeechLanguage is "tr-TR" or "en-US" or "de-DE" or "ru-RU" or "ar-SA" ? SpeechLanguage : "en-US",
         SpeechHome = !string.IsNullOrEmpty(SpeechHome) && Path.IsPathFullyQualified(SpeechHome) ? SpeechHome : "",
         OutputDirectory = !string.IsNullOrWhiteSpace(OutputDirectory) && Path.IsPathFullyQualified(OutputDirectory)
-            ? OutputDirectory : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "MorseCore")
+            ? OutputDirectory : DesktopPaths.OutputDirectory
     };
 }
 
 public sealed class PreferencesStore(string path)
 {
-    public static string DefaultPath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MorseCore", "Desktop", "settings.json");
+    public static string DefaultPath => DesktopPaths.PreferencesFile;
     public string? LoadWarning { get; private set; }
     public Preferences Load()
     {
@@ -48,7 +48,7 @@ public sealed class PreferencesStore(string path)
     public void Save(Preferences preferences)
     {
         string directory=Path.GetDirectoryName(Path.GetFullPath(path))!;
-        Directory.CreateDirectory(directory);
+        DesktopPaths.CreateUserDirectory(directory);
         string temporary=Path.Combine(directory,$".settings-{Guid.NewGuid():N}.tmp");
         try
         {

@@ -61,8 +61,16 @@ internal static class MorseAudioCapture
         }
     }
 #else
-    public static Task<IReadOnlyList<AudioCaptureDevice>> DevicesAsync() => Task.FromResult<IReadOnlyList<AudioCaptureDevice>>([]);
-    public static Task<string> RecordAsync(string deviceId, CancellationToken stop, CancellationToken abandon) => throw new PlatformNotSupportedException();
+    private static readonly SemaphoreSlim CaptureGate = new(1, 1);
+    public static Task<IReadOnlyList<AudioCaptureDevice>> DevicesAsync() => OperatingSystem.IsLinux()
+        ? LinuxAudio.CaptureDevicesAsync() : Task.FromResult<IReadOnlyList<AudioCaptureDevice>>([]);
+    public static async Task<string> RecordAsync(string deviceId, CancellationToken stop, CancellationToken abandon)
+    {
+        if(!OperatingSystem.IsLinux()) throw new PlatformNotSupportedException();
+        await CaptureGate.WaitAsync(abandon);
+        try { return await LinuxAudio.RecordAsync(deviceId, MaxSeconds, stop, abandon); }
+        finally { CaptureGate.Release(); }
+    }
 #endif
 
     public static void Delete(string path)
@@ -70,5 +78,16 @@ internal static class MorseAudioCapture
         try { File.Delete(path); }
         catch (IOException) { }
         catch (UnauthorizedAccessException) { }
+        if(OperatingSystem.IsLinux() && Path.GetFileName(path)=="capture.wav")
+        {
+            string? directory=Path.GetDirectoryName(path);
+            if(directory!=null && Path.GetFileName(directory).StartsWith("morsecore-audio-",StringComparison.Ordinal))
+            {
+                // Delete only the now-empty private capture directory, never a caller's unrelated files.
+                try { Directory.Delete(directory); }
+                catch(IOException) { }
+                catch(UnauthorizedAccessException) { }
+            }
+        }
     }
 }

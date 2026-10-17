@@ -25,7 +25,8 @@ public sealed partial class MainPage
         TitleDragRegion.SizeChanged+=(_,_)=>UpdateCaptionRegions();
         PaneToggle.SizeChanged+=(_,_)=>UpdateCaptionRegions();
 #else
-        App.MainWindow.SetTitleBar(TitleDragRegion);
+        if(OperatingSystem.IsLinux()) LinuxWindowChrome.Attach(App.MainWindow,TitleDragRegion);
+        else App.MainWindow.SetTitleBar(TitleDragRegion);
 #endif
     }
 #if MORSE_WINUI

@@ -4,10 +4,13 @@
     <TargetFrameworks Condition="!$([MSBuild]::IsOSPlatform('Windows'))">net10.0-desktop</TargetFrameworks>
     <OutputType>Exe</OutputType>
     <UnoSingleProject>true</UnoSingleProject>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ApplicationTitle>MorseCore</ApplicationTitle>
     <ApplicationId>io.github.mustafamertakceylan.morsecore</ApplicationId>
-    <ApplicationDisplayVersion>0.7.5</ApplicationDisplayVersion>
-    <Version>0.7.5</Version>
+    <_MorseCoreVersionFile>$(MSBuildThisFileDirectory)../../../CMakeLists.txt</_MorseCoreVersionFile>
+    <_MorseCoreProjectVersion>$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(_MorseCoreVersionFile)')), 'project\(MorseCore VERSION (\d+\.\d+\.\d+) ').Groups[1].Value)</_MorseCoreProjectVersion>
+    <ApplicationDisplayVersion>$(_MorseCoreProjectVersion)</ApplicationDisplayVersion>
+    <Version>$(_MorseCoreProjectVersion)</Version>
     <ApplicationVersion>0</ApplicationVersion>
     <ApplicationPublisher>Mustafa Mert Akceylan</ApplicationPublisher>
     <Description>Text, signals and speech. MorseCore desktop.</Description>
@@ -26,6 +29,10 @@
       SkiaRenderer;
     </UnoFeatures>
   </PropertyGroup>
+  <Target Name="ValidateMorseCoreVersion" BeforeTargets="PrepareForBuild">
+    <Error Condition="'$(_MorseCoreProjectVersion)' == ''" Text="CMake project version is missing." />
+    <Error Condition="'$(Version)' != '$(_MorseCoreProjectVersion)' or '$(ApplicationDisplayVersion)' != '$(_MorseCoreProjectVersion)'" Text="Desktop versions must match the CMake project version $(_MorseCoreProjectVersion)." />
+  </Target>
   <PropertyGroup Condition="$([System.String]::Copy('$(TargetFramework)').Contains('-windows'))">
     <DefineConstants>$(DefineConstants);MORSE_WINUI</DefineConstants>
     <!-- Preserve WinRT metadata until a trimmed deployment passes device tests. -->

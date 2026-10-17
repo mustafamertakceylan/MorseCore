@@ -26,9 +26,13 @@ import Testing
     let suite = "com.morsecore.mac.tests.\(UUID().uuidString)"
     defer { UserDefaults(suiteName: suite)?.removePersistentDomain(forName: suite) }
     let settings = AppSettings(suiteName: suite)
+    let referenceKeys = Set(SharedCopy.languages["en"]?.keys.map { $0 } ?? [])
+    #expect(!referenceKeys.isEmpty)
     for language in AppLanguage.allCases {
         settings.language = language
-        #expect(SharedCopy.languages[language.rawValue]?.count == 467)
+        let translations = SharedCopy.languages[language.rawValue] ?? [:]
+        #expect(Set(translations.keys) == referenceKeys)
+        #expect(translations.values.allSatisfy { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty })
         #expect(settings.text("radio") != "radio")
     }
     settings.wpm = 25; settings.separator = 124

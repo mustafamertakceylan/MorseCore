@@ -70,11 +70,12 @@ public sealed partial class MainPage
         if(update!=null)
         {
             updates.Children.Add(Label($"{T("updateAvailable")} · {update.Version}"));
-            if(OperatingSystem.IsWindows() && update.Installer!=null && update.Checksums!=null)
+            if((OperatingSystem.IsWindows() || OperatingSystem.IsLinux()) && update.Installer!=null && update.Checksums!=null)
             {
-                var install=Action("installUpdate",InstallUpdate,"\uE896",true);
+                var install=Action(OperatingSystem.IsLinux()?"linuxDownloadUpdate":"installUpdate",InstallUpdate,"\uE896",true);
                 install.IsEnabled=!installingUpdate; updates.Children.Add(install);
             }
+            if(OperatingSystem.IsLinux()) updates.Children.Add(Label(T("linuxUpdateHelp"),13,true));
             updates.Children.Add(Action("openRelease",async()=> { await Launcher.LaunchUriAsync(update.Page); }));
         }
         PageContent.Children.Add(Columns(340,2,Card(voices),Card(updates)));
@@ -94,7 +95,7 @@ public sealed partial class MainPage
         var detail=Label(T("updateDownloading"),14,true); detail.TextWrapping=TextWrapping.Wrap;
         var content=new StackPanel { Spacing=16 }; content.Children.Add(detail); content.Children.Add(progress);
         var dialog=new ContentDialog { XamlRoot=XamlRoot,RequestedTheme=ActualTheme,FlowDirection=text.IsRtl ? FlowDirection.RightToLeft : FlowDirection.LeftToRight,Title=$"{T("updateAvailable")} · {release.Version}",Content=content,
-            PrimaryButtonText=T("updateInstallClose"),CloseButtonText=T("cancelUpdate"),IsPrimaryButtonEnabled=false,DefaultButton=ContentDialogButton.Close };
+            PrimaryButtonText=T(OperatingSystem.IsLinux()?"linuxOpenFolder":"updateInstallClose"),CloseButtonText=T("cancelUpdate"),IsPrimaryButtonEnabled=false,DefaultButton=ContentDialogButton.Close };
         dialog.Resources["ContentDialogBackground"]=Brush("CardBrush");
         dialog.Resources["ContentDialogForeground"]=Brush("InkBrush");
         dialog.Resources["ContentDialogTitleForeground"]=Brush("InkBrush");
@@ -105,14 +106,24 @@ public sealed partial class MainPage
             var shown=dialog.ShowAsync();
             string cache=SmokeDirectory is { } smoke
                 ? Path.Combine(smoke,"Updates")
+                : OperatingSystem.IsLinux() ? Path.Combine(DesktopPaths.CacheDirectory,"Updates")
                 : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"MorseCore","Updates");
             using var prepared=await updater.DownloadAsync(release,cache,new Progress<double>(value=> { if(!disposed) progress.Value=value; }),cancellation.Token);
             if(disposed) return;
-            progress.Value=100; detail.Text=T("updateConfirm"); dialog.IsPrimaryButtonEnabled=true;
+            progress.Value=100; detail.Text=T(OperatingSystem.IsLinux()?"linuxUpdateHelp":"updateConfirm"); dialog.IsPrimaryButtonEnabled=true;
             if(await shown==ContentDialogResult.Primary)
             {
-                using var installer=prepared.StartInstaller(AppContext.BaseDirectory,preferences.Language);
-                App.MainWindow.Close();
+                if(OperatingSystem.IsLinux())
+                {
+                    prepared.VerifyIntegrity();
+                    LinuxDesktop.OpenDirectory(Path.GetDirectoryName(prepared.InstallerPath)!);
+                    prepared.RetainVerifiedFile();
+                }
+                else
+                {
+                    using var installer=prepared.StartInstaller(AppContext.BaseDirectory,preferences.Language);
+                    App.MainWindow.Close();
+                }
             }
         }
         catch(Exception e) when(e is HttpRequestException or IOException or UnauthorizedAccessException or OperationCanceledException or System.ComponentModel.Win32Exception or InvalidOperationException)
@@ -125,7 +136,7 @@ public sealed partial class MainPage
         checkingUpdates=true; if(manual) SetStatus(T("checking"));
         try
         {
-            var found=await new UpdateService(http).CheckAsync(Version.Parse(version),lifetime.Token);
+            var found=await new UpdateService(http).CheckAsync(Version.Parse(version),OperatingSystem.IsLinux()?UpdatePlatform.LinuxX64:UpdatePlatform.WindowsX64,lifetime.Token);
             if(disposed) return;
             update=found; preferences=preferences with { LastUpdateCheck=DateTimeOffset.UtcNow }; SavePreferences();
             if(found!=null) { SetStatus($"{T("updateAvailable")} · {found.Version}"); if(page=="settings") BuildPage(); }

@@ -1,0 +1,6 @@
+{
+  "linuxDownloadUpdate": "Download update package",
+  "linuxOpenFolder": "Open download folder",
+  "linuxUpdateHelp": "The package is verified with SHA256. For the portable edition, close the app and use the new folder. For DEB or Arch installations, update the appropriate package with your package manager. Settings and contacts are stored outside the application folder.",
+  "linuxPythonHelp": "Voice packages require Python 3.11–3.13 with venv support. System Python is left unchanged; dependencies are installed in a private environment. See the Linux installation guide for your distribution."
+}

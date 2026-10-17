@@ -18,7 +18,8 @@ internal static partial class WindowChrome
         window.ExtendsContentIntoTitleBar=true;
         appWindow.TitleBar.PreferredHeightOption=TitleBarHeightOption.Collapsed;
 #else
-        presenter.SetBorderAndTitleBar(true,false);
+        if(OperatingSystem.IsLinux()) LinuxWindowChrome.RemoveDecorations(window);
+        else presenter.SetBorderAndTitleBar(true,false);
 #endif
         var size=new SizeInt32 { Width=1440,Height=900 };
 #if MORSE_WINUI
@@ -26,10 +27,17 @@ internal static partial class WindowChrome
         if(File.Exists(iconPath)) appWindow.SetIcon(iconPath);
         var work=DisplayArea.GetFromWindowId(appWindow.Id,DisplayAreaFallback.Nearest).WorkArea;
         size=new SizeInt32 { Width=Math.Min(size.Width,Math.Max(1,work.Width-32)),Height=Math.Min(size.Height,Math.Max(1,work.Height-32)) };
+#else
+        RectInt32? linuxWorkArea=LinuxWindowChrome.TryGetWorkArea(out var linuxWork) ? linuxWork : null;
+        if(linuxWorkArea is { } available)
+            size=new SizeInt32 { Width=Math.Min(size.Width,Math.Max(1,available.Width-32)),Height=Math.Min(size.Height,Math.Max(1,available.Height-32)) };
 #endif
         appWindow.Resize(size);
 #if MORSE_WINUI
         appWindow.Move(new PointInt32 { X=work.X+(work.Width-size.Width)/2,Y=work.Y+(work.Height-size.Height)/2 });
+#else
+        if(linuxWorkArea is { } target)
+            appWindow.Move(new PointInt32 { X=target.X+(target.Width-size.Width)/2,Y=target.Y+(target.Height-size.Height)/2 });
 #endif
         bool adjusting=false;
         void Constrain(AppWindow sender,AppWindowChangedEventArgs change)

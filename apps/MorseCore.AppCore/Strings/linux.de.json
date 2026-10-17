@@ -1,0 +1,6 @@
+{
+  "linuxDownloadUpdate": "Update-Paket herunterladen",
+  "linuxOpenFolder": "Download-Ordner öffnen",
+  "linuxUpdateHelp": "Das Paket wird mit SHA256 geprüft. Bei der portablen Version die App schließen und den neuen Ordner verwenden. DEB- und Arch-Installationen mit dem passenden Paket über die Paketverwaltung aktualisieren. Einstellungen und Funkkontakte liegen außerhalb des App-Ordners.",
+  "linuxPythonHelp": "Sprachpakete benötigen Python 3.11–3.13 mit venv. System-Python bleibt unverändert; Abhängigkeiten werden in einer privaten Umgebung installiert. Schritte für deine Distribution stehen in der Linux-Installationsanleitung."
+}

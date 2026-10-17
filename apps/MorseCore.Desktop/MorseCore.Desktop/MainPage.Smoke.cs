@@ -19,11 +19,17 @@ public sealed partial class MainPage
     private string? smokeSavePath;
     private string? smokeOperationFailure;
     private bool smokeLoadingControlsHidden;
+    private Func<Task>? decoderBeforePublish;
     private async Task Snapshot(string path,UIElement? element=null,bool contentOnly=false)
     {
+        void Phase(string phase)=>File.AppendAllText(Path.Combine(Path.GetDirectoryName(path)!,"capture-phases.log"),$"{DateTimeOffset.UtcNow:O} {Path.GetFileName(path)} {phase}\n");
+        Phase("layout");
         await Task.Delay(250); Root.UpdateLayout();
+        Phase("render-start");
         var bitmap=new RenderTargetBitmap(); await bitmap.RenderAsync(element ?? Root);
+        Phase("render-done");
         var pixels=await bitmap.GetPixelsAsync();
+        Phase("pixels-done");
         using var stream=File.Create(path);
         var encoder=await BitmapEncoder.CreateAsync(BitmapEncoder.PngEncoderId,stream.AsRandomAccessStream());
         byte[] data=pixels.ToArray(); int height=bitmap.PixelHeight;
@@ -35,6 +41,7 @@ public sealed partial class MainPage
         }
         encoder.SetPixelData(BitmapPixelFormat.Bgra8,BitmapAlphaMode.Premultiplied,(uint)bitmap.PixelWidth,(uint)height,96,96,data);
         await encoder.FlushAsync();
+        Phase("encoder-done");
     }
     private async Task RunUiSmoke(string directory,double splashVisibleMilliseconds)
     {
@@ -42,7 +49,12 @@ public sealed partial class MainPage
         var voices=new Dictionary<string,int>(); bool synthesized=false;
         bool mouseDragTested=false;
         object? mouseDragEvidence=null;
-        void Check(bool condition,string description) { if(!condition) throw new InvalidOperationException(description); checks.Add(description); }
+        void Check(bool condition,string description)
+        {
+            if(!condition) throw new InvalidOperationException(description);
+            checks.Add(description);
+            File.AppendAllText(Path.Combine(directory,"checks-progress.jsonl"),JsonSerializer.Serialize(new { Count=checks.Count,Description=description })+"\n");
+        }
         IEnumerable<DependencyObject> Descendants(DependencyObject root)
         {
             for(int i=0;i<VisualTreeHelper.GetChildrenCount(root);i++)
@@ -51,7 +63,8 @@ public sealed partial class MainPage
         async Task Invoke(Button button)
         {
             var peer=new ButtonAutomationPeer(button);
-            ((IInvokeProvider)peer.GetPattern(PatternInterface.Invoke)).Invoke(); await Task.Delay(60);
+            if(peer.GetPattern(PatternInterface.Invoke) is not IInvokeProvider invoke) throw new InvalidOperationException("Button invoke pattern unavailable.");
+            invoke.Invoke(); await Task.Delay(60);
         }
         async Task ActionButton(string id)
         {
@@ -184,7 +197,7 @@ public sealed partial class MainPage
             Check(preferences.Collapsed && store.Load().Collapsed && Math.Abs(Pane.ActualWidth-72)<2,"Header menu button collapses the sidebar and saves its state");
             await ActionButton("PaneToggle"); await Task.Delay(250);
             Check(!preferences.Collapsed && !store.Load().Collapsed && Math.Abs(Pane.ActualWidth-240)<2,"Header menu button restores the expanded sidebar");
-            Check(result?.Text=="-- . .-. .... .- -... .- / -.. ..- -. -.-- .- -.-.-- ","Turkish conversion through native DLL");
+            Check(result?.Text=="-- . .-. .... .- -... .- / -.. ..- -. -.-- .- -.-.-- ","Turkish conversion through the shared native engine survives initial layout events");
             Check(result!.Statistics.InputCharacters==14 && result.Statistics.Words==2,"Unicode character and word counters");
             await Snapshot(Path.Combine(directory,"light.png"));
             var lightInput=inputBox!.TransformToVisual(PageContent).TransformBounds(new Windows.Foundation.Rect(0,0,inputBox.ActualWidth,inputBox.ActualHeight));
@@ -220,6 +233,40 @@ public sealed partial class MainPage
             preferences=preferences with { Language="tr",Alphabet=MorseAlphabet.Latin,Theme="light" }; source="Merhaba dünya!"; result=null; ApplyTheme();
             foreach(string feature in new[]{"files","audio","practice","alphabet","glossary","radio","settings"})
             { Navigate(feature); await Snapshot(Path.Combine(directory,feature+".png")); Check(PageContent.Children.Count>0,feature+" page rendered"); }
+            Navigate("files");
+            var previousSelectedFiles=files.ToArray();
+            string pickerFixture=Path.Combine(directory,"picker-selection.txt"); File.WriteAllText(pickerFixture,"SOS");
+            int pickerInvocations=0;
+            var pendingPicker=new TaskCompletionSource<IReadOnlyList<string>>(TaskCreationOptions.RunContinuationsAsynchronously);
+            var firstSelection=ChooseFiles(()=> { pickerInvocations++; return pendingPicker.Task; });
+            try
+            {
+                await ChooseFiles(()=> { pickerInvocations++; return Task.FromResult<IReadOnlyList<string>>([pickerFixture]); });
+                BuildPage();
+                Check(pickerInvocations==1 && !firstSelection.IsCompleted && filePickerPending && filePickerButton?.IsEnabled==false,
+                    "A pending file picker rejects duplicate invocation and stays disabled after rebuilding its controls");
+                Navigate("converter"); Navigate("files");
+                pendingPicker.TrySetResult([pickerFixture]); await firstSelection;
+                Check(files.SequenceEqual(previousSelectedFiles) && !filePickerPending && filePickerButton?.IsEnabled==true,
+                    "A picker result arriving after navigation away and back leaves the selection unchanged and releases its gate");
+                await ChooseFiles(()=>Task.FromResult<IReadOnlyList<string>>([]));
+                bool cancelledPickerReleased=!filePickerPending && filePickerButton?.IsEnabled==true && files.SequenceEqual(previousSelectedFiles);
+                bool pickerFailureObserved=false;
+                try { await ChooseFiles(()=>Task.FromException<IReadOnlyList<string>>(new IOException("Synthetic picker failure"))); }
+                catch(IOException) { pickerFailureObserved=true; }
+                Check(cancelledPickerReleased && pickerFailureObserved && !filePickerPending && filePickerButton?.IsEnabled==true && files.SequenceEqual(previousSelectedFiles),
+                    "Cancelling or failing a file picker preserves the selection and releases its pending gate");
+                await ChooseFiles(()=>Task.FromResult<IReadOnlyList<string>>([pickerFixture]));
+                Check(files.SequenceEqual([pickerFixture]) && !filePickerPending && filePickerButton?.IsEnabled==true,
+                    "A new file selection succeeds after picker cancellation and failure");
+            }
+            finally
+            {
+                pendingPicker.TrySetResult([]);
+                try { await firstSelection; }
+                finally { files.Clear(); files.AddRange(previousSelectedFiles); }
+            }
+            Navigate("settings");
             var credits=Descendants(Root).OfType<Expander>().First(e=>AutomationProperties.GetAutomationId(e)=="OpenSourceCredits");
             credits.IsExpanded=true; await Task.Delay(150); Root.UpdateLayout();
             var creditLinks=Descendants(credits).OfType<HyperlinkButton>().ToArray();
@@ -240,24 +287,43 @@ public sealed partial class MainPage
             Check(lesson.Correct==1 && lesson.Incorrect==0,"Practice submit button and score");
             answer.Text="WRONG"; await ActionButton("submit"); await ActionButton("retryMissed");
             Check(lesson.Current!=null && lesson.Correct==0,"Mistakes can be reviewed separately");
-            keyingSound=false; keyingWpm=5; Navigate("keying"); await ActionButton("keyingStart");
-            Check(keyingSession is { IsFinished:false } && keyingSmokePress!=null,"Keying start opens a measured input session");
-            keyingSmokePress!(true); await Task.Delay(260); keyingSmokePress!(false); await Task.Delay(600);
-            await ActionButton("keyingFinish");
-            Check(keyingSession!.Snapshot().Text=="E" && keyingSession.Snapshot().Marks==1,"Keying paddle handlers decode a measured dot and finalize its letter");
-            Check(keyingSession.IsFinished && keyingTimer?.IsEnabled==false,"Finishing keying stops the display timer");
-            await Snapshot(Path.Combine(directory,"keying.png"));
-            keyingExpected="🙂"; BuildPage(); keyingSmokePress!(true);
-            Check(keyingSession?.IsPressed!=true && keyingTone==null && Status.Text==T("unsupported"),"Unsupported keying reference is rejected safely from the direct input handler");
-            keyingExpected="SOS"; keyingWpm=20;
-            Navigate("practice");
-            Check(keyingSmokePress==null && keyingTimer==null && keyingTone==null,"Leaving keying releases its input hook, timer and tone");
+            TimeSpan keyingTestTime=TimeSpan.Zero;
+            keyingSmokeClock=()=>keyingTestTime;
+            try
+            {
+                keyingSound=false; keyingWpm=5; Navigate("keying"); await ActionButton("keyingStart");
+                Check(keyingSession is { IsFinished:false } && keyingSmokePress!=null,"Keying start opens a measured input session");
+                keyingSmokePress!(true);
+                bool keyingPressed=keyingSession!.IsPressed;
+                keyingTestTime=TimeSpan.FromMilliseconds(240);
+                keyingSmokePress!(false);
+                keyingTestTime=TimeSpan.FromMilliseconds(840);
+                await ActionButton("keyingFinish");
+                var keyingSnapshot=keyingSession.Snapshot();
+                Check(keyingPressed && keyingSnapshot.Text=="E" && keyingSnapshot.Marks==1 &&
+                    keyingSnapshot.Timings.Single(t=>t.Kind==MorseCore.AppCore.Keying.KeyingTimingKind.Dot).AverageMilliseconds==240,
+                    "Keying paddle handlers measure a controlled 240-ms dot and finalize its letter");
+                Check(keyingSession.IsFinished && keyingTimer?.IsEnabled==false,"Finishing keying stops the display timer");
+                await Snapshot(Path.Combine(directory,"keying.png"));
+                keyingExpected="🙂"; BuildPage(); keyingSmokePress!(true);
+                Check(keyingSession?.IsPressed!=true && keyingTone==null && Status.Text==T("unsupported"),"Unsupported keying reference is rejected safely from the direct input handler");
+                keyingExpected="SOS"; keyingWpm=20;
+                Navigate("practice");
+                Check(keyingSmokePress==null && keyingTimer==null && keyingTone==null,"Leaving keying releases its input hook, timer and tone");
+            }
+            finally
+            {
+                try { CleanupKeying(); }
+                finally { keyingSmokeClock=null; }
+            }
             await ActionButton("Nav-education");
             Check(educationChildren?.Visibility==Visibility.Collapsed,"Education group collapses");
             await ActionButton("Nav-education"); await ActionButton("Nav-glossary");
             var search=Descendants(Root).OfType<TextBox>().First(b=>Equals(b.Header,T("searchTerms")));
             search.Text="QRL"; await Task.Delay(70);
             Check(Descendants(PageContent).OfType<TextBlock>().Any(b=>b.Text=="QRL?"),"Radio glossary search filters real definitions");
+            // Test the expanded navigation independently of transient native resize notifications.
+            SetCollapsed(false,false);
             if(radioExpanded) await ActionButton("Nav-radio");
             await ActionButton("Nav-radio");
             Check(radioChildren?.Visibility==Visibility.Visible && radioChildren.Children.Count==3,"Radio expands into three sidebar destinations");
@@ -391,8 +457,32 @@ public sealed partial class MainPage
             await DecodeAudioPath(brokenWave);
             Check(Status.Text==T("decoderFileSize") && decoderOperation==null,"Malformed audio reports its error and releases the operation");
             decoderResult=null;
-            var cancelledDecode=DecodeAudioPath(decoderWave); Navigate("converter"); await cancelledDecode;
-            Check(decoderResult==null && decoderOperation==null,"Navigating away cancels audio decoding without writing stale results");
+            var decodeReachedPublication=new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            var releaseDecodePublication=new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            decoderBeforePublish=async ()=>
+            {
+                decodeReachedPublication.TrySetResult();
+                await releaseDecodePublication.Task;
+            };
+            Task? cancelledDecode=null;
+            try
+            {
+                cancelledDecode=DecodeAudioPath(decoderWave);
+                await decodeReachedPublication.Task.WaitAsync(TimeSpan.FromSeconds(5));
+                var decoderOwner=decoderOperation;
+                Check(decoderOwner!=null && !cancelledDecode.IsCompleted,"A real completed decode retains its owner until result publication");
+                Navigate("converter");
+                Check(decoderOwner!.IsCancellationRequested && decoderOperation==null,"Navigation cancels the pending decoder owner before publication");
+                releaseDecodePublication.TrySetResult();
+                await cancelledDecode;
+                Check(decoderResult==null && decoderOperation==null,"Navigating away cancels audio decoding without writing stale results");
+            }
+            finally
+            {
+                decoderBeforePublish=null;
+                releaseDecodePublication.TrySetResult();
+                if(cancelledDecode!=null) await cancelledDecode;
+            }
             Navigate("settings"); await ActionButton("workspaceManageVoices");
             Check(page=="audio" && audioWorkspace==2,"Settings opens the voice manager inside Audio");
             var voiceDeadline=DateTimeOffset.UtcNow.AddSeconds(10);
@@ -413,6 +503,14 @@ public sealed partial class MainPage
                 while(voicePackRequest!=null && DateTimeOffset.UtcNow<sampleDeadline) await Task.Delay(50);
                 Check(voicePackRequest==null && voicePackageFeedback==T("voicesPreviewDone"),"Voice package preview synthesizes locally and releases the worker");
             }
+            var previousSpeech=preferences;
+            string secondaryVoice=OfflineSpeech.ForLanguage("de-DE").Last().Id;
+            preferences=preferences with { SpeechLanguage="de-DE",VoiceId=secondaryVoice };
+            audioWorkspace=3; BuildPage(); await Task.Delay(150);
+            Check(preferences.VoiceId==secondaryVoice,"Saved secondary voice survives delayed initial language selection");
+            Rebuild(); await Task.Delay(150);
+            Check(preferences.VoiceId==secondaryVoice,"Rebuilding the speech page preserves the selected secondary voice");
+            preferences=previousSpeech; audioWorkspace=2; BuildPage();
             string originalSpeechHome=preferences.SpeechHome;
             preferences=preferences with { SpeechHome=Path.GetPathRoot(directory)! }; BuildPage();
             Check(Descendants(PageContent).OfType<TextBlock>().Any(b=>b.Text==T("voicesLocationInvalid")),"Invalid voice home renders a recoverable page instead of throwing");
@@ -449,15 +547,15 @@ public sealed partial class MainPage
                 synthesized=true; decode=false; source="Merhaba dünya!"; result=null;
             }
 #endif
-            preferences=preferences with { ReduceMotion=false }; page="converter"; Rebuild(); SetCollapsed(true,true); AnimateContent(); await Task.Delay(350);
-            Check(Math.Abs(Pane.ActualWidth-72)<2,"Animated menu collapse");
+            preferences=preferences with { ReduceMotion=false }; page="converter"; Rebuild(); SetCollapsed(true,true); AnimateContent();
+            await WaitFor(()=>paneAnimation==null && Math.Abs(Pane.ActualWidth-72)<2,"Animated menu collapse");
             CheckCollapsedAlignment("tr"); await Snapshot(Path.Combine(directory,"collapsed-dark.png"));
             preferences=preferences with { Theme="light" }; ApplyTheme(); Rebuild(); await Snapshot(Path.Combine(directory,"collapsed-light.png"));
             CheckCollapsedAlignment("tr light");
             preferences=preferences with { Language="ar" }; Rebuild(); await Snapshot(Path.Combine(directory,"collapsed-arabic.png"));
             CheckCollapsedAlignment("ar");
             preferences=preferences with { Language="tr" }; Rebuild();
-            SetCollapsed(false,true); await Task.Delay(350); Check(Math.Abs(Pane.ActualWidth-240)<2,"Animated menu expansion");
+            SetCollapsed(false,true); await WaitFor(()=>paneAnimation==null && Math.Abs(Pane.ActualWidth-240)<2,"Animated menu expansion");
             await ConvertNow();
             foreach(string language in new[]{"en","de","ru","ar","tr"})
             {
@@ -519,9 +617,9 @@ public sealed partial class MainPage
             finally { Workspace.Width=double.NaN; }
             preferences=preferences with { Language="tr",ReduceMotion=false }; page="converter"; Rebuild();
             Backdrop.SetActive(true);
-            Check(Backdrop.IsAnimating==MotionAllowed(),"RAW background motion follows the system animation preference");
+            Check(Backdrop.IsAnimating==(MotionAllowed() && Backdrop.SupportsContinuousMotion),"RAW background motion follows the animation preference and renderer capability");
             Backdrop.SetActive(false); Check(!Backdrop.IsAnimating,"RAW background animation stops when the application is inactive");
-            Backdrop.SetActive(true); Check(Backdrop.IsAnimating==MotionAllowed(),"RAW background animation resumes when the application becomes active");
+            Backdrop.SetActive(true); Check(Backdrop.IsAnimating==(MotionAllowed() && Backdrop.SupportsContinuousMotion),"RAW background animation resumes when active if the renderer supports continuous motion");
             Check((contentAnimation!=null)==MotionAllowed(),"Page transition follows the system and application motion preferences");
             await Task.Delay(350);
             Check(contentAnimation==null && PageContent.Opacity==1 && ((TranslateTransform)PageContent.RenderTransform).X==0,"Page transition completes without leaving displaced or transparent content");
@@ -530,18 +628,21 @@ public sealed partial class MainPage
             page="settings"; Rebuild();
             var reduceMotion=Descendants(PageContent).OfType<ToggleSwitch>().First(t=>Equals(t.Header,T("reduceMotion")));
             reduceMotion.IsOn=false;
-            Check(Backdrop.IsAnimating==MotionAllowed(),"Settings can enable RAW background motion immediately");
+            Check(Backdrop.IsAnimating==(MotionAllowed() && Backdrop.SupportsContinuousMotion),"Settings enable RAW background motion immediately when supported by the renderer");
             reduceMotion.IsOn=true;
             Check(!Backdrop.IsAnimating,"Settings reduced motion immediately freezes the RAW background");
             byte[] updateBytes=System.Text.Encoding.UTF8.GetBytes("UI update verification fixture");
-            string updateName="MorseCore-2.0.0-Windows-x64-Setup.exe";
+            bool linuxUpdate=OperatingSystem.IsLinux();
+            string updateName=linuxUpdate?"MorseCore-2.0.0-Linux-x64.tar.gz":"MorseCore-2.0.0-Windows-x64-Setup.exe";
+            string checksumName=linuxUpdate?"SHA256SUMS-Linux-x64.txt":"SHA256SUMS";
             string updateRoot="https://github.com/mustafamertakceylan/MorseCore/releases/";
             var available=new ReleaseUpdate(new Version(2,0,0),new Uri(updateRoot+"tag/v2.0.0"),
                 new ReleaseAsset(updateName,new Uri(updateRoot+"download/v2.0.0/"+updateName),updateBytes.Length),
-                new ReleaseAsset("SHA256SUMS",new Uri(updateRoot+"download/v2.0.0/SHA256SUMS"),64+2+updateName.Length+1));
+                new ReleaseAsset(checksumName,new Uri(updateRoot+"download/v2.0.0/"+checksumName),64+2+updateName.Length+1))
+                { Platform=linuxUpdate?UpdatePlatform.LinuxX64:UpdatePlatform.WindowsX64 };
             update=available; Navigate("settings"); BuildPage();
-            Check(Descendants(Root).OfType<Button>().Any(b=>AutomationProperties.GetAutomationId(b)=="installUpdate"),"Settings offers installation when a verified-download-capable release is available");
-            using(var updateClient=new System.Net.Http.HttpClient(new SmokeUpdateHandler(updateBytes,updateName)))
+            Check(Descendants(Root).OfType<Button>().Any(b=>AutomationProperties.GetAutomationId(b)==(linuxUpdate?"linuxDownloadUpdate":"installUpdate")),"Settings offers the platform's verified update action");
+            using(var updateClient=new System.Net.Http.HttpClient(new SmokeUpdateHandler(updateBytes,updateName,checksumName)))
             {
                 var operation=DownloadAndInstallUpdate(new UpdateService(updateClient),available);
                 var deadline=DateTimeOffset.UtcNow.AddSeconds(5);
@@ -578,13 +679,14 @@ public sealed partial class MainPage
         var report=new { Passed=failure is null,Checks=checks,Failure=failure,SplashVisibleMilliseconds=Math.Round(splashVisibleMilliseconds,1),Status=Status.Text,Page=page,LogCall=logCall,AppliedLogCall=appliedLogQuery?.Call,NativeVersion=version,CatalogVoices=voices,SpeechSynthesized=synthesized,MouseDragTested=mouseDragTested,MouseDragEvidence=mouseDragEvidence,WorkingSetMiB=Math.Round(Process.GetCurrentProcess().WorkingSet64/1048576.0,1) };
         await File.WriteAllTextAsync(Path.Combine(directory,"ui-smoke.json"),JsonSerializer.Serialize(report,new JsonSerializerOptions { WriteIndented=true }));
         var closePeer=new ButtonAutomationPeer(CloseWindowButton);
-        ((IInvokeProvider)closePeer.GetPattern(PatternInterface.Invoke)).Invoke();
+        if(closePeer.GetPattern(PatternInterface.Invoke) is IInvokeProvider close) close.Invoke();
+        else App.MainWindow.Close();
     }
-    private sealed class SmokeUpdateHandler(byte[] payload,string name) : System.Net.Http.HttpMessageHandler
+    private sealed class SmokeUpdateHandler(byte[] payload,string name,string checksumName) : System.Net.Http.HttpMessageHandler
     {
         protected override Task<System.Net.Http.HttpResponseMessage> SendAsync(System.Net.Http.HttpRequestMessage request,CancellationToken token)
         {
-            System.Net.Http.HttpContent content=request.RequestUri!.AbsolutePath.EndsWith("/SHA256SUMS",StringComparison.Ordinal) ?
+            System.Net.Http.HttpContent content=request.RequestUri!.AbsolutePath.EndsWith("/"+checksumName,StringComparison.Ordinal) ?
                 new System.Net.Http.StringContent(Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(payload))+"  "+name+"\n") : new System.Net.Http.ByteArrayContent(payload);
             return Task.FromResult(new System.Net.Http.HttpResponseMessage(System.Net.HttpStatusCode.OK) { Content=content,RequestMessage=request });
         }

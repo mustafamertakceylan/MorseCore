@@ -21,9 +21,7 @@ public sealed partial class MainPage
     private StackPanel? decoderDetails;
     private bool decoderAutomaticTone = true, decoderAutomaticSpeed = true;
     private double decoderFrequency = 700, decoderWpm = 20, decoderThreshold = 35;
-#if MORSE_WINUI
     private string decoderDeviceId = "";
-#endif
     private int decoderGeneration;
 
     private void BuildAudioDecoderSection()
@@ -109,7 +107,7 @@ public sealed partial class MainPage
         var output = new TextBox { Header = T("decodedText"), Text = decoderResult?.Text ?? "", IsReadOnly = true, AcceptsReturn = true, TextWrapping = TextWrapping.Wrap, MinHeight = 100, FlowDirection = PlainDirection, FontSize = 18 };
         Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(output, "DecoderText");
         decoderText = output;
-        var code = new TextBox { Header = T("morseInput"), Text = decoderResult?.Morse ?? "", IsReadOnly = true, AcceptsReturn = true, TextWrapping = TextWrapping.Wrap, MinHeight = 72, FlowDirection = FlowDirection.LeftToRight, FontFamily = new FontFamily("Consolas") };
+        var code = new TextBox { Header = T("morseInput"), Text = decoderResult?.Morse ?? "", IsReadOnly = true, AcceptsReturn = true, TextWrapping = TextWrapping.Wrap, MinHeight = 72, FlowDirection = FlowDirection.LeftToRight, FontFamily = MonoFont };
         decoderMorseText = code;
         code.Background=Brush("ResultBrush"); code.MinHeight=output.MinHeight=120;
         results.Children.Add(Columns(300,2,output,code));
@@ -142,7 +140,6 @@ public sealed partial class MainPage
 
     private void BuildDecoderCapture(StackPanel stack)
     {
-#if MORSE_WINUI
         int enumerationGeneration = decoderGeneration;
         var devices = new ComboBox { Header = T("decoderDevice"), HorizontalAlignment = HorizontalAlignment.Stretch, DisplayMemberPath = nameof(AudioCaptureDevice.Name) };
         Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(devices, "DecoderInputs");
@@ -207,9 +204,6 @@ public sealed partial class MainPage
         controls.Children.Add(decoderRefreshButton);
         stack.Children.Add(controls); WrapActions(controls, stack);
         _ = RefreshDevices();
-#else
-        stack.Children.Add(Label(T("decoderWindowsCapture"), 13, true));
-#endif
     }
 
     private async Task DecodeAudioPath(string path)
@@ -227,6 +221,11 @@ public sealed partial class MainPage
         try
         {
             var result = await MorseDecoder.DecodeFileAsync(path, options, operation.Token);
+#if DEBUG
+            // Smoke tests can hold a real completed decode before publication
+            // to exercise navigation cancellation independently of CPU speed.
+            if(SmokeDirectory is not null && decoderBeforePublish is { } beforePublish) await beforePublish();
+#endif
             if (disposed || generation != decoderGeneration) return;
             decoderResult = result; decoderOperation = null; BuildPage(); SetStatus(T("ready"));
             Root.UpdateLayout();

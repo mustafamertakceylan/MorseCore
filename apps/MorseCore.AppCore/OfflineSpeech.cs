@@ -31,7 +31,7 @@ public static class OfflineSpeech
             string candidate=Path.Combine(directory.FullName,"speech-runtime");
             if(File.Exists(Path.Combine(candidate,"pack-ready.json"))) return candidate;
         }
-        return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"MorseCore","Speech");
+        return DesktopPaths.SpeechDirectory;
     }
     public static bool IsInstalled(string home,OfflineVoice voice)
     {

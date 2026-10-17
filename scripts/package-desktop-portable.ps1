@@ -4,8 +4,6 @@ $ErrorActionPreference='Stop'
 $taskRoot=(Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $taskVersion=[regex]::Match((Get-Content (Join-Path $taskRoot 'CMakeLists.txt') -Raw),'project\(MorseCore VERSION (\d+\.\d+\.\d+)').Groups[1].Value
 if(!$taskVersion) { throw 'CMake project version is missing.' }
-[xml]$taskProject=Get-Content (Join-Path $taskRoot 'apps/MorseCore.Desktop/MorseCore.Desktop/MorseCore.Desktop.csproj') -Raw
-if([string]$taskProject.Project.PropertyGroup[0].ApplicationDisplayVersion -ne $taskVersion -or [string]$taskProject.Project.PropertyGroup[0].Version -ne $taskVersion) { throw 'Native and desktop versions differ.' }
 if(!$OutputDirectory) { $OutputDirectory=Join-Path $taskRoot ('cmake-build-desktop-portable/'+[Guid]::NewGuid().ToString('N')) }
 $taskOutput=[System.IO.Path]::GetFullPath($OutputDirectory)
 $taskPayload=Join-Path $taskOutput ('stage-'+[Guid]::NewGuid().ToString('N'))

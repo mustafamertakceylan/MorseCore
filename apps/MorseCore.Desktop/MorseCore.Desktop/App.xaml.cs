@@ -38,4 +38,18 @@ public partial class App : Application
         MainWindow.Activate();
     }
     public static void InitializeLogging() { }
+#if !MORSE_WINUI
+    internal static void ActivateLinuxInstance()
+    {
+        var window=MainWindow;
+        if(window is null) return;
+        window.DispatcherQueue.TryEnqueue(()=>
+        {
+            if(window.AppWindow.Presenter is Microsoft.UI.Windowing.OverlappedPresenter presenter &&
+                presenter.State==Microsoft.UI.Windowing.OverlappedPresenterState.Minimized) presenter.Restore();
+            window.Activate();
+            LinuxWindowChrome.RestoreActivate(window);
+        });
+    }
+#endif
 }

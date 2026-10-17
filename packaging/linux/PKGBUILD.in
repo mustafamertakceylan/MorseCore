@@ -1,0 +1,29 @@
+# Generated from CMakeLists.txt and dependencies.json by package-linux.sh.
+# Local, checksummed upstream tarball: no AUR submission or release is implied.
+pkgname=morsecore-bin
+pkgver=@VERSION@
+pkgrel=1
+pkgdesc='Desktop Morse toolkit with a shared C23 engine and offline speech'
+arch=('x86_64')
+url='https://github.com/mustafamertakceylan/MorseCore'
+license=('Apache-2.0')
+depends=(@DEPENDS@)
+optdepends=(@OPTIONAL@)
+provides=('morsecore')
+conflicts=('morsecore')
+options=('!strip' '!debug')
+source=('MorseCore-@VERSION@-Linux-x64.tar.gz')
+sha256sums=('@SHA256@')
+
+package() {
+    local upstream="$srcdir/MorseCore-@VERSION@-Linux-x64"
+    install -d "$pkgdir/usr/lib/morsecore" "$pkgdir/usr/bin"
+    cp -a "$upstream/." "$pkgdir/usr/lib/morsecore/"
+    ln -s /usr/lib/morsecore/morsecore "$pkgdir/usr/bin/morsecore"
+    install -Dm644 "$upstream/morsecore.desktop" \
+        "$pkgdir/usr/share/applications/io.github.mustafamertakceylan.morsecore.desktop"
+    install -Dm644 "$upstream/morsecore.svg" \
+        "$pkgdir/usr/share/icons/hicolor/scalable/apps/io.github.mustafamertakceylan.morsecore.svg"
+    install -Dm644 "$upstream/LICENSE" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+    install -Dm644 "$upstream/NOTICE" "$pkgdir/usr/share/licenses/$pkgname/NOTICE"
+}

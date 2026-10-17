@@ -7,7 +7,7 @@ using System.Text.Json;
 namespace MorseCore.AppCore;
 
 public sealed record ReleaseAsset(string Name, Uri Download, long Size);
-public enum UpdatePlatform { WindowsX64, MacArm64, MacX64 }
+public enum UpdatePlatform { WindowsX64, MacArm64, MacX64, LinuxX64 }
 public sealed record ReleaseUpdate(Version Version, Uri Page, ReleaseAsset? Installer=null, ReleaseAsset? Checksums=null)
 {
     public UpdatePlatform Platform { get; init; }=UpdatePlatform.WindowsX64;
@@ -19,12 +19,14 @@ public sealed class UpdateService(HttpClient client)
     public const long MaxInstallerBytes=512L*1024*1024;
     public static readonly Uri Endpoint=new("https://api.github.com/repos/mustafamertakceylan/MorseCore/releases/latest");
     // Redirects are followed explicitly so every hop, including intermediate hops,
-    // is constrained to GitHub HTTPS storage on both desktop platforms.
+    // is constrained to GitHub HTTPS storage on every desktop platform.
     public static HttpClient CreateHttpClient()=>new(new HttpClientHandler { AllowAutoRedirect=false });
 
-    public async Task<ReleaseUpdate?> CheckAsync(Version current, CancellationToken token=default)
+    public Task<ReleaseUpdate?> CheckAsync(Version current,CancellationToken token=default)=>CheckAsync(current,UpdatePlatform.WindowsX64,token);
+
+    public async Task<ReleaseUpdate?> CheckAsync(Version current,UpdatePlatform platform,CancellationToken token=default)
     {
-        var release=await LatestAsync(UpdatePlatform.WindowsX64,token).ConfigureAwait(false);
+        var release=await LatestAsync(platform,token).ConfigureAwait(false);
         return release?.Version>current ? release : null;
     }
 
@@ -43,20 +45,24 @@ public sealed class UpdateService(HttpClient client)
         var page=ExactUrl(root.GetProperty("html_url").GetString(),Repository+"tag/"+tag);
         ReleaseAsset? installer=null,checksums=null;
         var names=InstallerNames(version,platform);
+        var checksumNames=ChecksumNames(platform);
         var installers=new Dictionary<string,ReleaseAsset>(StringComparer.Ordinal);
+        var checksumFiles=new Dictionary<string,ReleaseAsset>(StringComparer.Ordinal);
         if(root.TryGetProperty("assets",out var assets))
             foreach(var asset in assets.EnumerateArray())
             {
                 string? name=asset.GetProperty("name").GetString();
-                if(name==null || (!names.Contains(name,StringComparer.Ordinal) && name!="SHA256SUMS")) continue;
+                if(name==null || (!names.Contains(name,StringComparer.Ordinal) && !checksumNames.Contains(name,StringComparer.Ordinal))) continue;
+                bool isChecksum=checksumNames.Contains(name,StringComparer.Ordinal);
                 long size=asset.GetProperty("size").GetInt64();
-                if(size<=0 || size>(name=="SHA256SUMS" ? 64*1024 : MaxInstallerBytes)) throw new InvalidDataException("Invalid release asset size.");
+                if(size<=0 || size>(isChecksum ? 64*1024 : MaxInstallerBytes)) throw new InvalidDataException("Invalid release asset size.");
                 var download=ExactUrl(asset.GetProperty("browser_download_url").GetString(),Repository+"download/"+tag+"/"+name);
                 var selected=new ReleaseAsset(name,download,size);
-                if(name!="SHA256SUMS") { if(!installers.TryAdd(name,selected)) throw new InvalidDataException("Duplicate installer."); }
-                else { if(checksums!=null) throw new InvalidDataException("Duplicate checksum file."); checksums=selected; }
+                if(!isChecksum) { if(!installers.TryAdd(name,selected)) throw new InvalidDataException("Duplicate installer."); }
+                else if(!checksumFiles.TryAdd(name,selected)) throw new InvalidDataException("Duplicate checksum file.");
             }
         installer=names.Select(name=>installers.GetValueOrDefault(name)).FirstOrDefault(asset=>asset!=null);
+        checksums=checksumNames.Select(name=>checksumFiles.GetValueOrDefault(name)).FirstOrDefault(asset=>asset!=null);
         string notes=root.TryGetProperty("body",out var body)&&body.ValueKind==JsonValueKind.String ? body.GetString()??"" : "";
         return new(version,page,installer,checksums) { Platform=platform,Notes=notes[..Math.Min(notes.Length,32768)] };
     }
@@ -64,10 +70,16 @@ public sealed class UpdateService(HttpClient client)
     private static string[] InstallerNames(Version version,UpdatePlatform platform)=>platform switch
     {
         UpdatePlatform.WindowsX64=>[$"MorseCore-{version}-Windows-x64-Setup.exe"],
+        UpdatePlatform.LinuxX64=>[$"MorseCore-{version}-Linux-x64.tar.gz"],
         UpdatePlatform.MacArm64 or UpdatePlatform.MacX64=>new[] { platform==UpdatePlatform.MacArm64?"arm64":"x64","universal" }
             .SelectMany(cpu=>new[] { "dmg","pkg","zip" }.Select(ext=>$"MorseCore-{version}-macOS-{cpu}.{ext}")).ToArray(),
         _=>throw new ArgumentOutOfRangeException(nameof(platform))
     };
+
+    // Supplemental Linux assets can be added without replacing an existing release's
+    // Windows/macOS checksum list. Legacy all-platform lists remain compatible.
+    private static string[] ChecksumNames(UpdatePlatform platform)=>platform==UpdatePlatform.LinuxX64
+        ? ["SHA256SUMS-Linux-x64.txt","SHA256SUMS"] : ["SHA256SUMS"];
 
     public async Task<PreparedUpdate> DownloadAsync(ReleaseUpdate release,string cacheDirectory,IProgress<double>? progress=null,CancellationToken token=default)
     {
@@ -79,8 +91,9 @@ public sealed class UpdateService(HttpClient client)
         var checksums=release.Checksums ?? throw new InvalidDataException("Release has no checksums.");
         ExactUrl(release.Page.AbsoluteUri,Repository+"tag/"+tag);
         ExactUrl(installer.Download.AbsoluteUri,Repository+"download/"+tag+"/"+filename);
-        ExactUrl(checksums.Download.AbsoluteUri,Repository+"download/"+tag+"/SHA256SUMS");
-        if(installer.Name!=filename || installer.Size<=0 || installer.Size>MaxInstallerBytes || checksums.Name!="SHA256SUMS" || checksums.Size<=0 || checksums.Size>64*1024)
+        if(!ChecksumNames(release.Platform).Contains(checksums.Name,StringComparer.Ordinal)) throw new InvalidDataException("Checksum platform differs from release.");
+        ExactUrl(checksums.Download.AbsoluteUri,Repository+"download/"+tag+"/"+checksums.Name);
+        if(installer.Name!=filename || installer.Size<=0 || installer.Size>MaxInstallerBytes || checksums.Size<=0 || checksums.Size>64*1024)
             throw new InvalidDataException("Invalid release assets.");
         if(!Path.IsPathFullyQualified(cacheDirectory)) throw new ArgumentException("An absolute update cache is required.",nameof(cacheDirectory));
         using var timeout=CancellationTokenSource.CreateLinkedTokenSource(token);
@@ -93,7 +106,7 @@ public sealed class UpdateService(HttpClient client)
         if(matches.Length!=1 || matches[0][..64].Any(c=>!Uri.IsHexDigit(c))) throw new InvalidDataException("Installer checksum is missing or ambiguous.");
         string expected=matches[0][..64];
         string directory=Path.Combine(cacheDirectory,Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(directory);
+        DesktopPaths.CreateUserDirectory(directory);
         string partial=Path.Combine(directory,filename+".download"),complete=Path.Combine(directory,filename);
         try
         {

@@ -15,7 +15,9 @@ public sealed partial class VoicePackageManager(string home,HttpClient http)
         var package=VoicePackageCatalog.Get(voiceId);
         using var lease=AcquireLease();
         string? python=await FindPythonAsync(token).ConfigureAwait(false);
-        if(python is null) throw new FileNotFoundException("A compatible Python runtime is required.");
+        if(python is null) throw new FileNotFoundException(OperatingSystem.IsLinux()
+            ? "Offline voices require 64-bit Python 3.11–3.13 with venv and ensurepip. Install the distribution's matching python3-venv package (Debian/Ubuntu/Pardus); no system packages are installed automatically."
+            : "A compatible Python runtime is required.");
         ExtractTools();
         foreach(string path in new[]{"speech-models.json","installed-packages.txt",ToolDirectory+"/setup.stdout.log",ToolDirectory+"/setup.stderr.log"}) OwnedPath(path);
         progress?.Report(new("dependencies"));
@@ -164,5 +166,5 @@ public sealed partial class VoicePackageManager(string home,HttpClient http)
             catch(DirectoryNotFoundException) { }
         }
     }
-    private static void EnsureDirectory(string path) { CheckLinks(path); Directory.CreateDirectory(path); CheckLinks(path); }
+    private static void EnsureDirectory(string path) { CheckLinks(path); DesktopPaths.CreateUserDirectory(path); CheckLinks(path); }
 }

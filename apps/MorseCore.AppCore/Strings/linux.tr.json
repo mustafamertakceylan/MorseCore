@@ -1,0 +1,6 @@
+{
+  "linuxDownloadUpdate": "Güncelleme paketini indir",
+  "linuxOpenFolder": "İndirilen klasörü aç",
+  "linuxUpdateHelp": "Paket SHA256 ile doğrulanır. Taşınabilir sürümde uygulamayı kapatıp yeni klasörü kullan. DEB veya Arch kurulumunda uygun paketi paket yöneticisiyle güncelle. Ayarlar ve görüşme kayıtları uygulama klasöründen ayrı saklanır.",
+  "linuxPythonHelp": "Ses paketleri Python 3.11–3.13 ve venv desteği ister. Sistem Python'u değiştirilmez; bağımlılıklar uygulamanın özel ortamına kurulur. Dağıtımına uygun hazırlık adımları Linux kurulum rehberinde."
+}

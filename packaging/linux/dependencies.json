@@ -1,0 +1,28 @@
+{
+  "runtime": "linux-x64",
+  "glibc_maximum_required": "2.36",
+  "glibcxx_maximum_required": "3.4.30",
+  "cxxabi_maximum_required": "1.3.13",
+  "debian": [
+    "ca-certificates", "libc6 (>= 2.36)", "libgcc-s1", "libstdc++6",
+    "libgssapi-krb5-2", "libicu72 | libicu74 | libicu76 | libicu78",
+    "libssl3 | libssl3t64", "zlib1g", "libbrotli1", "tzdata",
+    "libfontconfig1", "libfreetype6", "fonts-dejavu-core", "libx11-6", "libxext6", "libxrandr2",
+    "libxi6", "libxfixes3", "libxcursor1", "libgl1", "libice6", "libsm6", "dbus",
+    "libsdl2-2.0-0", "xdg-utils", "xdg-desktop-portal",
+    "xdg-desktop-portal-gtk | xdg-desktop-portal-kde | xdg-desktop-portal-gnome"
+  ],
+  "arch": [
+    "ca-certificates", "glibc", "gcc-libs", "krb5", "icu", "openssl", "zlib",
+    "brotli", "tzdata", "fontconfig", "freetype2", "ttf-dejavu", "libx11", "libxext",
+    "libxrandr", "libxi", "libxfixes", "libxcursor", "libglvnd", "libice", "libsm",
+    "dbus", "sdl2", "xdg-utils", "xdg-desktop-portal"
+  ],
+  "debian_optional": ["python3", "python3-venv"],
+  "arch_optional": [
+    "python: optional offline speech packages",
+    "xdg-desktop-portal-gtk: file picker backend for GTK desktops",
+    "xdg-desktop-portal-kde: file picker backend for KDE desktops",
+    "xdg-desktop-portal-gnome: file picker backend for GNOME desktops"
+  ]
+}

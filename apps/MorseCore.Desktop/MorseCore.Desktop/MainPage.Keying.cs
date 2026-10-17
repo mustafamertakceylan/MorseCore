@@ -22,7 +22,16 @@ public sealed partial class MainPage
     private string keyingNormalizedExpected="";
 #if DEBUG
     private Action<bool>? keyingSmokePress;
+    private Func<TimeSpan>? keyingSmokeClock;
 #endif
+
+    private TimeSpan KeyingNow()
+    {
+#if DEBUG
+        if(SmokeDirectory is not null && keyingSmokeClock is { } clock) return clock();
+#endif
+        return keyingClock?.Elapsed ?? TimeSpan.Zero;
+    }
 
     private void BuildKeying()
     {
@@ -46,7 +55,7 @@ public sealed partial class MainPage
         var guide=Label(T("keyingKeyboardHelp"),13,true); guide.TextWrapping=TextWrapping.Wrap;
         stack.Children.Add(key); stack.Children.Add(guide);
         var transcript=new TextBox { Header=T("keyingDecoded"),IsReadOnly=true,TextWrapping=TextWrapping.Wrap,MinHeight=70,FlowDirection=PlainDirection };
-        var symbols=new TextBox { Header=T("keyingMorse"),IsReadOnly=true,FontFamily=new FontFamily("Consolas"),TextWrapping=TextWrapping.Wrap,FlowDirection=FlowDirection.LeftToRight,MinHeight=60 };
+        var symbols=new TextBox { Header=T("keyingMorse"),IsReadOnly=true,FontFamily=MonoFont,TextWrapping=TextWrapping.Wrap,FlowDirection=FlowDirection.LeftToRight,MinHeight=60 };
         Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(transcript,"KeyingTranscript");
         Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(symbols,"KeyingMorse");
         var resultLabel=Label("",14); resultLabel.TextWrapping=TextWrapping.Wrap;
@@ -102,7 +111,7 @@ public sealed partial class MainPage
             CancelInput();
             if(!TryReference(out string normalized))
             {
-                if(keyingClock!=null && keyingSession is { IsFinished:false }) keyingSession.Finish(keyingClock.Elapsed);
+                if(keyingClock!=null && keyingSession is { IsFinished:false }) keyingSession.Finish(KeyingNow());
                 keyingClock?.Stop(); keyingTimer?.Stop();
                 keyingTone?.Dispose(); keyingTone=null;
                 Refresh(); return false;
@@ -119,7 +128,7 @@ public sealed partial class MainPage
         {
             if(!ReferenceEquals(keyingSurface,key) || inputKind!=null) return;
             if((keyingSession==null || keyingSession.IsFinished || sessionReference!=expected.Text) && !TryStart()) return;
-            if(keyingClock==null || !keyingSession!.KeyDown(keyingClock.Elapsed)) return;
+            if(keyingClock==null || !keyingSession!.KeyDown(KeyingNow())) return;
             inputKind=kind; pointerId=id; Visual(true);
             if(keyingSound && keyingTone!=null && !keyingTone.Start()) toneUnavailable=true;
             Refresh();
@@ -128,7 +137,7 @@ public sealed partial class MainPage
         {
             if(!ReferenceEquals(keyingSurface,key) || inputKind!=kind || kind=="pointer" && pointerId!=id) return;
             inputKind=null;
-            if(keyingClock!=null) keyingSession?.KeyUp(keyingClock.Elapsed);
+            if(keyingClock!=null) keyingSession?.KeyUp(KeyingNow());
             keyingTone?.Stop(); Visual(false); Refresh();
         }
 #if DEBUG
@@ -176,7 +185,7 @@ public sealed partial class MainPage
         keyingTimer.Tick+=(_,_)=>
         {
             if(!ReferenceEquals(keyingSurface,key) || keyingSession==null || keyingClock==null) return;
-            keyingSession.Advance(keyingClock.Elapsed);
+            keyingSession.Advance(KeyingNow());
             if(inputKind!=null && !keyingSession.IsPressed) { inputKind=null; keyingTone?.Stop(); Visual(false); }
             Refresh();
         };
@@ -187,7 +196,7 @@ public sealed partial class MainPage
         {
             CancelInput();
             keyingNormalizedExpected=TryReference(out string normalized) ? normalized : "";
-            if(keyingClock!=null) { keyingSession?.Finish(keyingClock.Elapsed); keyingClock.Stop(); }
+            if(keyingClock!=null) { keyingSession?.Finish(KeyingNow()); keyingClock.Stop(); }
             keyingTimer.Stop(); Refresh(); return Task.CompletedTask;
         },"\uE71A"));
         stack.Children.Add(controls); WrapActions(controls,stack);
@@ -210,7 +219,7 @@ public sealed partial class MainPage
     {
         keyingCancelInput?.Invoke(); keyingCancelInput=null;
         keyingSurface=null;
-        if(keyingClock!=null && keyingSession is { IsFinished:false }) keyingSession.Finish(keyingClock.Elapsed);
+        if(keyingClock!=null && keyingSession is { IsFinished:false }) keyingSession.Finish(KeyingNow());
         keyingClock?.Stop();
         keyingTimer?.Stop(); keyingTimer=null;
         keyingTone?.Dispose(); keyingTone=null;
@@ -237,8 +246,14 @@ internal sealed class KeyingSidetone : IDisposable
     private nint handle,header,buffer;
     private readonly uint headerSize=(uint)Marshal.SizeOf<Header>();
     private bool playing;
+    private LinuxAudio.Sidetone? linux;
     public static KeyingSidetone? TryCreate(uint frequency)
     {
+        if(OperatingSystem.IsLinux())
+        {
+            var tone=LinuxAudio.CreateSidetone(frequency);
+            return tone is null ? null : new KeyingSidetone { linux=tone };
+        }
         if(!OperatingSystem.IsWindows()) return null;
         var result=new KeyingSidetone();
         try
@@ -260,16 +275,18 @@ internal sealed class KeyingSidetone : IDisposable
     }
     public bool Start()
     {
+        if(linux is { } tone) return tone.Start();
         if(handle==0 || header==0) return false;
         if(playing) return true;
         var value=Marshal.PtrToStructure<Header>(header); value.Flags=(value.Flags&~1u)|12u; value.Loops=uint.MaxValue;
         Marshal.StructureToPtr(value,header,false);
         playing=waveOutWrite(handle,header,headerSize)==0; return playing;
     }
-    public void Stop() { if(handle!=0 && playing) { waveOutReset(handle); playing=false; } }
+    public void Stop() { linux?.Stop(); if(handle!=0 && playing) { waveOutReset(handle); playing=false; } }
     public void Dispose()
     {
         Stop();
+        linux?.Dispose(); linux=null;
         if(handle!=0)
         {
             if(header!=0) waveOutUnprepareHeader(handle,header,headerSize);
