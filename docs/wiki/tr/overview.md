@@ -23,6 +23,6 @@ MorseCore; metinleri dönüştürmek, Morse sesini dinlemek ve amatör telsiz g�
 
 Menü dili, dönüşüm alfabesi ve seslendirme dili ayrı seçimlerdir. Arapça menüler sağdan sola döner; Morse alanları soldan sağa kalır. Açık/koyu tema ve hareketi azaltma seçeneği **Ayarlar** içindedir.
 
-Windows x64 ve Apple Silicon Mac paketleri vardır. **Linux masaüstü uygulaması henüz yoktur.** Menü ve ses seçenekleri beş dili kapsar; bu Wiki şimdilik Türkçe ve İngilizcedir.
+Windows x64 ve Apple Silicon Mac paketleri vardır. [Linux geliştirme sürümü](../../linux.tr.md) Ubuntu, Debian, Arch ve Pardus'u hedefler; dağıtım testleri tamamlanmamıştır. Menü ve ses seçenekleri beş dili kapsar; bu Wiki şimdilik Türkçe ve İngilizcedir.
 
 Sonraki adım: [İlk kullanım](first-steps.md) · Yardım: [Sorun giderme](updates.md)

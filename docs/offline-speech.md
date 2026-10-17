@@ -26,7 +26,7 @@ Speech then uses local files with no API key or background server. Missing voice
 
 ## Limits and credits
 
-Speech playback is available on Windows x64 and Apple Silicon macOS. Linux has no desktop interface yet. On Mac, use **Audio → Voice packs**; if needed, the app prepares its own verified Python runtime without changing the system PATH. Models load in a separate worker process when needed and exit after playback preparation. The request limit is 4000 characters and two minutes of generation. Small model files do not imply small peak RAM; Turkish voices use CPU PyTorch and can consume several hundred MiB while generating.
+Speech playback is available on Windows x64 and Apple Silicon macOS; the [Linux preview](linux.md) uses the same voice packages with an SDL2 playback adapter. Linux needs Python 3.11–3.13 with venv. All eight voices were synthesized in an Ubuntu 24.04.5 VM with Python 3.12 and external networking unavailable; physical audio quality still requires listening. On Mac, use **Audio → Voice packs**; if needed, the app prepares its own verified Python runtime without changing the system PATH. Models load in a separate worker process when needed and exit after playback preparation. The request limit is 4000 characters and two minutes of generation. Small model files do not imply small peak RAM; Turkish voices use CPU PyTorch and can consume several hundred MiB while generating.
 
 Thanks to the creators of [EMA Lightning](https://huggingface.co/canberkkkkkk/ema-lightning), [Antalia-2 Mini](https://huggingface.co/cloud0day3/antalia-mini) and [Piper](https://github.com/OHF-Voice/piper1-gpl/tree/v1.3.0). EMA and Antalia code/weights are Apache-2.0. Piper is GPL-3.0 and runs as a separate executable process. Individual models and dependencies retain their own terms. License and NOTICE files stay with the installed pack.
 
@@ -38,6 +38,8 @@ Kareem's source model card does not explicitly identify the dataset license. Rev
 The optional command-line setup still works: `python -X utf8 scripts/setup-speech.py --voice ema-tr`. Omit `--voice` to install the full catalog. Desktop installation uses the same version-pinned engine packages and individually verifies files from `scripts/speech-models.json`; downloads use temporary files, exact sizes and SHA-256 or Git blob digests before replacement.
 
 The app discovers the ignored `speech-runtime/` development folder, a configured absolute folder or `%LOCALAPPDATA%/MorseCore/Speech`. `MORSECORE_SPEECH_HOME` overrides discovery when no folder is selected. Setup details are in `.voice-tools/setup.stdout.log` and `setup.stderr.log` inside the selected folder. This virtual environment is tied to the Python installation on the same computer; copying it to another machine is unsupported.
+
+On Linux the default installed voice directory is `$XDG_DATA_HOME/morsecore/Speech`, or `~/.local/share/morsecore/Speech` when XDG data home is unset.
 
 Run `python -m unittest discover -s tests -p test_speech_setup.py`, the AppCore smoke checks, and `pwsh -File scripts/test-speech.ps1` for installed voices. Actual sound quality and speaker output require listening; automated tests do not prove them.
 

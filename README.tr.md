@@ -4,9 +4,10 @@
 
 **Mesajını yaz. Morse'u dinle. Alıştırma yaparak öğren.**
 
-[![İndir Windows](https://img.shields.io/badge/%C4%B0ndir-Windows-5e6a42?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.7.5/MorseCore-0.7.5-Windows-x64-Setup.exe)
-[![İndir macOS](https://img.shields.io/badge/macOS-Apple_Silicon-5e6a42?style=for-the-badge&logo=apple&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.7.5/MorseCore-0.7.5-macOS-arm64.dmg)
-[![0.7.5](https://img.shields.io/badge/v0.7.5-%C3%96nizleme-c58c59?style=for-the-badge)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v0.7.5)
+[![İndir Windows](https://img.shields.io/badge/%C4%B0ndir-Windows-5e6a42?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/download/v1.0.0/MorseCore-1.0.0-Windows-x64-Setup.exe)
+[![İndir macOS](https://img.shields.io/badge/macOS-Apple_Silicon-5e6a42?style=for-the-badge&logo=apple&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/download/v1.0.0/MorseCore-1.0.0-macOS-arm64.dmg)
+[![İndir Linux](https://img.shields.io/badge/Linux-x64-5e6a42?style=for-the-badge&logo=linux&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v1.0.0)
+[![1.0.0](https://img.shields.io/badge/v1.0.0-Yay%C4%B1nda-c58c59?style=for-the-badge)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v1.0.0)
 
 [English](README.md) · **Türkçe** · [Deutsch](README.de.md) · [Русский](README.ru.md) · [العربية](README.ar.md)
 
@@ -14,25 +15,27 @@
 
 </div>
 
-MorseCore; metni Morse koduna çevirmek, dinlemek ve alıştırma yapmak için ücretsiz bir Windows ve macOS uygulamasıdır. Mesajların bilgisayarında kalır.
+MorseCore; metni Morse koduna çevirmek, dinlemek ve alıştırma yapmak için ücretsiz bir Windows, macOS ve Linux uygulamasıdır. Mesajların bilgisayarında kalır.
 
 ![Türkçe MorseCore: solda metin, sağda Morse kodu](docs/media/converter.tr.png)
 
-**macOS:** [DMG dosyasını](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.7.5/MorseCore-0.7.5-macOS-arm64.dmg) açıp MorseCore’u Applications klasörüne sürükle. Bu önizleme Apple noter onayına sahip değil; Gizlilik ve Güvenlik üzerinden açılışa izin vermen gerekebilir. [Mac kurulumu](docs/macos.md).
+**macOS:** [DMG dosyasını](https://github.com/mustafamertakceylan/MorseCore/releases/download/v1.0.0/MorseCore-1.0.0-macOS-arm64.dmg) açıp MorseCore’u Applications klasörüne sürükle. Bu sürüm Apple noter onayına sahip değil; Gizlilik ve Güvenlik üzerinden açılışa izin vermen gerekebilir. [Mac kurulumu](docs/macos.md).
+
+**Linux:** Ubuntu, Debian veya Pardus için `.deb`; Arch için taşınabilir arşiv ve `PKGBUILD` kullan. [Linux kurulumu](docs/linux.tr.md).
 
 ### Hemen başla
 
-1. **Setup’ı çalıştır**, ardından Başlat menüsünden MorseCore’u aç.
+1. Windows’ta: **Setup’ı çalıştır**, ardından Başlat menüsünden MorseCore’u aç.
 2. **Dönüştürücü** bölümüne mesajını yazıp **Dönüştür** düğmesine bas. Dinlemek için **Ses** bölümünü kullan.
 3. Alfabe, alıştırmalar ve telsiz kısaltmaları için **Eğitim** bölümünü aç.
 
-Kurmak istemiyorsan [taşınabilir ZIP’i](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.7.5/MorseCore-0.7.5-Windows-x64-Desktop.zip) çıkarıp **MorseCore.Desktop.exe** dosyasını aç. Bu önizleme imzasızdır; Windows yayıncı uyarısı gösterebilir.
+Kurmak istemiyorsan [taşınabilir ZIP’i](https://github.com/mustafamertakceylan/MorseCore/releases/download/v1.0.0/MorseCore-1.0.0-Windows-x64-Desktop.zip) çıkarıp **MorseCore.Desktop.exe** dosyasını aç. Bu Windows sürümü imzasızdır; Windows yayıncı uyarısı gösterebilir.
 
 ### Neler yapabilirsin?
 
 - Metinleri ve metin dosyalarını iki yönde, tek tek veya topluca çevir.
 - Morse dinle, WAV kaydet ve kendin göndererek ritmini ölç.
-- WAV dosyasından veya Windows ses girişinden temiz, tek tonlu Morse kaydını çöz.
+- WAV dosyasından veya mikrofondan temiz, tek tonlu Morse kaydını çöz.
 - **Amatör telsiz** altında istasyonlarını yönet, mesaj hazırla, ADIF içe aktar ve çevrimdışı haritalı görüşme günlüğü tut. Cihaz bağlantısı planlanıyor; uygulama RF yayını yapmaz.
 - EMA Lightning, Antalia-2 Mini ve Piper sesleriyle metni çevrimdışı seslendir. Sesi ilk kez internetle kur; sonrasında bilgisayarında dinle.
 
@@ -53,7 +56,7 @@ Ayarlar’dan krem açık temayı veya yeşil koyu temayı seç. Yavaş arka pla
 
 </details>
 
-**Windows x64 ve macOS Apple Silicon (M1 ve sonrası) için mevcut. Linux planlanıyor; tarih henüz yok.**
+**Windows x64, macOS Apple Silicon (M1 ve sonrası) ve Linux x64 için mevcut.** Ubuntu, Debian, Arch ve Pardus için [Linux kurulumuna](docs/linux.tr.md) bak.
 
 ### Teşekkürler ve lisans
 

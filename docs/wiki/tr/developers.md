@@ -18,7 +18,7 @@ Windows ve Mac, **aynı C23 motorunu ve AppCore iş kurallarını** kullanır. A
 - [Mac kaynak koddan derleme](../../../apps/MorseCore.macOS/README.md)
 - [Native API](../../native-api.tr.md)
 
-Linux'taki otomatik kontroller ortak motoru sınar; yayımlanmış Linux arayüzü anlamına gelmez.
+Linux geliştirme sürümü aynı XAML, AppCore ve C23 motorunu kullanır. [Linux rehberi](../../linux.tr.md) paketleri, otomatik kontrolleri ve henüz tamamlanmamış dağıtım testlerini ayırır; CI başarısı her dağıtımın test edildiği anlamına gelmez.
 
 ## Wiki'yi güncellemek
 

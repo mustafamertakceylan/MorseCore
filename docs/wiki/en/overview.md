@@ -23,6 +23,6 @@ MorseCore is a free desktop app for converting text, listening to Morse, and pre
 
 Menu language, conversion alphabet and speech language are separate choices. Arabic menus mirror from right to left; Morse fields remain left to right. Light/dark themes and reduced motion are in **Settings**.
 
-Packages are available for Windows x64 and Apple Silicon Macs. **There is no Linux desktop app yet.** The app's menus and voice choices cover five languages; this first Wiki is in English and Turkish.
+Packages are available for Windows x64 and Apple Silicon Macs. A [Linux development preview](../../linux.md) targets Ubuntu, Debian, Arch and Pardus; distribution testing is not yet complete. The app's menus and voice choices cover five languages; this first Wiki is in English and Turkish.
 
 Next: [First steps](first-steps.md) · Help: [Troubleshooting](updates.md)

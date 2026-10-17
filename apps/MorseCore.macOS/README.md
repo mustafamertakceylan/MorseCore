@@ -1,7 +1,7 @@
-# MorseCore for macOS — development preview
+# MorseCore for macOS
 
 Native SwiftUI frontend with the same C23 engine and AppCore business logic
-as Windows. Requires macOS 14 or later. Apple Silicon is the currently tested
+as Windows and Linux. Requires macOS 14 or later. Apple Silicon is the currently tested
 target. Development builds require Xcode/Swift 6 and CMake 3.28 or later with
 a final C23 compiler. The app bundle includes its .NET helper runtime;
 end users do not need a separate .NET installation.
@@ -54,7 +54,7 @@ From the repository root, create and validate a drag-and-drop installer:
 ```sh
 bash scripts/package-macos.sh
 MORSECORE_PACKAGE_GUI_SMOKE=1 bash scripts/test-macos-package.sh \
-  build/release-macos/MorseCore-0.7.5-macOS-arm64.dmg
+  build/release-macos/MorseCore-1.0.0-macOS-arm64.dmg
 ```
 
 For a freshly cross-published helper, set `MORSECORE_SKIP_HELPER_PUBLISH=1` on
@@ -63,10 +63,10 @@ reuse option is for developers; CI normally publishes from source.
 `python3 scripts/sync-macos-resources.py --check` detects stale strings,
 brand resources and generated ADIF ranges.
 
-The local bundle uses ad hoc signing for development, not Developer ID signing
+Community bundles use ad hoc signing, not Developer ID signing
 or notarization. Native library and SwiftPM resources are bundled together.
 Brand artwork and OFL fonts are reused from the desktop app; font licenses,
-Apache-2.0 LICENSE and NOTICE travel with the development bundle.
+Apache-2.0 LICENSE and NOTICE travel with the app bundle.
 
 Developer ID and notarization are currently rejected by the scripts: the
 managed helper layout needs a separate signing-compatible packaging change.

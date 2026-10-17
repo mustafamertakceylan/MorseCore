@@ -26,7 +26,7 @@ Seslendirme bundan sonra API anahtarı veya sürekli çalışan sunucu olmadan y
 
 ## Sınırlar ve teşekkür
 
-Ses oynatımı Windows x64 ve Apple Silicon macOS üzerinde kullanılabilir. Linux masaüstü arayüzü henüz yoktur. Mac'te **Ses → Ses paketleri** bölümünü kullan; gerekirse uygulama sistem PATH ayarını değiştirmeden kendine özel, doğrulanmış bir Python hazırlar. Modeller gerektiğinde ayrı çalıştırıcıda yüklenir; üretim bitince işlem kapanır. Sınır 4000 karakter ve iki dakikalık ses üretimidir. Küçük model dosyası düşük tepe RAM tüketimi anlamına gelmez; Türkçe sesler CPU PyTorch kullanır ve üretim sırasında birkaç yüz MiB bellek tüketebilir.
+Ses oynatımı Windows x64 ve Apple Silicon macOS üzerinde kullanılabilir; [Linux geliştirme sürümü](linux.tr.md) aynı ses paketlerini SDL2 oynatma adaptörüyle kullanır. Linux'ta venv destekli Python 3.11–3.13 gerekir. Sekiz sesin üretimi Ubuntu 24.04.5 VM ve Python 3.12 ile ağ erişimi kapalı işlemde kontrol edildi; fiziksel ses kalitesi ayrıca dinlenmelidir. Mac'te **Ses → Ses paketleri** bölümünü kullan; gerekirse uygulama sistem PATH ayarını değiştirmeden kendine özel, doğrulanmış bir Python hazırlar. Modeller gerektiğinde ayrı çalıştırıcıda yüklenir; üretim bitince işlem kapanır. Sınır 4000 karakter ve iki dakikalık ses üretimidir. Küçük model dosyası düşük tepe RAM tüketimi anlamına gelmez; Türkçe sesler CPU PyTorch kullanır ve üretim sırasında birkaç yüz MiB bellek tüketebilir.
 
 [EMA Lightning](https://huggingface.co/canberkkkkkk/ema-lightning), [Antalia-2 Mini](https://huggingface.co/cloud0day3/antalia-mini) ve [Piper](https://github.com/OHF-Voice/piper1-gpl/tree/v1.3.0) geliştiricilerine teşekkürler. EMA ve Antalia'nın kod ve ağırlıkları Apache-2.0'dır. Piper GPL-3.0 lisansıyla ayrı işlem olarak çalışır. Modellerin ve bağımlılıkların kendi koşulları geçerlidir. Lisans ve NOTICE dosyaları kurulan pakette korunur.
 
@@ -38,6 +38,8 @@ Kareem'in kaynak model kartında veri kümesinin lisansı açıkça belirtilmez.
 İsteğe bağlı komut satırı kurulumu korunur: `python -X utf8 scripts/setup-speech.py --voice ema-tr`. `--voice` olmadan tüm katalog kurulur. Arayüz aynı sürümü sabitlenmiş motor paketlerini kullanır; `scripts/speech-models.json` içindeki dosyaları geçici dosya, kesin boyut ve SHA-256 veya Git blob özetiyle doğruladıktan sonra taşır.
 
 Uygulama gitignore içindeki `speech-runtime/` geliştirme klasörünü, seçilmiş mutlak klasörü veya `%LOCALAPPDATA%/MorseCore/Speech` konumunu kullanır. Klasör seçilmemişse `MORSECORE_SPEECH_HOME` keşfi değiştirebilir. Kurulum ayrıntıları seçili klasörde `.voice-tools/setup.stdout.log` ve `setup.stderr.log` dosyalarındadır. Sanal ortam aynı bilgisayardaki Python'a bağlıdır; başka bilgisayara kopyalanması desteklenmez.
+
+Linux'ta varsayılan ses klasörü `$XDG_DATA_HOME/morsecore/Speech`; XDG veri kökü ayarlanmamışsa `~/.local/share/morsecore/Speech` olur.
 
 `python -m unittest discover -s tests -p test_speech_setup.py`, AppCore kontrolleri ve kurulu sesler için `pwsh -File scripts/test-speech.ps1` kullanılabilir. Ses doğallığı ve fiziksel hoparlör çıkışı ayrıca dinlenmelidir; otomatik testler bunları kanıtlamaz.
 

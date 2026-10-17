@@ -22,9 +22,9 @@ Convert text and Morse code, listen offline, and prepare and log amateur radio c
 | [Güncelleme ve sorun giderme](tr/updates.md) | [Updates and troubleshooting](en/updates.md) |
 | [Geliştiriciler ve katkılar](tr/developers.md) | [Developers and contributions](en/developers.md) |
 
-**Windows x64 ve Apple Silicon Mac için mevcut. Linux arayüzü planlanıyor.**
+**Windows x64 ve Apple Silicon Mac için mevcut. Linux geliştirme sürümü dağıtım testleri aşamasında.**
 
-**Available for Windows x64 and Apple Silicon Mac. A Linux interface is planned.**
+**Available for Windows x64 and Apple Silicon Mac. The Linux preview is undergoing distribution testing.**
 
 Uygulama menüleri Türkçe, İngilizce, Almanca, Rusça ve Arapçadır. Wiki'nin ilk sürümü Türkçe ve İngilizcedir. Uygulama RF yayını yapmaz; telsiz cihazı bağlantısı henüz yoktur.
 

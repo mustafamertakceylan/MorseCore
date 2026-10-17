@@ -18,7 +18,7 @@ Windows and Mac use **the same C23 engine and AppCore business rules**. Their in
 - [Build Mac from source](../../../apps/MorseCore.macOS/README.md)
 - [Native API](../../native-api.md)
 
-Linux CI checks the shared engine; it does not mean a Linux desktop interface has been released.
+The Linux preview shares the XAML interface, AppCore and C23 engine. The [Linux guide](../../linux.md) separates package targets, automated checks and remaining distribution tests; CI success does not establish compatibility with every distribution.
 
 ## Update the Wiki
 

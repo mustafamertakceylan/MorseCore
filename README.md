@@ -4,9 +4,10 @@
 
 **Write a message. Hear Morse. Learn by practicing.**
 
-[![Download Windows](https://img.shields.io/badge/Download-Windows-5e6a42?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.7.5/MorseCore-0.7.5-Windows-x64-Setup.exe)
-[![Download macOS](https://img.shields.io/badge/macOS-Apple_Silicon-5e6a42?style=for-the-badge&logo=apple&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.7.5/MorseCore-0.7.5-macOS-arm64.dmg)
-[![0.7.5](https://img.shields.io/badge/v0.7.5-Preview-c58c59?style=for-the-badge)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v0.7.5)
+[![Download Windows](https://img.shields.io/badge/Download-Windows-5e6a42?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/download/v1.0.0/MorseCore-1.0.0-Windows-x64-Setup.exe)
+[![Download macOS](https://img.shields.io/badge/macOS-Apple_Silicon-5e6a42?style=for-the-badge&logo=apple&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/download/v1.0.0/MorseCore-1.0.0-macOS-arm64.dmg)
+[![Download Linux](https://img.shields.io/badge/Linux-x64-5e6a42?style=for-the-badge&logo=linux&logoColor=white)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v1.0.0)
+[![1.0.0](https://img.shields.io/badge/v1.0.0-Release-c58c59?style=for-the-badge)](https://github.com/mustafamertakceylan/MorseCore/releases/tag/v1.0.0)
 
 **English** · [Türkçe](README.tr.md) · [Deutsch](README.de.md) · [Русский](README.ru.md) · [العربية](README.ar.md)
 
@@ -14,25 +15,27 @@
 
 </div>
 
-MorseCore is a free Windows and macOS app for converting text to Morse code, listening and practicing. Your messages stay on your computer.
+MorseCore is a free Windows, macOS and Linux app for converting text to Morse code, listening and practicing. Your messages stay on your computer.
 
 ![MorseCore in English: text on the left, Morse code on the right](docs/media/converter.en.png)
 
-**macOS:** open the [DMG](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.7.5/MorseCore-0.7.5-macOS-arm64.dmg), then drag MorseCore to Applications. This preview is not notarized; macOS may require approval in Privacy & Security. See [Mac installation](docs/macos.md).
+**macOS:** open the [DMG](https://github.com/mustafamertakceylan/MorseCore/releases/download/v1.0.0/MorseCore-1.0.0-macOS-arm64.dmg), then drag MorseCore to Applications. This release is not notarized; macOS may require approval in Privacy & Security. See [Mac installation](docs/macos.md).
+
+**Linux:** choose the `.deb` for Ubuntu, Debian or Pardus, or the portable archive and `PKGBUILD` for Arch. See [Linux installation](docs/linux.md).
 
 ### Get started
 
-1. **Run Setup**, then open MorseCore from the Start menu.
+1. On Windows: **Run Setup**, then open MorseCore from the Start menu.
 2. Type a message in **Converter** and choose **Convert**. Use **Audio** to listen.
 3. Open **Learning** for the alphabet, exercises and radio abbreviations.
 
-Prefer no installation? Extract the [portable ZIP](https://github.com/mustafamertakceylan/MorseCore/releases/download/v0.7.5/MorseCore-0.7.5-Windows-x64-Desktop.zip) and open **MorseCore.Desktop.exe**. This preview is unsigned; Windows may show a publisher warning.
+Prefer no installation? Extract the [portable ZIP](https://github.com/mustafamertakceylan/MorseCore/releases/download/v1.0.0/MorseCore-1.0.0-Windows-x64-Desktop.zip) and open **MorseCore.Desktop.exe**. This Windows build is unsigned; Windows may show a publisher warning.
 
 ### What can you do?
 
 - Convert text and text files in both directions, including batches.
 - Listen to Morse, save WAV files and practice sending with timing feedback.
-- Decode clean, single-tone Morse from WAV files or a Windows audio input.
+- Decode clean, single-tone Morse from WAV files or a microphone.
 - Use **Amateur radio** for station profiles, message preparation and a contact log with ADIF import and an offline map. Hardware connection is planned; the app does not transmit RF.
 - Read text aloud offline. Install a voice once with internet, then listen locally. Thanks to EMA Lightning, Antalia-2 Mini and Piper.
 
@@ -53,7 +56,7 @@ Choose the cream light theme or the green dark theme in Settings. Gentle backgro
 
 </details>
 
-**Available: Windows x64 and macOS Apple Silicon (M1 or newer). Linux is planned; no date yet.**
+**Available: Windows x64, macOS Apple Silicon (M1 or newer) and Linux x64.** [Linux installation](docs/linux.md) covers Ubuntu, Debian, Arch and Pardus.
 
 ### Thanks & license
 

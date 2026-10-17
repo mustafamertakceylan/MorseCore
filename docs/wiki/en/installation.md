@@ -28,4 +28,4 @@ The [Mac DMG]({{MAC_DMG_URL}}) supports **Apple Silicon (M1 or newer)** and targ
 
 On Windows, uninstall through **Settings → Apps**. On Mac, quit the app and move it to Trash. Preferences, QSO records and downloaded voices are retained; back up important records before changing computers. Exported files stay where you saved them.
 
-Linux is planned; there is no Linux desktop package yet. Continue with [Audio](audio.md) or [Updates](updates.md).
+See the [Linux guide](../../linux.md) for the development preview. No stable Linux desktop package has been released yet. Continue with [Audio](audio.md) or [Updates](updates.md).

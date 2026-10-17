@@ -28,4 +28,4 @@ Kurulum istemiyorsan [taşınabilir ZIP'in]({{WINDOWS_ZIP_URL}}) tamamını bir 
 
 Windows'ta **Ayarlar → Uygulamalar** bölümünden kaldır. Mac'te uygulamayı kapatıp Çöp Sepeti'ne taşı. Tercihler, QSO kayıtları ve indirilmiş sesler korunur; bilgisayar değiştirmeden önce önemli kayıtlarını yedekle. Dışa aktardığın dosyalar kaydettiğin yerde kalır.
 
-Linux planlanıyor; henüz Linux masaüstü paketi yok. Sonraki adım: [Ses](audio.md) veya [Güncelleme](updates.md).
+Linux geliştirme sürümü için [Linux rehberine](../../linux.tr.md) bak. Henüz kararlı Linux masaüstü paketi yayımlanmadı. Sonraki adım: [Ses](audio.md) veya [Güncelleme](updates.md).
