@@ -1,0 +1,96 @@
+name: Linux desktop
+
+on:
+  workflow_call:
+    inputs:
+      release-tag:
+        description: Optional release tag; must equal v plus the CMake project version.
+        required: false
+        default: ""
+        type: string
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: linux-desktop-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  desktop:
+    name: Ubuntu / shared desktop and packages
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      CC: clang-18
+      NUGET_PACKAGES: ${{ github.workspace }}/build/linux/nuget
+      DOTNET_CLI_HOME: ${{ github.workspace }}/build/linux/dotnet-home
+      DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+      DOTNET_GENERATE_ASPNET_CERTIFICATE: "false"
+      DOTNET_ADD_GLOBAL_TOOLS_TO_PATH: "false"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5
+        with:
+          dotnet-version: "10.0.x"
+      - name: Install build and desktop dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y clang-18 cmake ninja-build python3 binutils dpkg-dev xvfb xauth libsdl2-2.0-0 libfontconfig1 libgl1 libx11-6 libxext6 libxrandr2 libxi6 libxfixes3 libxcursor1 libice6 libsm6 libicu74 libssl3t64 libgssapi-krb5-2 libbrotli1 dbus-x11 xdg-utils xdg-desktop-portal xdg-desktop-portal-gtk
+      - name: Check shared resources, speech and packaging contracts
+        run: |
+          python3 scripts/sync-macos-resources.py --check
+          python3 packaging/linux/test_packaging.py
+          bash packaging/linux/test-native-dependencies.sh
+          python3 tests/linux_speech_portability_tests.py
+          python3 tests/mac_speech_portability_tests.py
+          python3 tests/test_speech_setup.py
+      - name: Build portable archive, Debian package and Arch recipe
+        run: bash scripts/package-linux.sh --deb
+      - name: Verify release tag
+        if: inputs.release-tag != ''
+        env:
+          MORSECORE_RELEASE_TAG: ${{ inputs.release-tag }}
+        run: cmake -DVERSION_FILE=build/linux/native/MorseCoreVersion.cmake -P scripts/verify_release_tag.cmake
+      - name: Test shared rules and SDL device lifecycle
+        run: |
+          dotnet build tests/dotnet/MorseCore.AppCore.Smoke -c Release --artifacts-path build/linux/tests -p:ArtifactsPivots=linux -m:1 -p:UseSharedCompilation=false --disable-build-servers
+          dotnet build/linux/tests/bin/MorseCore.AppCore.Smoke/linux/MorseCore.AppCore.Smoke.dll "$PWD/build/linux/native/libMorseCore.Native.so"
+          dotnet build tests/dotnet/MorseCore.LinuxAudio.Smoke -c Release --artifacts-path build/linux/audio-tests -p:ArtifactsPivots=linux -m:1 -p:UseSharedCompilation=false --disable-build-servers
+          dotnet build/linux/audio-tests/bin/MorseCore.LinuxAudio.Smoke/linux/MorseCore.LinuxAudio.Smoke.dll
+          dotnet build tests/dotnet/MorseCore.LinuxInstance.Smoke -c Release --artifacts-path build/linux/instance-tests -p:ArtifactsPivots=linux -m:1 -p:UseSharedCompilation=false --disable-build-servers
+          dotnet build/linux/instance-tests/bin/MorseCore.LinuxInstance.Smoke/linux/MorseCore.LinuxInstance.Smoke.dll
+      - name: Verify relocated packages and desktop UI
+        run: |
+          MORSECORE_LINUX_GUI_SMOKE=1 xvfb-run -a bash scripts/test-linux-package.sh build/release-linux/MorseCore-*-Linux-x64.tar.gz build/release-linux/MorseCore-*-Linux-x64.deb
+          MORSECORE_NATIVE_LIBRARY="$PWD/build/linux/native/libMorseCore.Native.so" xvfb-run -a bash scripts/test-linux-desktop.sh
+      - name: Upload tested Linux packages
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: MorseCore-Linux-x64
+          path: |
+            build/release-linux/*.tar.gz
+            build/release-linux/*.deb
+            build/release-linux/PKGBUILD
+            build/release-linux/SHA256SUMS-Linux-x64.txt
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
+      - name: Save Linux test evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: MorseCore-Linux-checks
+          path: |
+            build/linux/instance-tests/bin/**/instance-smoke-*.json
+            cmake-build-linux-ui.*/ui-smoke.json
+            cmake-build-linux-ui.*/gui.log
+            cmake-build-linux-ui.*/capture-phases.log
+            cmake-build-linux-ui.*/checks-progress.jsonl
+            cmake-build-linux-ui.*/*.png
+          if-no-files-found: warn
+          retention-days: 14
+          compression-level: 0

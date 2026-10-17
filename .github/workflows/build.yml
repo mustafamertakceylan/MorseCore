@@ -16,6 +16,11 @@ env:
   PYTHONUTF8: "1"
 
 jobs:
+  linux-desktop:
+    uses: ./.github/workflows/linux-desktop.yml
+    with:
+      release-tag: ${{ inputs.release-tag }}
+
   macos:
     name: macOS / Apple Silicon
     runs-on: macos-26
